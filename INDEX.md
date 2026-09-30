@@ -21,3 +21,12 @@
 ## How to use these files
 
 Use the extracts for quick planning. Check the corresponding official PDF or official rules page before relying on a date, policy, or platform claim in a final submission. The official rules take precedence where sources conflict.
+
+## Project planning and landslide research
+
+| File | Function |
+| --- | --- |
+| `research/landslides/README.md` | Research artifact guide and NASA export provenance. |
+| `research/landslides/findings.md` | Malaysian landslide data feasibility, source limitations, LHASA comparison, and proposed scope. |
+| `research/landslides/malaysia-events.json` | NASA COOLR report-point API export of 236 Malaysian event records. |
+| `planning/session-transcript-2026-09-30.md` | Conversation prompts and responses through the request to commit the research. |
