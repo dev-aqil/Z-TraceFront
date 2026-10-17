@@ -1,0 +1,110 @@
+==================================================================
+step:      chemical/23_train
+utc:       2026-10-17T13:33:53Z
+host:      ibmdatatontest   kernel: Linux 6.8.0-147-generic   arch: s390x
+machine:   Manufacturer: IBM  Type: 9175
+os:        "Ubuntu 24.04.5 LTS"
+python:    3.12.3 big-endian
+command:   python -m src.cli train-chemical
+==================================================================
+2026-10-17 13:33:53,741 INFO numexpr.utils: NumExpr defaulting to 3 threads.
+2026-10-17 13:33:54,365 INFO src.models.chemical: fitting commodity_rate
+2026-10-17 13:33:56,054 INFO src.models.chemical: fitting dummy_prior
+2026-10-17 13:33:57,610 INFO src.models.chemical: fitting logistic_regression
+2026-10-17 13:33:59,565 INFO src.models.chemical: fitting random_forest
+2026-10-17 13:34:02,417 INFO src.models.chemical: fitting xgboost
+2026-10-17 13:34:04,434 INFO src.models.chemical: selected random_forest (tied within 0.005 validation PR-AUC: ['random_forest'])
+2026-10-17 13:34:11,768 INFO src.models.registry: registered /home/linux1/tracefront/food-risk-ml/artifacts/registry_chemical_imidacloprid/chemical-imidacloprid-random_forest-20261017T133410Z
+{
+  "model_version": "chemical-imidacloprid-random_forest-20261017T133410Z",
+  "selected_model": "random_forest",
+  "tied_models": [
+    "random_forest"
+  ],
+  "test": {
+    "n": 1418,
+    "prevalence": 0.03244005641748942,
+    "threshold": 0.02424259153670228,
+    "precision": 0.06312769010043041,
+    "recall": 0.9565217391304348,
+    "f1": 0.11843876177658141,
+    "specificity": 0.5240524781341108,
+    "false_negative_rate": 0.043478260869565216,
+    "pr_auc": 0.1609629486101812,
+    "roc_auc": 0.8592660666751173,
+    "brier": 0.029187757861219767,
+    "tn": 719,
+    "fp": 653,
+    "fn": 2,
+    "tp": 44
+  },
+  "test_pr_auc_ci": [
+    0.10318299558593262,
+    0.24985390768917926
+  ],
+  "vs_commodity_rate_pr_auc": {
+    "val": {
+      "diff": 0.04669139799233374,
+      "ci": [
+        -0.024458658754490638,
+        0.12649805863035943
+      ],
+      "share_a_better": 0.9155,
+      "resamples": 2000
+    },
+    "test": {
+      "diff": 0.05718308000239512,
+      "ci": [
+        0.023261550957882703,
+        0.12367622118383714
+      ],
+      "share_a_better": 1.0,
+      "resamples": 2000
+    }
+  },
+  "ablation_with_calendar_position": {
+    "added_features": [
+      "pdp_collection_doy",
+      "pdp_collection_isoweek"
+    ],
+    "model": "random_forest",
+    "val": {
+      "pr_auc": 0.1415381744297925,
+      "pr_auc_ci": [
+        0.0819887591859479,
+        0.23836103975040207
+      ]
+    },
+    "test": {
+      "pr_auc": 0.15345305286365452,
+      "pr_auc_ci": [
+        0.09643941388854532,
+        0.24518160082008994
+      ]
+    }
+  }
+}
+	Command being timed: "python -m src.cli train-chemical"
+	User time (seconds): 19.06
+	System time (seconds): 0.22
+	Percent of CPU this job got: 105%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:18.25
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 210464
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 48491
+	Voluntary context switches: 53030
+	Involuntary context switches: 3771
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 9152
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+exit_code: 0

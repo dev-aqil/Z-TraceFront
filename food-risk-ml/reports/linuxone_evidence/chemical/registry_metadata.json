@@ -1,0 +1,148 @@
+{
+  "model_version": "chemical-imidacloprid-random_forest-20261017T133410Z",
+  "task": "chemical_imidacloprid_detected",
+  "domain": "CHEMICAL",
+  "target": "imidacloprid_detected",
+  "analyte": "PDP analyte 967",
+  "scope": "RETROSPECTIVE_RELEASE_COHORT_ONLY",
+  "target_meaning": "publisher original-extraction detection (MEAN O) of imidacloprid; 0 = validated well-recovered nondetect (ND). Not exceedance, not unsafe food.",
+  "created_at": "2026-10-17T13:34:11.694766+00:00",
+  "provenance": {
+    "synthetic": false,
+    "git_commit": null,
+    "dataset_id": "chemical_imidacloprid_detection_training_v1",
+    "dataset_version": "1.0",
+    "readiness_scope": "RETROSPECTIVE_RELEASE_COHORT_ONLY",
+    "prospective_deployment_ready": false,
+    "observation_time": "2025-12-24",
+    "dataset_sha256": "686885fa458a9f098df9133058b0e007482d92307ba495eb996436c9c664afde",
+    "feature_manifest_sha256": "ced00126dcf178529e02456c76a2e54d4939aee09e2768954c421404e93e03dd",
+    "leakage_audit_sha256": "4056852c6926e2f93a4fcb8b26c37737983836f2b2f5cef621bed29f13037a3b",
+    "schema_sha256": "0456a029bbbe74658b48daec4776903e3ed05974f486b8ca6ddf30242ff18a5e",
+    "provenance_sha256": "0767a5bfe419b4d12cea1bed0e5910c034834382afce866c09a4ba6ad4849426"
+  },
+  "split": {
+    "method": "person_a_audited_temporal",
+    "audit": {
+      "limitation": "Released cohort study only; not a prospective 2024 backtest. No label-availability assumption at earlier collection boundaries.",
+      "method": "TEMPORAL_COLLECTION_PERIOD_RETROSPECTIVE",
+      "no_sample_overlap": true,
+      "partitions": {
+        "test": {
+          "max_date": "2024-12-23",
+          "min_date": "2024-11-06",
+          "rows": 1418,
+          "target_counts": {
+            "0": 1372,
+            "1": 46
+          }
+        },
+        "train": {
+          "max_date": "2024-09-09",
+          "min_date": "2024-01-02",
+          "rows": 6913,
+          "target_counts": {
+            "0": 6622,
+            "1": 291
+          }
+        },
+        "validation": {
+          "max_date": "2024-11-05",
+          "min_date": "2024-09-10",
+          "rows": 1540,
+          "target_counts": {
+            "0": 1487,
+            "1": 53
+          }
+        }
+      }
+    },
+    "sizes": {
+      "train": 6913,
+      "val": 1540,
+      "test": 1418
+    }
+  },
+  "features": {
+    "all": [
+      "pdp_commodity_code",
+      "pdp_commodity_type_code",
+      "pdp_origin_code",
+      "pdp_import_origin_country_code",
+      "pdp_product_claim_code",
+      "pdp_sample_unit_count",
+      "pdp_collection_dow_iso"
+    ],
+    "categorical": [
+      "pdp_commodity_code",
+      "pdp_commodity_type_code",
+      "pdp_origin_code",
+      "pdp_import_origin_country_code",
+      "pdp_product_claim_code"
+    ],
+    "numeric": [
+      "pdp_sample_unit_count",
+      "pdp_collection_dow_iso"
+    ],
+    "excluded_by_contract": [
+      "pdp_collection_doy",
+      "pdp_collection_isoweek"
+    ]
+  },
+  "threshold": 0.02424259153670228,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "risk_bands": {
+    "high_from": 0.02424259153670228,
+    "medium_from": 0.015407220205766242,
+    "definition": "high: score >= operating threshold; medium: within validation 95%-recall net; low: below. Low does not mean no residue."
+  },
+  "calibration": {
+    "raw_brier": 0.14919130072485523,
+    "platt_oof_brier": 0.03177229829084358,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "explain_top_k": 5,
+  "metrics": {
+    "val": {
+      "n": 1540,
+      "prevalence": 0.03441558441558441,
+      "threshold": 0.02424259153670228,
+      "precision": 0.0649171270718232,
+      "recall": 0.8867924528301887,
+      "f1": 0.12097812097812098,
+      "specificity": 0.5447209145931405,
+      "false_negative_rate": 0.11320754716981132,
+      "pr_auc": 0.1475222331444978,
+      "roc_auc": 0.7705777112332035,
+      "brier": 0.03174379858705949,
+      "tn": 810,
+      "fp": 677,
+      "fn": 6,
+      "tp": 47
+    },
+    "test": {
+      "n": 1418,
+      "prevalence": 0.03244005641748942,
+      "threshold": 0.02424259153670228,
+      "precision": 0.06312769010043041,
+      "recall": 0.9565217391304348,
+      "f1": 0.11843876177658141,
+      "specificity": 0.5240524781341108,
+      "false_negative_rate": 0.043478260869565216,
+      "pr_auc": 0.1609629486101812,
+      "roc_auc": 0.8592660666751173,
+      "brier": 0.029187757861219767,
+      "tn": 719,
+      "fp": 653,
+      "fn": 2,
+      "tp": 44
+    }
+  },
+  "versions": {
+    "sklearn": "1.4.1.post1",
+    "xgboost": "2.0.3",
+    "shap": null,
+    "pandas": "2.1.4"
+  }
+}

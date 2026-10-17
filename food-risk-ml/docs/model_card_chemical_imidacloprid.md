@@ -103,6 +103,14 @@ These describe which inputs move the score. They are associations within the 202
 - Unit count probably reflects commodity-specific sampling protocols, not anything about the residue.
 - Per-request SHAP on this forest takes about 30 ms per sample on x86.
 
+## LinuxONE (IBM Z)
+
+The model was retrained on the LinuxONE VM (s390x, big-endian) from commit `6513e9f`, with Person A's handoff files byte-exact. Evidence is in `reports/linuxone_evidence/chemical/`.
+- The hash gate passed.
+- 100 tests passed.
+- Training took 18 s.
+- The same random forest was selected, with identical test results (PR-AUC 0.161, ROC-AUC 0.859, recall@10% 0.517).
+
 ## Limitations
 
 - **Few detections.** 46 test and 53 validation positives make every metric uncertain. Read the intervals, not the point estimates.

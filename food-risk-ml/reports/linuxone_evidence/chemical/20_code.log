@@ -1,0 +1,10 @@
+utc: 2026-10-17T13:33:47Z  host: ibmdatatontest  arch: s390x
+code + handoff: git archive of commit 6513e9f
+tarball sha256: 4e54ef54c45b9de81b53c9d4249425f6a3302e2ed771e2f460a83d2d0e4eb58a
+== Person A handoff files (sha256)
+686885fa458a9f098df9133058b0e007482d92307ba495eb996436c9c664afde  /home/linux1/tracefront/data/processed/chemical_imidacloprid_detection_training_v1.csv
+ced00126dcf178529e02456c76a2e54d4939aee09e2768954c421404e93e03dd  /home/linux1/tracefront/data/processed/chemical_imidacloprid_detection_training_v1.features.json
+0767a5bfe419b4d12cea1bed0e5910c034834382afce866c09a4ba6ad4849426  /home/linux1/tracefront/data/processed/chemical_imidacloprid_detection_training_v1.provenance.json
+58172c184fe83c0c486f70704160ac41af360879b1c503bc69b676d5747e577d  /home/linux1/tracefront/data/processed/chemical_imidacloprid_detection_training_v1.readiness.json
+0456a029bbbe74658b48daec4776903e3ed05974f486b8ca6ddf30242ff18a5e  /home/linux1/tracefront/data/processed/chemical_imidacloprid_detection_training_v1.schema.json
+4056852c6926e2f93a4fcb8b26c37737983836f2b2f5cef621bed29f13037a3b  /home/linux1/tracefront/reports/m7_validation.json
