@@ -1,0 +1,206 @@
+{
+  "schema_version": "1.0",
+  "status": "NOT MODEL-READY",
+  "row_granularity": "One selected imidacloprid analytical result linked to the identical release specimen context",
+  "columns": {
+    "result_source_row_number": {
+      "datatype": "integer",
+      "role": "lineage"
+    },
+    "result_sample_pk": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_commod": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_commtype": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_lab": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_pestcode": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_testclass": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_concen": {
+      "datatype": "decimal",
+      "unit_column": "conunit",
+      "nullable": true,
+      "role": "analytical outcome"
+    },
+    "result_lod": {
+      "datatype": "decimal",
+      "unit_column": "conunit",
+      "nullable": true,
+      "role": "assay metadata"
+    },
+    "result_conunit": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_confmethod": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_confmethod2": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_annotate": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_quantitate": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_mean": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_extract": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_determin": {
+      "datatype": "string",
+      "nullable": true
+    },
+    "result_concen_raw": {
+      "datatype": "string",
+      "role": "unaltered concentration token"
+    },
+    "result_concen_missing_reason": {
+      "datatype": "string",
+      "nullable": true,
+      "role": "measurement missingness"
+    },
+    "result_duplicate_of_source_row": {
+      "datatype": "integer",
+      "nullable": true,
+      "role": "lineage"
+    },
+    "pdp_source_row_number": {
+      "datatype": "integer",
+      "role": "lineage",
+      "source_column": "source_row_number",
+      "note": "M2 lineage; not a predictor"
+    },
+    "pdp_sample_id": {
+      "datatype": "string",
+      "role": "lineage",
+      "source_column": "sample_pk",
+      "note": "Release-local grouping key; a lineage column, never a predictor"
+    },
+    "pdp_commodity_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "commod",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP commodity code",
+      "canonical_source_field": "pdp_commodity_code"
+    },
+    "pdp_commodity_type_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "commtype",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP commodity-form code",
+      "canonical_source_field": "pdp_commodity_type_code"
+    },
+    "pdp_origin_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "origin",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP origin code",
+      "canonical_source_field": "pdp_origin_code"
+    },
+    "pdp_import_origin_country_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "country",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP import-origin country code; null is not imputed",
+      "canonical_source_field": "pdp_import_origin_country_code"
+    },
+    "pdp_variety_text": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "variety",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim publisher free-text variety description",
+      "canonical_source_field": "pdp_variety_text"
+    },
+    "pdp_product_claim_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "claim",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP label-claim code",
+      "canonical_source_field": "pdp_product_claim_code"
+    },
+    "pdp_sample_unit_count": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "quantity",
+      "family": "pdp_product_context",
+      "unit": "count_individual_sample_units",
+      "derivation": "verbatim nonnegative integer sample-unit count; null is not zero",
+      "canonical_source_field": "pdp_sample_unit_count"
+    },
+    "pdp_collection_dow_iso": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "collection_date",
+      "family": "pdp_collection_calendar",
+      "unit": "iso_weekday_1_monday_7_sunday",
+      "derivation": "ISO weekday (1=Monday..7=Sunday) of the validated collection date"
+    },
+    "pdp_collection_doy": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "collection_date",
+      "family": "pdp_collection_calendar",
+      "unit": "day_of_year_1_366",
+      "derivation": "day of year (1..366) of the validated collection date"
+    },
+    "pdp_collection_isoweek": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "collection_date",
+      "family": "pdp_collection_calendar",
+      "unit": "iso_week_number_1_53",
+      "derivation": "ISO week number (1..53) of the validated collection date"
+    },
+    "collection_date": {
+      "datatype": "date"
+    },
+    "observation_time": {
+      "datatype": "date"
+    },
+    "source_release": {
+      "datatype": "string"
+    }
+  },
+  "null_encoding": {
+    "null": "\\N",
+    "escape": "Prefix one extra backslash to non-null values starting with backslash",
+    "empty_string": "non-null empty string"
+  }
+}

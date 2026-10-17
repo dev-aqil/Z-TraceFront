@@ -1,0 +1,294 @@
+{
+  "blocked_tasks": {
+    "BIOLOGICAL": "BLOCKED_PENDING_FSIS: official raw pathogen samples and matching dictionary not acquired.",
+    "CHEMICAL_RESIDUE_REGRESSION": "PARTIAL: censored targets and quantification policy not approved. Detection only.",
+    "COLD_CHAIN": "BLOCKED_PENDING_SENSOR_DATA: no validated specimen-linked storage/sensor/microbial series."
+  },
+  "candidate": "chemical_imidacloprid_detection_training_v1",
+  "candidate_path": "data/interim/modeling/m7_v1/chemical_imidacloprid_detection_training_v1.csv",
+  "code_sha256": {
+    "src/tracefront_data/modeling_handoff.py": "d4e2db6636057be6f583ae32ba6d281011b6c65edf28224654228cecdd004192"
+  },
+  "column_classification": {
+    "analyte_code": "METADATA_ONLY",
+    "collection_date": "METADATA_ONLY",
+    "imidacloprid_detected": "TARGET",
+    "observation_id": "IDENTIFIER_ONLY",
+    "observation_time": "METADATA_ONLY",
+    "pdp_collection_dow_iso": "SAFE_FEATURE",
+    "pdp_collection_doy": "SAFE_FEATURE",
+    "pdp_collection_isoweek": "SAFE_FEATURE",
+    "pdp_commodity_code": "SAFE_FEATURE",
+    "pdp_commodity_type_code": "SAFE_FEATURE",
+    "pdp_import_origin_country_code": "SAFE_FEATURE",
+    "pdp_origin_code": "SAFE_FEATURE",
+    "pdp_product_claim_code": "SAFE_FEATURE",
+    "pdp_result_source_row_number": "IDENTIFIER_ONLY",
+    "pdp_sample_id": "IDENTIFIER_ONLY",
+    "pdp_sample_unit_count": "SAFE_FEATURE",
+    "pdp_source_row_number": "IDENTIFIER_ONLY",
+    "pdp_variety_text": "QUESTIONABLE",
+    "result_annotate": "LEAKAGE",
+    "result_commod": "METADATA_ONLY",
+    "result_commtype": "METADATA_ONLY",
+    "result_concen": "LEAKAGE",
+    "result_concen_missing_reason": "LEAKAGE",
+    "result_concen_raw": "LEAKAGE",
+    "result_confmethod": "LEAKAGE",
+    "result_confmethod2": "LEAKAGE",
+    "result_conunit": "QUESTIONABLE",
+    "result_determin": "QUESTIONABLE",
+    "result_duplicate_of_source_row": "METADATA_ONLY",
+    "result_extract": "QUESTIONABLE",
+    "result_lab": "QUESTIONABLE",
+    "result_lod": "QUESTIONABLE",
+    "result_mean": "LEAKAGE",
+    "result_pestcode": "METADATA_ONLY",
+    "result_quantitate": "LEAKAGE",
+    "result_sample_pk": "IDENTIFIER_ONLY",
+    "result_source_row_number": "IDENTIFIER_ONLY",
+    "result_testclass": "QUESTIONABLE",
+    "source_release": "METADATA_ONLY"
+  },
+  "exclusions": {
+    "candidate_rows": 9871,
+    "excluded_records": [
+      {
+        "pdp_result_source_row_number": 653881,
+        "pdp_sample_id": "2522",
+        "reason": "excluded_mean_R"
+      }
+    ],
+    "excluded_rows": 1,
+    "exclusion_reasons": {
+      "excluded_mean_R": 1
+    },
+    "input_rows": 9872,
+    "repeated_sample_groups_before_exclusion": 0
+  },
+  "forbidden_features": [
+    "result_mean",
+    "result_concen",
+    "result_concen_raw",
+    "result_concen_missing_reason",
+    "result_annotate",
+    "result_confmethod",
+    "result_confmethod2",
+    "result_quantitate",
+    "result_extract",
+    "result_determin",
+    "result_lod",
+    "result_lab",
+    "result_testclass",
+    "contaminated",
+    "unsafe_food",
+    "pesticide_exceedance",
+    "recall_status",
+    "previous_positive_rate",
+    "full_history_count",
+    "future_weather",
+    "supplier_id",
+    "pdp_variety_text"
+  ],
+  "inputs": {
+    "configs/m7_chemical_detection_v1.json": "3f83182269e23b09122534042030e7086390af8815f442c224dc48d196b66dca",
+    "data/interim/enriched/m6_v1/pdp_imidacloprid_context.csv": "8b3a287530963e1d5b9109e56d9fdd5fc7c6ed3de5b559dafc2d76c2b5de6105",
+    "data/interim/enriched/m6_v1/pdp_imidacloprid_context.schema.json": "f7b5ddb131de0e00dce1a4a3a44f4fc681b6eb6e04009a33d812007d79c47154",
+    "reports/m6_enrichment_summary.json": "5d017fc97506256a6e7bbfac62e585bd0cce57ca7b86071612989656392a7810",
+    "reports/m6_validation.json": "70a7b06d473f479517d061ef2b3a3c6744bb9e23ec92a23d7d2e3bbbf976e57b"
+  },
+  "leakage_findings": {
+    "analytical_target_evidence_removed_from_features": true,
+    "availability_scope": "Retrospective public release study only; no pre-collection availability asserted.",
+    "feature_cutoff": "All context available by 2025-12-23 < observation_time 2025-12-24; no historical aggregates.",
+    "full_analytical_panel_not_expanded": true,
+    "historical_features": [],
+    "known_leakage_features_remaining": [],
+    "whitelist_only": true
+  },
+  "limitations": [
+    "Retrospective supervised association study of the released 2024 PDP cohort only. Digital context and outcomes were released together; pre-assay public availability and operational prospective validation are unproved.",
+    "Detection depends on analyte/commodity assay sensitivity and sampling program; ND is not zero residue, absence of all pesticides, safe food or legal compliance. No tolerance comparison or regulatory exceedance target.",
+    "One fixed parent analyte (967 Imidacloprid); metabolites and other analytes are excluded. No sample-level any-pesticide label or untested negative manufactured.",
+    "One re-extraction excluded under a prespecified conservative original-result policy; NP would be excluded as marginal-performing nondetect. This selection can affect estimand and missingness.",
+    "Temporal collection-date holdout measures later-2024 cohort association, not a model trainable during 2024: all labels were published after the cohort. No future-year generalization is established.",
+    "No verified lot, farm, supplier or facility grouping; repeated upstream entities may remain. Do not claim new-farm/facility performance or representative population prevalence.",
+    "Imbalanced observed target; use prevalence baseline and class-aware metrics. Person B owns fitting, calibration, explanation and evaluation; no model or accuracy claim produced here.",
+    "Country null mixes domestic non-applicability and unknown origin. Quantity null is unknown, never zero. Native categorical tokens are not harmonized; variety text remains withheld.",
+    "No cross-source or historical features; NOAA ambient weather is not cold-chain telemetry. Pending FSIS, inspections and sensor datasets remain unavailable.",
+    "Actual IBM Z LinuxONE/s390x runtime has not been tested. Portable stdlib CSV/JSON path validated locally on x86_64 only."
+  ],
+  "milestone": "M7",
+  "model_ready_candidate": true,
+  "outputs": {
+    "data/interim/modeling/m7_v1/chemical_imidacloprid_detection_training_v1.csv": "686885fa458a9f098df9133058b0e007482d92307ba495eb996436c9c664afde",
+    "data/interim/modeling/m7_v1/chemical_imidacloprid_detection_training_v1.schema.json": "268cd9374c70421cf014920a8872bbb6e98cbababa348e0bca998790ece089a3"
+  },
+  "profile": {
+    "categorical_domains": {
+      "pdp_commodity_code": {
+        "AL": 531,
+        "AP": 704,
+        "AV": 706,
+        "BK": 684,
+        "CB": 607,
+        "CS": 101,
+        "CT": 529,
+        "CU": 708,
+        "FS": 176,
+        "KZ": 24,
+        "LH": 708,
+        "LL": 706,
+        "NZ": 52,
+        "OG": 709,
+        "ON": 708,
+        "PK": 706,
+        "PN": 656,
+        "PO": 177,
+        "TT": 679
+      },
+      "pdp_commodity_type_code": {
+        "FR": 8865,
+        "FZ": 300,
+        "PU": 706
+      },
+      "pdp_import_origin_country_code": {
+        "160": 4,
+        "260": 172,
+        "275": 148,
+        "280": 77,
+        "285": 5,
+        "295": 579,
+        "315": 2,
+        "320": 26,
+        "325": 29,
+        "336": 1,
+        "415": 46,
+        "430": 51,
+        "450": 2,
+        "595": 2556,
+        "610": 19,
+        "660": 6,
+        "685": 16,
+        "720": 60,
+        "730": 1,
+        "801": 31,
+        "830": 2,
+        "925": 2,
+        "930": 4,
+        "945": 1,
+        "973": 1,
+        "M15": 1,
+        "MT5": 1
+      },
+      "pdp_origin_code": {
+        "1": 5936,
+        "2": 3843,
+        "3": 92
+      },
+      "pdp_product_claim_code": {
+        "NC": 9173,
+        "PD": 67,
+        "PO": 620,
+        "PP": 11
+      }
+    },
+    "collection_date_max": "2024-12-23",
+    "collection_date_min": "2024-01-02",
+    "columns": 18,
+    "missingness": {
+      "pdp_import_origin_country_code": 6028,
+      "pdp_sample_unit_count": 2045
+    },
+    "no_duplicate_sample": true,
+    "numeric_ranges": {
+      "pdp_collection_dow_iso": {
+        "max": 4,
+        "min": 1
+      },
+      "pdp_collection_doy": {
+        "max": 358,
+        "min": 2
+      },
+      "pdp_collection_isoweek": {
+        "max": 52,
+        "min": 1
+      },
+      "pdp_sample_unit_count": {
+        "max": 2124,
+        "min": 1
+      }
+    },
+    "rows": 9871,
+    "target_counts": {
+      "0": 9481,
+      "1": 390
+    },
+    "target_feature_separation": true,
+    "temporal_cutoff_proven": true,
+    "unique_observation_ids": 9871,
+    "unique_samples": 9871
+  },
+  "safe_features": [
+    "pdp_commodity_code",
+    "pdp_commodity_type_code",
+    "pdp_origin_code",
+    "pdp_import_origin_country_code",
+    "pdp_product_claim_code",
+    "pdp_sample_unit_count",
+    "pdp_collection_dow_iso",
+    "pdp_collection_doy",
+    "pdp_collection_isoweek"
+  ],
+  "split_audit": {
+    "limitation": "Released cohort study only; not a prospective 2024 backtest. No label-availability assumption at earlier collection boundaries.",
+    "method": "TEMPORAL_COLLECTION_PERIOD_RETROSPECTIVE",
+    "no_sample_overlap": true,
+    "partitions": {
+      "test": {
+        "max_date": "2024-12-23",
+        "min_date": "2024-11-06",
+        "rows": 1418,
+        "target_counts": {
+          "0": 1372,
+          "1": 46
+        }
+      },
+      "train": {
+        "max_date": "2024-09-09",
+        "min_date": "2024-01-02",
+        "rows": 6913,
+        "target_counts": {
+          "0": 6622,
+          "1": 291
+        }
+      },
+      "validation": {
+        "max_date": "2024-11-05",
+        "min_date": "2024-09-10",
+        "rows": 1540,
+        "target_counts": {
+          "0": 1487,
+          "1": 53
+        }
+      }
+    }
+  },
+  "split_recommendation": {
+    "group_column": "pdp_sample_id",
+    "policy": "Whole collection days in chronological order, all rows of each sample together. Dataset has one row per sample. Fit all transforms on training only. Require both classes per partition; stop if unsupported.",
+    "proportions": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "rationale": "Later collection-period holdout probes within-2024 drift without analytical sample overlap. All labels released together: this is retrospective temporal validation, not evidence a model could be trained during 2024. No result availability at earlier training boundaries is claimed.",
+    "secondary": "GROUPED sample holdout for within-cohort comparison; GEOGRAPHIC only after source location semantics reviewed. No facility IDs; cannot prove lot/farm independence.",
+    "time_column": "collection_date",
+    "type": "TEMPORAL"
+  },
+  "status": "COMPLETE",
+  "target": "imidacloprid_detected",
+  "target_contract": "Publisher original-extraction imidacloprid detection (O=1) versus validated well-recovered nondetect (ND=0). NP marginal-performing nondetect and R re-extraction excluded. Nondetect is assay-relative, not zero residue or safe food.",
+  "training_performed": false
+}

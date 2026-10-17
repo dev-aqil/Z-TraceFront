@@ -1,0 +1,40 @@
+{
+  "columns": 18,
+  "dataset": "chemical_imidacloprid_detection_training_v1",
+  "dataset_path": "data/processed/chemical_imidacloprid_detection_training_v1.csv",
+  "dataset_sha256": "686885fa458a9f098df9133058b0e007482d92307ba495eb996436c9c664afde",
+  "domain": "CHEMICAL",
+  "feature_manifest_path": "data/processed/chemical_imidacloprid_detection_training_v1.features.json",
+  "feature_manifest_sha256": "ced00126dcf178529e02456c76a2e54d4939aee09e2768954c421404e93e03dd",
+  "group_column": "pdp_sample_id",
+  "leakage_audit_passed": true,
+  "leakage_audit_path": "reports/m7_validation.json",
+  "leakage_audit_sha256": "4056852c6926e2f93a4fcb8b26c37737983836f2b2f5cef621bed29f13037a3b",
+  "model_ready": true,
+  "observation_time": "2025-12-24",
+  "prospective_deployment_ready": false,
+  "provenance_sha256": "0767a5bfe419b4d12cea1bed0e5910c034834382afce866c09a4ba6ad4849426",
+  "readiness_scope": "RETROSPECTIVE_RELEASE_COHORT_ONLY",
+  "recommended_split": {
+    "group_column": "pdp_sample_id",
+    "policy": "Whole collection days in chronological order, all rows of each sample together. Dataset has one row per sample. Fit all transforms on training only. Require both classes per partition; stop if unsupported.",
+    "proportions": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "rationale": "Later collection-period holdout probes within-2024 drift without analytical sample overlap. All labels released together: this is retrospective temporal validation, not evidence a model could be trained during 2024. No result availability at earlier training boundaries is claimed.",
+    "secondary": "GROUPED sample holdout for within-cohort comparison; GEOGRAPHIC only after source location semantics reviewed. No facility IDs; cannot prove lot/farm independence.",
+    "time_column": "collection_date",
+    "type": "TEMPORAL"
+  },
+  "rows": 9871,
+  "schema_sha256": "0456a029bbbe74658b48daec4776903e3ed05974f486b8ca6ddf30242ff18a5e",
+  "schema_version": "1.0",
+  "target": "imidacloprid_detected",
+  "task": "binary_classification",
+  "time_column": "collection_date",
+  "training_performed": false,
+  "unit_of_observation": "One unambiguous original imidacloprid analytical result for one PDP 2024 sample; at most one row per sample.",
+  "version": "1.0"
+}

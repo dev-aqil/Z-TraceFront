@@ -1,0 +1,57 @@
+{
+  "version": "1.0",
+  "dataset": "chemical_imidacloprid_detection_training_v1",
+  "source_release": "PDP_2024",
+  "analyte_code": "967",
+  "analyte_name": "Imidacloprid",
+  "selection_policy": "One named analyte with full 9872-sample coverage in pinned publisher reference workbook; chosen before target counts. Other analytes and metabolites are outside this task. Not selected by accuracy or class balance.",
+  "experiment": "Retrospective supervised association study of publisher original-extraction detection in the released 2024 cohort. No operational pre-assay or future-year deployment claim.",
+  "observation_time": "2025-12-24",
+  "observation_time_precision": "DATE, conservative day after official archive posting",
+  "available_at_upper_bound": "2025-12-23",
+  "target": "imidacloprid_detected",
+  "positive_mean_codes": [
+    "O"
+  ],
+  "negative_mean_codes": [
+    "ND"
+  ],
+  "excluded_mean_codes": [
+    "NP",
+    "R"
+  ],
+  "target_meaning": "Publisher original-extraction imidacloprid detection (O=1) versus validated well-recovered nondetect (ND=0). NP marginal-performing nondetect and R re-extraction excluded. Nondetect is assay-relative, not zero residue or safe food.",
+  "unit_of_observation": "One unambiguous original imidacloprid analytical result for one PDP 2024 sample; at most one row per sample.",
+  "safe_features": [
+    "pdp_commodity_code",
+    "pdp_commodity_type_code",
+    "pdp_origin_code",
+    "pdp_import_origin_country_code",
+    "pdp_product_claim_code",
+    "pdp_sample_unit_count",
+    "pdp_collection_dow_iso",
+    "pdp_collection_doy",
+    "pdp_collection_isoweek"
+  ],
+  "questionable_features": {
+    "pdp_variety_text": "Free-form variety text, ambiguous N/A tokens and possible identifiers; withheld from default matrix."
+  },
+  "recommended_split": {
+    "type": "TEMPORAL",
+    "time_column": "collection_date",
+    "group_column": "pdp_sample_id",
+    "proportions": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "policy": "Whole collection days in chronological order, all rows of each sample together. Dataset has one row per sample. Fit all transforms on training only. Require both classes per partition; stop if unsupported.",
+    "rationale": "Later collection-period holdout probes within-2024 drift without analytical sample overlap. All labels released together: this is retrospective temporal validation, not evidence a model could be trained during 2024. No result availability at earlier training boundaries is claimed.",
+    "secondary": "GROUPED sample holdout for within-cohort comparison; GEOGRAPHIC only after source location semantics reviewed. No facility IDs; cannot prove lot/farm independence."
+  },
+  "blocked_tasks": {
+    "BIOLOGICAL": "BLOCKED_PENDING_FSIS: official raw pathogen samples and matching dictionary not acquired.",
+    "COLD_CHAIN": "BLOCKED_PENDING_SENSOR_DATA: no validated specimen-linked storage/sensor/microbial series.",
+    "CHEMICAL_RESIDUE_REGRESSION": "PARTIAL: censored targets and quantification policy not approved. Detection only."
+  }
+}
