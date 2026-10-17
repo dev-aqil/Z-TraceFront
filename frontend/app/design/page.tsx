@@ -3,31 +3,52 @@ import Link from "next/link";
 import { StageCard } from "@/components/design/StageCard";
 import { WorkflowSteps } from "@/components/design/WorkflowSteps";
 
-const steps = ["Supplier data", "Analysis", "Review and response"] as const;
+const steps = ["Upload", "Confirm", "Analyze", "Distribution", "Anomalies", "Response"] as const;
 
 const stages = [
   {
     number: 1,
-    title: "Upload the supplier record",
-    description: "A supplier or factory owner selects a recent shipment dataset and checks what it contains before analysis.",
+    title: "Upload a supplier dataset",
+    description: "Choose a recent shipment file. This is the first dedicated screen in the flow.",
     inputs: ["Batch and product identifiers", "Transport temperature and timestamps", "Origins, destinations, and buyers"],
-    outcome: "A validated file and a clear summary of the records to analyze.",
+    outcome: "A file selected locally for the next review step.",
     previewHref: "/",
   },
   {
     number: 2,
-    title: "Analyze the connected evidence",
-    description: "The circular network animation explains the handoff from shipment records to the risk and traceability pipeline.",
-    inputs: ["Uploaded shipment records", "Historical recall reference data", "Batch relationships and approved procedures"],
-    outcome: "A review priority with linked evidence, when the services are connected.",
-    previewHref: "/ml-process",
+    title: "Confirm the file",
+    description: "Show the file name, format, and records that will be read before starting analysis.",
+    inputs: ["Selected file", "Detected columns", "Validation messages"],
+    outcome: "The operator confirms the dataset or chooses another file.",
   },
   {
     number: 3,
-    title: "Review anomalies and reach",
-    description: "Investigators inspect each anomaly, trace where a batch went, and prepare the right message for the right stage.",
-    inputs: ["Anomaly evidence and affected batch IDs", "Downstream recipients in the supply graph", "Official lab result when available"],
-    outcome: "An early precautionary warning, followed by a lab-informed response after review.",
+    title: "Run the analysis",
+    description: "The circular network animation accompanies real pipeline status once the services are connected.",
+    inputs: ["Validated shipment records", "Risk model output", "Batch links"],
+    outcome: "Analysis progress and a result ready for review.",
+    previewHref: "/ml-process",
+  },
+  {
+    number: 4,
+    title: "Inspect distribution",
+    description: "Show where the selected batch went across known buyers and destinations.",
+    inputs: ["Batch ID", "Shipment and delivery records", "Known downstream partners"],
+    outcome: "A batch-specific distribution view.",
+  },
+  {
+    number: 5,
+    title: "Review anomalies",
+    description: "Investigators inspect flagged shipments and the evidence behind each finding.",
+    inputs: ["Temperature and time deviations", "Model score and explanation", "Affected batch records"],
+    outcome: "A prioritized case with its traceable evidence.",
+  },
+  {
+    number: 6,
+    title: "Prepare a response",
+    description: "Choose recipients and review a precautionary warning or a later lab-informed update.",
+    inputs: ["Affected recipients", "Anomaly evidence", "Official lab result when available"],
+    outcome: "A message ready for human approval and delivery.",
   },
 ] as const;
 
@@ -39,22 +60,22 @@ export default function DesignWorkspace() {
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-rose-700 dark:text-rose-300">
             Tracefront / Design workspace
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">One record. One traceable response.</h1>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Six focused screens, one traceable case.</h1>
           <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
-            The two HTML mockups are being organized into a three-screen Next.js flow. This page is the shared design map, not a live analysis result.
+            Explore the six screens in the TraceFront workflow, from supplier data to contact review.
           </p>
         </div>
         <Link
           href="/"
           className="inline-flex min-h-10 items-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 dark:border-slate-700 dark:hover:bg-slate-800"
         >
-          Back to dashboard
+          Open upload page
         </Link>
       </header>
 
       <WorkflowSteps steps={steps} />
 
-      <section className="mt-6 grid gap-4 lg:grid-cols-3" aria-label="Proposed screens">
+      <section className="mt-6 grid gap-4 lg:grid-cols-3" aria-label="Planned screens">
         {stages.map((stage) => <StageCard key={stage.number} {...stage} />)}
       </section>
 
@@ -71,9 +92,6 @@ export default function DesignWorkspace() {
         </div>
       </section>
 
-      <p className="mt-6 text-xs leading-5 text-slate-600 dark:text-slate-400">
-        Design preview only. File ingestion, trained inference, lab verification, and outbound notifications are not connected here.
-      </p>
     </main>
   );
 }

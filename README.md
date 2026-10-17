@@ -30,11 +30,11 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Dashboard at http://localhost:3000. The supplier-report list is sample UI data and the file control only selects a local file. Report storage and analysis endpoints are not connected yet.
+Upload page at http://localhost:3000. It matches the approved page-one mockup and uses the TraceFront logo. Its single upload button opens a simulated file-selection walkthrough; drag-and-drop checks a local file extension. Server upload is not connected yet. The earlier supplier-report dashboard is at http://localhost:3000/reports and still uses sample UI data.
 
-Design workspace at http://localhost:3000/design. It maps the two HTML mockups into three planned Next.js screens and keeps the original mockups under `frontend/design/reference/`. The full screens have not been converted yet.
+Design workspace at http://localhost:3000/design. It maps the two HTML mockups into six separate Next.js screens and keeps the original mockups under `frontend/design/reference/`. Page one and the step-two overlay demo are implemented; the later screens are design drafts.
 
-The network animation preview is at http://localhost:3000/ml-process. Connections draw over three seconds, then new links appear while older ones retract and signal dots move rapidly across active links. The dots thin out over three seconds, leaving the lines to retract into their endpoint dashes. The dash circle closes into the first dash, then the camera slowly zooms toward it. This is an illustrative sequence, not a trained model visualization. It includes pause and replay controls and a static view for reduced-motion settings.
+The network animation preview is at http://localhost:3000/ml-process. The selected demo file's "Start analysis" button fades the upload screen out, then this page fades in with the circle fully visible on a desktop viewport. Connections draw over three seconds, then new links appear while older ones retract and signal dots move rapidly across active links. The dots thin out over three seconds, leaving the lines to retract into their endpoint dashes. The dash circle closes into the first dash, then the camera slowly zooms toward it. This is an illustrative sequence, not a trained model visualization. It includes pause and replay controls and a static view for reduced-motion settings.
 
 ## Not built yet
 

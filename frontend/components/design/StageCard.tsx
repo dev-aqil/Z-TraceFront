@@ -12,12 +12,9 @@ type StageCardProps = {
 export function StageCard({ number, title, description, inputs, outcome, previewHref }: StageCardProps) {
   return (
     <article className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6">
-      <div className="mb-5 flex items-center justify-between gap-3">
+      <div className="mb-5">
         <span className="text-xs font-semibold uppercase tracking-widest text-rose-700 dark:text-rose-300">
           Screen {number}
-        </span>
-        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-          Design draft
         </span>
       </div>
       <h2 className="text-xl font-semibold tracking-tight">{title}</h2>

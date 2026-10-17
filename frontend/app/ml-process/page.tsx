@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const CONNECT_START = 1800;
 const CONNECT_END = 4800;
@@ -11,20 +12,10 @@ const RELEASE_START = 11600;
 const RELEASE_END = 13000;
 const CLOSE_START = 13300;
 const CLOSE_END = 16100;
-const DURATION = 19100;
+const DURATION = 16800;
 const NODE_COUNT = 96;
 const INITIAL_EDGE_COUNT = 156;
 const EDGE_COUNT = 312;
-const STAGES = [
-  { at: 0, title: "Signals appear", detail: "Individual records spread into view." },
-  { at: CONNECT_START, title: "Relationships form", detail: "Connections draw across the network for three seconds." },
-  { at: CONNECT_END, title: "Evidence moves", detail: "Links refresh while signals travel rapidly through them." },
-  { at: DOTS_DECLINE_START, title: "Signals settle", detail: "Traveling dots thin out over three seconds." },
-  { at: RELEASE_START, title: "Connections release", detail: "Each line retracts into its two dash endpoints." },
-  { at: CLOSE_START, title: "Circle closes", detail: "Dashes gather at the first signal." },
-  { at: CLOSE_END, title: "Focus on signal", detail: "The camera slowly moves in on the final dash." },
-];
-
 type Point = { x: number; y: number };
 type Edge = { from: number; to: number; bend: number };
 
@@ -80,16 +71,6 @@ function edgeRange(index: number, time: number): { from: number; to: number } {
     from: range.from + (midpoint - range.from) * settle,
     to: range.to + (midpoint - range.to) * settle,
   };
-}
-
-function stageFor(time: number) {
-  if (time >= STAGES[6].at) return 6;
-  if (time >= STAGES[5].at) return 5;
-  if (time >= STAGES[4].at) return 4;
-  if (time >= STAGES[3].at) return 3;
-  if (time >= STAGES[2].at) return 2;
-  if (time >= STAGES[1].at) return 1;
-  return 0;
 }
 
 function draw(canvas: HTMLCanvasElement, time: number) {
@@ -225,12 +206,17 @@ function draw(canvas: HTMLCanvasElement, time: number) {
 }
 
 export default function MlProcess() {
+  const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const elapsedRef = useRef(0);
+  const skipClicksRef = useRef(0);
   const [playing, setPlaying] = useState(true);
   const [replayKey, setReplayKey] = useState(0);
-  const [stage, setStage] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    router.prefetch("/analysis-results");
+  }, [router]);
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -239,6 +225,10 @@ export default function MlProcess() {
     preference.addEventListener("change", updatePreference);
     return () => preference.removeEventListener("change", updatePreference);
   }, []);
+
+  useEffect(() => {
+    if (reducedMotion) router.push("/analysis-results");
+  }, [reducedMotion, router]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -261,82 +251,50 @@ export default function MlProcess() {
       }
       previousTime = now;
       draw(canvas, elapsedRef.current);
-      const nextStage = stageFor(elapsedRef.current);
-      setStage((current) => (current === nextStage ? current : nextStage));
       if (elapsedRef.current < DURATION) {
         frameId = requestAnimationFrame(tick);
       } else {
         setPlaying(false);
+        router.push("/analysis-results");
       }
     };
 
     frameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameId);
-  }, [playing, reducedMotion, replayKey]);
+  }, [playing, reducedMotion, replayKey, router]);
 
   function replay() {
     elapsedRef.current = 0;
-    setStage(0);
+    skipClicksRef.current = 0;
     setReplayKey((value) => value + 1);
     setPlaying(true);
     if (canvasRef.current) draw(canvasRef.current, reducedMotion ? DURATION : 0);
   }
 
-  const currentStage = reducedMotion ? STAGES[6] : STAGES[stage];
+  function skipToFinalTwoSeconds() {
+    skipClicksRef.current += 1;
+    if (skipClicksRef.current < 3) return;
+    skipClicksRef.current = 0;
+    elapsedRef.current = DURATION - 2000;
+    if (canvasRef.current) draw(canvasRef.current, elapsedRef.current);
+    setPlaying(true);
+  }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-      <header className="mb-7 flex flex-wrap items-start justify-between gap-5">
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-rose-700 dark:text-rose-300">
-            Tracefront / Concept preview
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">From signals to a decision</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700 dark:text-slate-300">
-            A visual story for how evidence from many records can come together for human review.
-          </p>
-        </div>
-        <a href="/" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 dark:border-slate-700 dark:hover:bg-slate-800">
-          Back to dashboard
-        </a>
-      </header>
-
-      <section aria-label="Machine learning concept animation" className="overflow-hidden rounded-2xl border border-rose-200 bg-white shadow-sm dark:border-slate-700">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rose-100 bg-rose-50 px-5 py-4 dark:border-slate-700 dark:bg-slate-800 sm:px-7">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-rose-700 dark:text-rose-300">Illustrative animation</p>
-            <h2 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white" aria-live="polite">{currentStage.title}</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300">{currentStage.detail}</p>
-          </div>
-          <div className="flex gap-2">
-            {reducedMotion && <span className="self-center text-xs text-slate-600 dark:text-slate-300">Static view for reduced motion</span>}
-            {!reducedMotion && elapsedRef.current < DURATION && (
-              <button type="button" onClick={() => setPlaying((value) => !value)} className="min-h-10 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
-                {playing ? "Pause" : "Play"}
-              </button>
-            )}
-            {!reducedMotion && (
-              <button type="button" onClick={replay} className="min-h-10 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
-                Replay
-              </button>
-            )}
-          </div>
-        </div>
-        <div className="relative mx-auto max-w-[680px] p-3 sm:p-6">
-          <canvas ref={canvasRef} aria-hidden="true" className="block aspect-square w-full rounded-xl bg-white" />
-        </div>
-      </section>
-
-      <ol className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Animation stages">
-        {STAGES.map((item, index) => (
-          <li key={item.title} className={`rounded-xl border px-4 py-3 text-sm ${index === (reducedMotion ? 6 : stage) ? "border-rose-300 bg-rose-50 text-rose-950 dark:border-rose-700 dark:bg-rose-950 dark:text-rose-100" : "border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"}`}>
-            <span className="mr-2 font-semibold">0{index + 1}</span>{item.title}
-          </li>
-        ))}
-      </ol>
-      <p className="mt-5 text-xs leading-5 text-slate-600 dark:text-slate-400">
-        Concept visualization only. The moving lines and particles do not represent a trained model or a live supplier analysis.
-      </p>
+    <main className="ml-process-enter relative h-dvh w-full overflow-hidden bg-white">
+      <canvas ref={canvasRef} role="img" aria-label="Animated network of connected records" onClick={skipToFinalTwoSeconds} className="block h-full w-full" />
+      <div className="absolute right-5 top-5 flex gap-2">
+        {!reducedMotion && elapsedRef.current < DURATION && (
+          <button type="button" onClick={() => setPlaying((value) => !value)} className="min-h-10 rounded-lg border border-slate-300 bg-white/90 px-4 py-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+            {playing ? "Pause" : "Play"}
+          </button>
+        )}
+        {!reducedMotion && (
+          <button type="button" onClick={replay} className="min-h-10 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+            Replay
+          </button>
+        )}
+      </div>
     </main>
   );
 }

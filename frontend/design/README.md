@@ -1,21 +1,24 @@
 # Tracefront design workspace
 
-The existing Next.js app serves the design map at `/design`. React components shared by the future screens live in `../components/design/`. The two original HTML mockups are archived in `reference/` as design inputs, not runtime pages.
+The existing Next.js app serves the first upload screen at `/` and the design map at `/design`. The earlier supplier-report dashboard remains at `/reports`. React components shared by future screens live in `../components/design/`. The two original HTML mockups are archived in `reference/` as design inputs, not runtime pages. The approved image mockup for page one is in `mockups/page-01-upload.png`.
 
 ## Screen mapping
 
 | New screen | Mockup material to carry forward | Product decision |
 | --- | --- | --- |
-| 1. Supplier upload | File well, dataset summary, confirmation | Accept a shipment dataset, validate its structure, and show exactly what was read. Do not claim that choosing a file has uploaded it. |
-| 2. Analysis | Circular correlation motif | Reuse the current `/ml-process` animation as an explanation while actual ingestion, risk inference, document analysis, retrieval, and graph tracing run through separate services. The animation itself is illustrative. |
-| 3. Review and response | Anomaly cards, distribution view, contact panel | Show anomaly evidence and a batch-specific downstream graph. Keep an early precautionary warning separate from the update based on an official lab result. Both require a human review step. |
+| 1. Upload | File well and one centered upload action | The button opens the step-two demo overlay. Drag-and-drop checks a local file extension; no server upload is connected yet. |
+| 2. Confirm | Dark overlay, floating dialog, and Windows-style demo picker | The current dialog demonstrates a sample file already selected. Real column detection and validation are future work. |
+| 3. Analyze | Circular correlation motif | The step-two confirmation fades into `/ml-process`, which shows the circle as an illustration. Actual ingestion, inference, retrieval, and graph tracing remain separate services to build. |
+| 4. Distribution | Recipient and route cards | Show known destinations and buyers for the selected batch. |
+| 5. Anomalies | Anomaly cards and network view | Show evidence and the affected batch-specific downstream graph. |
+| 6. Response | Contact and notification panel | Keep an early precautionary warning separate from the update based on an official lab result; require human approval. |
 
-The two mockups spread these concepts across six numbered pages. The new flow groups them into three screens so the supplier can move from upload to evidence to action without repeating panels.
+Each numbered page remains a separate screen, matching the team's preferred segmented journey.
 
 ## Candidate component boundaries
 
 - `WorkflowSteps` and `StageCard` provide shared navigation and design language now.
-- `SupplierUpload` will own file selection, format checks, column mapping, and upload status.
+- The root upload page currently owns local file selection and extension checks. Column mapping and server upload are future work.
 - `AnalysisProgress` will present actual backend job state alongside the circular animation.
 - `AnomalyList` and `SupplyChainGraph` will share batch IDs and a selected anomaly.
 - `NotificationReview` will prepare separate early and post-lab messages, with explicit approval and delivery status.
@@ -28,4 +31,4 @@ The two mockups spread these concepts across six numbered pages. The new flow gr
 - Copy, English terminology, and stage ownership are deliberately open for team review before the six mockup pages are converted.
 - Keep page fades short, optional under reduced motion, and separate from the longer explanatory network animation.
 
-No dataset is uploaded, model is run, or notification is sent by the current design map.
+No dataset is uploaded, model is run, or notification is sent by the current design preview. The Windows-style picker is simulated and clearly labeled as a demo. The fade to `/ml-process` leads to the existing illustrative animation.
