@@ -10,6 +10,22 @@ type Evidence = { source_record_id: string; field: string; observed_value: numbe
 type ApiFinding = { finding_id: string; batch_id: string; shipment_id: string | null; anomaly_type: string; severity: string; summary: string; evidence: Evidence[] };
 export type GraphNode = { id: string; kind: "root" | "route" | "batch" | "recipient"; label: string; detail?: string | null; flagged?: boolean };
 export type Graph = { nodes: GraphNode[]; edges: [string, string][] };
+export type TraceBatch = {
+  batch_id: number; lot_code: string | null; product_name: string; organization_id: number;
+  organization_name: string; organization_type: string; produced_at: string; status: string; synthetic: boolean;
+};
+export type TraceShipment = {
+  shipment_id: number; shipment_code: string; batch_id: number; from_org_id: number; to_org_id: number;
+  from_name: string; to_name: string; quantity: number; quantity_unit: string | null; status: string;
+  departed_at: string | null; eta: string | null;
+};
+export type TraceDocument = {
+  selected_batch_ids: number[]; upstream: number[]; downstream: number[]; related: number[];
+  batches: TraceBatch[]; edges: [number, number][]; shipments: TraceShipment[];
+  source_ranking: { batch_id: number; matched_batch_ids: number[]; flagged_product_count: number; total_distance: number }[];
+  lab_results: { lab_result_id: number; batch_id: number; tested_at: string; contaminant: string | null; result: string }[];
+  interpretation: string;
+};
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   let response: Response;
@@ -28,7 +44,9 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 let pending: Promise<string> | null = null;
 
 function setPending(work: Promise<string>) {
+  try { sessionStorage.removeItem("tracefront:pending-result"); } catch {}
   pending = work;
+  pending.then((href) => writeJson("tracefront:pending-result", href), () => {});
   pending.catch(() => {}); // handled when the animation finishes; avoids an unhandled-rejection warning meanwhile
 }
 
@@ -41,7 +59,10 @@ export function startUpload(file: File | Promise<File>) {
 }
 
 export function finishAnalysis(go: (href: string) => void) {
-  if (!pending) return go("/analysis-results");
+  if (!pending) {
+    const saved = readJson<string>("tracefront:pending-result");
+    return go(saved?.startsWith("/analysis-results") ? saved : "/?error=Analysis%20was%20interrupted.%20Please%20upload%20the%20file%20again.");
+  }
   pending.then(go, (e: Error) => go(`/?error=${encodeURIComponent(e.message)}`));
 }
 
@@ -78,6 +99,9 @@ export type Tallies = { byModel: Record<string, Tally>; ids: string[] };
 export type StoredRun = { result: SampleRun; labels: Record<string, string>; tallies: Tallies };
 
 const json = { method: "POST", headers: { "Content-Type": "application/json" } };
+export const getTraceBatches = () => request<TraceBatch[]>(`${API_URL}/api/trace/batches`);
+export const traceLots = (ids: number[]) => request<TraceDocument>(`${API_URL}/api/trace?${ids.map((id) => `batch_ids=${id}`).join("&")}`);
+export const seedTraceDemo = () => request<{ selected_batch_ids: number[]; synthetic: boolean }>(`${API_URL}/api/demo/seed`, { ...json, body: "{}" });
 // Display form of a sample field. The models need the raw value (the beef models lower-case their text), so this is
 // for showing only: states in capitals, text fields capitalised, the "__unknown__" placeholder as "not recorded".
 export function displayValue(field: string, value: string) {

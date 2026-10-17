@@ -1,13 +1,13 @@
 # Tracefront: current schema and API
 
-Snapshot of `main` at commit `263a5ca`, taken 2026-10-18. The examples are real responses: the backend was called on a throwaway local database, and the ML service with the trained models. Long lists are trimmed and marked `"... N more"`.
+Updated 2026-10-18 for durable analyses and stored lot investigations. Earlier examples below are abbreviated; trace responses now contain additional fields documented in section 5. The backend integration tests use an isolated database; ML sample examples use trained models.
 
 There are two services:
 
 | Service | Code | Port | Where it runs now |
 |---|---|---|---|
 | **Backend** (database, uploads, trace) | `backend/` | 8000 | LinuxONE, always on (`tracefront-backend` service, PostgreSQL 16) |
-| **ML service** (pathogen models) | `food-risk-ml/` | 8100 | Locally only: `uvicorn src.api.app:app --port 8100` from `food-risk-ml/`. Not running on LinuxONE yet. |
+| **ML service** (pathogen models) | `food-risk-ml/` | 8100 | `tracefront-ml` on LinuxONE after combined deployment; local command: `uvicorn src.api.app:app --port 8100` |
 
 Reach the server's backend with `ssh -L 8000:127.0.0.1:8000 linux1@148.100.77.171`, then use `http://localhost:8000`. Interactive docs are at `/docs` on both services.
 
@@ -87,7 +87,7 @@ One batch moving from one organization to another.
 | `contaminant` | text | yes | e.g. `Salmonella` |
 | `result` | text | no | intended values `positive` / `negative`; not enforced |
 
-**Not in the database:** uploaded shipment files and their findings (kept in the backend's memory, see 2.8), and ML predictions (never stored).
+**Additional tables:** `analyses` stores immutable findings/distribution JSON documents, dataset ID and creation time; `batch_lots` maps integer batch IDs to external lot codes unique per producer; `shipment_manifests` maps shipment IDs to external codes unique per origin and explicit quantity units; `synthetic_batches` records demo provenance so simulated lots stay labelled after refresh. All are additive; no existing table is dropped or altered. Raw uploaded bytes and pathogen-model predictions are not stored.
 
 ---
 
@@ -112,12 +112,12 @@ One batch moving from one organization to another.
   {"detail": [{"type": "missing", "loc": ["body", "organization_id"], "msg": "Field required", "input": {"batch_id": 7, "product_name": "x"}}]}
   ```
 - **Other errors** return `{"detail": "<message>"}` with the status listed for each endpoint.
-- **A foreign-key violation** (for example a batch whose organization doesn't exist) is not caught, so it comes back as **500** `Internal Server Error`.
+- **Missing referenced parents** return **404**. Duplicate IDs or scoped codes return **409**. Ingredient self-links/cycles return **400**. SQLite connections also enforce foreign keys for local verification.
 
 ### 2.1 GET /api/health
-No parameters. Returns `200`:
+No parameters. Checks database connectivity and returns `200`:
 ```json
-{"status": "ok"}
+{"status": "ok", "analysis_storage": "database"}
 ```
 
 ### 2.2 GET /api/batches
@@ -137,7 +137,7 @@ JSON body:
 ```json
 {"batch_id": 42, "product_name": "Chicken Wrap CW-42", "organization_id": 2, "produced_at": "2026-10-16T09:00:00"}
 ```
-Returns `200`:
+Returns `201`:
 ```json
 {"batch_id": 42, "product_name": "Chicken Wrap CW-42", "organization_id": 2, "produced_at": "2026-10-16T09:00:00", "status": "normal"}
 ```
@@ -233,7 +233,7 @@ Returns `201`:
 - **400** for a bad file, with a specific message. For example `{"detail": "missing column(s): batch_id"}`, `{"detail": "file must be .csv, .xlsx or .json"}`, an invalid value in a named row, or an unknown `profile`.
 - **413** if the file is over 10 MB.
 
-Results live **in the backend's memory**. They disappear when the backend restarts or redeploys, and they are not written to the database tables.
+Results are committed to the `analyses` table before the upload succeeds. Findings and distribution documents survive API restarts/redeployment and are shared between workers. Existing IDs and response shapes remain valid. Raw file bytes are not retained.
 
 ### 2.9 GET /api/analyses/{analysis_id}/findings
 Returns `200`, following `contracts/ml-findings.schema.json`:
@@ -421,15 +421,40 @@ Returns `200` in the same shape as 3.4, with `sample_id: null` and `actual: null
 
 ---
 
-## 4. Gaps worth knowing
+## 4. Remaining limits
 
-1. **The shared database can't be filled through the API yet.**
-   - There are no endpoints for organizations, shipments or batch relationships, and every table on the server is empty (checked on 2026-10-18).
-   - Postgres enforces foreign keys, so creating a batch, a sensor reading or a lab result fails with **500** until those base rows are inserted some other way, such as with SQL.
-2. **Uploads and the database are separate.**
-   - An analysis upload never touches the tables, and its results vanish on restart.
-   - The upload uses text batch IDs (`RM-402`); the tables use integers.
-3. **Trace is shallow.** It returns IDs only and follows ingredient → product links only. It never says where a batch was shipped.
-4. **There are two temperature rules.** `/risk` uses a flat 7 °C; uploads use the per-product profiles.
-5. **The ML side is separate.** Its predictions aren't stored, the chemical model has no endpoint, and the ML service isn't running on LinuxONE.
-6. **Some fields are free text.** `status`, `type` and `result` aren't checked, and quantities carry no units.
+1. Upload findings persist, but an upload does not invent producer records, ingredient links or lab results. External lot codes must resolve to exactly one stored producer's batch; ambiguous matches require an organization choice.
+2. One batch per shipment remains the MVP contract. Legacy shipment rows have no unit until a manifest is provided; new shipments require an explicit unit. Ingredient `quantity_used` retains its legacy unspecified unit and is not used for inventory arithmetic.
+3. `/risk` retains the legacy flat 7 °C rule; uploads use per-product profiles. It is not used to rank shared ingredients.
+4. The models predict FSIS sample positivity; they do not predict an uploaded batch's contamination probability. Predictions are not stored, and the chemical model has no endpoint.
+5. Containment decisions, human approval logging and live replay are still pending. Trace selection is an investigation input, not laboratory confirmation.
+
+## 5. Stored traceability API
+
+| Method | Path | Input / output |
+|---|---|---|
+| GET / POST | `/api/organizations` | Create: `organization_id`, `name`, `type` (supplier/factory/warehouse/store). POST returns 201; duplicate ID 409. |
+| POST | `/api/batches` | Existing fields plus optional `lot_code`. Requires an existing organization. Returns 201, includes `lot_code`. Duplicate `(organization_id, lot_code)` returns 409. |
+| GET / POST | `/api/shipments` | Create: `shipment_id`, `shipment_code`, `batch_id`, `from_org_id`, `to_org_id`, positive finite `quantity`, `quantity_unit`, optional `status`, `departed_at`, `eta`. Status: pending/in_transit/delivered/held. Returns 201. List adds origin/destination names and units. |
+| GET / POST | `/api/batch-relationships` | Create: `parent_batch_id`, `child_batch_id`, positive finite `quantity_used`. Returns 201, duplicate 409, self-link/cycle 400. Both batches must exist. |
+| GET | `/api/trace/batches` | Batch catalog with lot code, producer name/type, product, status and production time. |
+| GET | `/api/lots/resolve?lot_code=RM-402` | Optional `organization_id`. Returns a batch; unknown 404, ambiguous 409. No route-name inference. |
+| GET | `/api/trace?batch_ids=910042&batch_ids=910091` | Investigate 1–20 selected batch IDs. See response below. Unknown batch 404; empty/oversize input 422. |
+| GET | `/api/batches/{id}/trace` | Same rich response plus `batch_id`. Keeps legacy `upstream` and `downstream` arrays. |
+| POST | `/api/demo/seed` | No body required. Adds fixed synthetic rows idempotently, refusing conflicting reserved IDs with 409 and rolling back the whole seed. Returns `synthetic`, `selected_batch_ids`, `second_batch_id`, `shared_ingredient_id`, `message`. Never resets or deletes data. |
+
+Trace response fields:
+
+- `selected_batch_ids`: unique selected batches.
+- `upstream`, `downstream`: batch IDs from directed ingredient links, excluding selected IDs.
+- `related`: other products made from upstream lots, excluding the previous groups.
+- `batches`: full catalog records for all included lots/products.
+- `edges`: directed `[parent_batch_id, child_batch_id]` pairs.
+- `shipments`: movements of included batches with origin/destination names, external codes, units, status and timestamps. These are not current-inventory totals.
+- `source_ranking`: upstream lots ordered by count of selected descendants, then summed shortest-path distance, then ID. Each row includes `batch_id`, `matched_batch_ids`, `flagged_product_count`, `total_distance`. A count is not a probability or causal conclusion.
+- `lab_results`: recorded laboratory evidence, independently of manual selection.
+- `interpretation`: explicit scope of the investigation leads.
+
+The synthetic seed uses 910xxx IDs. CW-42 (`910042`) and CS-91 (`910091`) share L-102 (`910102`). VW-17 is another product using L-102 at the second factory. RM-402 is a separate chicken ingredient of CW-42. Selecting both finished products ranks L-102 first with `flagged_product_count: 2`. The stored CW-42 laboratory result says `Salmonella (simulated)`; selecting CS-91 does not create a second lab result.
+
+New lab writes accept only `positive` or `negative`. Distribution upload grouping scopes routes and batch occurrences to their distributor/route, so identical route names do not merge independent suppliers.

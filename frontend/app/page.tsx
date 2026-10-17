@@ -160,6 +160,7 @@ export default function UploadPage() {
           </div>
 
           <SpinPanel onRun={goToProcessing} />
+          <Link href="/trace" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-rose-700">Open lot investigation <span aria-hidden="true">→</span></Link>
 
           {error && <p role="alert" className="mt-4 text-sm font-medium text-red-700">{error}</p>}
         </section>

@@ -9,7 +9,9 @@ PORT=8000
 cd "$BACKEND"
 
 echo "== 1. PostgreSQL + driver (apt: psycopg2-binary has no s390x wheel)"
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq postgresql python3-psycopg2 >/dev/null
+if [ "${TRACEFRONT_SKIP_INSTALL:-0}" != 1 ]; then
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq postgresql python3-psycopg2 >/dev/null
+fi
 sudo systemctl enable -q --now postgresql
 
 echo "== 2. Database role and database"
@@ -24,7 +26,9 @@ fi
 
 echo "== 3. Python packages"
 # SQLAlchemy pinned as in requirements.txt: 2.1 switched postgresql:// to the psycopg 3 driver, apt gives psycopg2
-"$VENV/bin/pip" install -q sqlalchemy==2.0.35 python-dotenv networkx python-multipart
+if [ "${TRACEFRONT_SKIP_INSTALL:-0}" != 1 ]; then
+  "$VENV/bin/pip" install -q sqlalchemy==2.0.35 python-dotenv networkx python-multipart
+fi
 "$VENV/bin/python" -c "import psycopg2, fastapi, uvicorn, pandas" || { echo "venv cannot see apt psycopg2"; exit 1; }
 
 echo "== 4. Backend tests"
@@ -36,6 +40,7 @@ for m in ("app.test_analysis", "app.test_risk"):
         getattr(mod, name)()
         print("  pass", m, name)
 PY
+"$VENV/bin/python" -B -m unittest app.test_system -v
 
 echo "== 5. Always-on service (survives logout and reboot)"
 sudo tee /etc/systemd/system/tracefront-backend.service >/dev/null <<EOF
@@ -47,7 +52,7 @@ Requires=postgresql.service
 [Service]
 User=$(whoami)
 WorkingDirectory=$BACKEND
-ExecStart=$VENV/bin/uvicorn app.main:app --host 127.0.0.1 --port $PORT
+ExecStart=$VENV/bin/python -B -m uvicorn app.main:app --host 127.0.0.1 --port $PORT
 Restart=on-failure
 
 [Install]
@@ -58,5 +63,10 @@ sudo systemctl enable -q tracefront-backend
 sudo systemctl restart tracefront-backend
 
 echo "== 6. Verify"
-for _ in $(seq 30); do curl -fsS "http://127.0.0.1:$PORT/api/health" 2>/dev/null && break; sleep 1; done
+ready=0
+for _ in $(seq 30); do
+  if curl -fsS "http://127.0.0.1:$PORT/api/health" 2>/dev/null; then ready=1; break; fi
+  sleep 1
+done
+[ "$ready" = 1 ] || { echo "backend health check failed"; exit 1; }
 echo; systemctl is-active tracefront-backend

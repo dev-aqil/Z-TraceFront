@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, JSON, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -64,3 +64,40 @@ class LabResult(Base):
     tested_at = Column(DateTime, nullable=False)
     contaminant = Column(String, nullable=True)
     result = Column(String, nullable=False)  # positive | negative
+
+
+class Analysis(Base):
+    __tablename__ = "analyses"
+
+    analysis_id = Column(String, primary_key=True)
+    dataset_id = Column(String, nullable=False)
+    generated_at = Column(DateTime(timezone=True), nullable=False)
+    findings = Column(JSON, nullable=False)
+    distribution = Column(JSON, nullable=False)
+
+
+class BatchLot(Base):
+    """External lot identity without changing the existing batch primary keys."""
+    __tablename__ = "batch_lots"
+    __table_args__ = (UniqueConstraint("organization_id", "lot_code"),)
+
+    batch_id = Column(Integer, ForeignKey("batches.batch_id"), primary_key=True)
+    organization_id = Column(Integer, ForeignKey("organizations.organization_id"), nullable=False)
+    lot_code = Column(String, nullable=False)
+
+
+class ShipmentManifest(Base):
+    __tablename__ = "shipment_manifests"
+    __table_args__ = (UniqueConstraint("from_org_id", "shipment_code"),)
+
+    shipment_id = Column(Integer, ForeignKey("shipments.shipment_id"), primary_key=True)
+    from_org_id = Column(Integer, ForeignKey("organizations.organization_id"), nullable=False)
+    shipment_code = Column(String, nullable=False)
+    quantity_unit = Column(String, nullable=False)
+
+
+class SyntheticBatch(Base):
+    __tablename__ = "synthetic_batches"
+
+    batch_id = Column(Integer, ForeignKey("batches.batch_id"), primary_key=True)
+    scenario = Column(String, nullable=False)

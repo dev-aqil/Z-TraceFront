@@ -62,10 +62,11 @@ def test_distribution_flags_only_shipments_with_findings():
     df, findings = analyse("s.csv", csv_bytes(rows()))
     graph = distribution(df, findings)
     nodes = {n["id"]: n for n in graph["nodes"]}
-    assert nodes["shipment:SHIP-017"]["flagged"] and nodes["batch:RM-402"]["flagged"]
+    batch = "batch:Food Processing:Protein:RM-402"
+    assert nodes["shipment:SHIP-017"]["flagged"] and nodes[batch]["flagged"]
     assert not nodes["shipment:SHIP-050"]["flagged"] and not nodes["root:Food Processing"]["flagged"]
-    assert nodes["batch:RM-402"]["label"] == "RM-402 · Marinated chicken"
-    assert ["route:Protein", "batch:RM-402"] in graph["edges"] and ["batch:RM-402", "shipment:SHIP-017"] in graph["edges"]
+    assert nodes[batch]["label"] == "RM-402 · Marinated chicken"
+    assert ["route:Food Processing:Protein", batch] in graph["edges"] and [batch, "shipment:SHIP-017"] in graph["edges"]
     assert len(graph["edges"]) == len({tuple(e) for e in graph["edges"]})
 
 
@@ -76,6 +77,15 @@ def test_json_and_xlsx_match_csv():
     want = by_type(analyse("s.csv", csv_bytes(rows()))[1]).keys()
     assert by_type(analyse("s.json", json.dumps(rows()).encode())[1]).keys() == want
     assert by_type(analyse("s.xlsx", xlsx.getvalue())[1]).keys() == want
+
+
+def test_same_route_name_does_not_connect_different_distributors():
+    import networkx as nx
+    df, findings = analyse("s.csv", b"shipment_id,batch_id,distributor,route\nS1,B,A,Cold\nS2,B,C,Cold\n")
+    graph = nx.DiGraph(distribution(df, findings)["edges"])
+    assert "shipment:S1" in nx.descendants(graph, "root:A")
+    assert "shipment:S2" not in nx.descendants(graph, "root:A")
+    assert "shipment:S1" not in nx.descendants(graph, "root:C")
 
 
 def rejected(name, raw):

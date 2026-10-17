@@ -35,6 +35,20 @@ def test_models_lists_families_with_their_models_and_reels(setup):
     assert all(start <= d < end for d in reels["sample_date"])
 
 
+def test_legacy_salmonella_table_keeps_its_labels(trained, cfg, tmp_path):
+    df = make_synthetic_canonical()
+    csv = tmp_path / "legacy.csv"
+    df.rename(columns={"pathogen_positive": "salmonella_positive"}).to_csv(csv, index=False)
+    model_dir = latest_model_dir(trained["root"] / "registry")
+    window = (cfg["split"]["val_start"], cfg["backtest"]["sealed_test_start"])
+    family = load_family("Poultry", [("salmonella", "Salmonella", model_dir, csv)], *window)
+    actual = family.pool.set_index("sample_id")["label:salmonella"].astype(int)
+    expected = df.set_index("sample_id")["pathogen_positive"].loc[actual.index].astype(int)
+    assert actual.equals(expected.rename("label:salmonella"))
+    with pytest.raises(ValueError, match="missing its pathogen_positive label"):
+        load_family("Wrong pathogen", [("campylobacter", "Campylobacter", model_dir, csv)], *window)
+
+
 def test_spin_runs_every_family_model_on_one_validation_sample(setup):
     client, family, (start, end), labels = setup
     for _ in range(20):

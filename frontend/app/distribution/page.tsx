@@ -19,7 +19,20 @@ export default function DistributionPage() {
   // Findings arrive highest severity first, so the alert and notify draft point at the most urgent shipment.
   const focus = findings.find((finding) => siteFor(finding.shipmentId));
   const site = focus && siteFor(focus.shipmentId);
-  const supplier = graph?.nodes.find((node) => node.kind === "root")?.label ?? "Supplier";
+  const supplierFor = (id: string): string => {
+    const visited = new Set<string>();
+    const queue = [id];
+    while (queue.length) {
+      const current = queue.shift()!;
+      if (visited.has(current)) continue;
+      visited.add(current);
+      const node = graph?.nodes.find((n) => n.id === current);
+      if (node?.kind === "root") return node.label;
+      queue.push(...(graph?.edges.filter(([, to]) => to === current).map(([from]) => from) ?? []));
+    }
+    return "Supplier";
+  };
+  const supplier = focus ? supplierFor(`shipment:${focus.shipmentId}`) : "Supplier";
   const marked = graph?.nodes.filter((node) => node.kind === "recipient" && node.flagged).length ?? 0;
 
   return (
@@ -51,6 +64,7 @@ export default function DistributionPage() {
               : <p role={error ? "alert" : "status"} className="flex h-[430px] items-center justify-center text-sm text-slate-600">{error || "Loading distribution…"}</p>}
           </section>
           <aside className="flex flex-col gap-4" aria-label="Distribution actions and legend">
+            <Link href={`/trace?${new URLSearchParams({ ...(focus ? { lot: focus.batchId } : {}), ...(id ? { analysis: id } : {}) })}`} className="rounded-2xl border border-slate-900 bg-slate-900 px-5 py-4 text-sm font-semibold text-white hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">Trace related lots <span aria-hidden="true">→</span><span className="mt-1 block text-xs font-normal text-slate-300">Ingredients, connected products &amp; locations</span></Link>
             {focus && site && <NotifyOverlay target={{ shipmentId: focus.shipmentId, batchId: focus.batchId, reason: focus.reason, supplier, recipient: site.label }} />}
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" aria-label="Network legend">
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-700">Legend</h2>

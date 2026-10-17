@@ -69,7 +69,14 @@ def load_family(name: str, members: list[tuple[str, str, Path, Path]], start: st
     for key, pathogen, model_dir, processed in members:
         predictor = Predictor(model_dir)
         wanted = [SAMPLE_DATE, PRODUCT_CATEGORY, ESTABLISHMENT_ID, *predictor.meta_features]
-        df = pd.read_csv(processed, dtype=str, usecols=lambda c: c in {SAMPLE_ID, TARGET, *wanted})
+        columns = pd.read_csv(processed, nrows=0).columns
+        # The first LinuxONE Salmonella registry pins the older, pathogen-specific canonical header.
+        target = "salmonella_positive" if key == "salmonella" and TARGET not in columns else TARGET
+        if target not in columns:
+            raise ValueError(f"{key}: sample table is missing its {target} label")
+        df = pd.read_csv(processed, dtype=str, usecols=lambda c: c in {SAMPLE_ID, target, *wanted})
+        if target != TARGET:
+            df = df.rename(columns={target: TARGET})
         df[SAMPLE_DATE] = df[SAMPLE_DATE].str[:10]
         programmes |= set(df[PRODUCT_CATEGORY].dropna()) - {UNKNOWN_CATEGORY}
         rows = df[(df[SAMPLE_DATE] >= start) & (df[SAMPLE_DATE] < end) & df[TARGET].isin(["0", "1"])]

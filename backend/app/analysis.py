@@ -20,7 +20,11 @@ from uuid import uuid4
 
 import numpy as np
 import pandas as pd
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models import Analysis
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "food-risk-ml"))
 from src.coldchain.rules import ColdChainMonitor, load_rules  # noqa: E402
@@ -42,9 +46,6 @@ ALIASES = {"temperature": "temperature_c", "shipment_time": "reading_time", "hum
 NUMBERS = ("temperature_c", "humidity_pct", "dispatched_qty", "received_qty")
 TIMES = ("reading_time", "planned_arrival", "actual_arrival")
 SEVERITY_ORDER = {"high": 0, "medium": 1, "low": 2}
-
-# ponytail: in memory, lost on restart and not shared between workers; move to the database when analyses must persist
-ANALYSES: dict[str, dict] = {}
 
 
 def text(v):
@@ -222,42 +223,44 @@ def distribution(df: pd.DataFrame, findings: list[dict]) -> dict:
         route = first(rows, "route")[0] or "Unassigned route"
         destination = first(rows, "destination")[0] or first(rows, "delivered_to")[0] or "Unknown destination"
         path = [node(f"root:{distributor}", "root", distributor, "Distributor"),
-                node(f"route:{route}", "route", route),
-                node(f"batch:{batch}", "batch", f"{batch} · {product}" if product else batch, hot=hot),
+                node(f"route:{distributor}:{route}", "route", route),
+                node(f"batch:{distributor}:{route}:{batch}", "batch", f"{batch} · {product}" if product else batch, hot=hot),
                 node(f"shipment:{ship}", "recipient", destination, ship, hot)]
         edges.update(dict.fromkeys(zip(path, path[1:])))
     return {"nodes": list(nodes.values()), "edges": [list(e) for e in edges]}
 
 
-def stored(analysis_id: str) -> dict:
-    if analysis_id not in ANALYSES:
+def stored(db: Session, analysis_id: str) -> Analysis:
+    analysis = db.get(Analysis, analysis_id)
+    if analysis is None:
         raise HTTPException(404, "analysis not found")
-    return ANALYSES[analysis_id]
+    return analysis
 
 
 @router.post("", status_code=201)
-def create_analysis(file: UploadFile):
+def create_analysis(file: UploadFile, db: Session = Depends(get_db)):
     raw = file.file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "file is larger than 10 MB")
     dataset_id = file.filename or "upload"
     df, findings = analyse(dataset_id, raw)
     analysis_id = f"analysis-{uuid4().hex[:12]}"
-    ANALYSES[analysis_id] = {
-        "findings": {"schema_version": "1.0", "analysis_id": analysis_id, "dataset_id": dataset_id,
-                     "generated_at": datetime.now(timezone.utc).isoformat(), "model_version": MODEL_VERSION,
-                     "findings": findings},
-        "distribution": {"analysis_id": analysis_id, **distribution(df, findings)},
-    }
+    generated_at = datetime.now(timezone.utc)
+    db.add(Analysis(analysis_id=analysis_id, dataset_id=dataset_id, generated_at=generated_at,
+                    findings={"schema_version": "1.0", "analysis_id": analysis_id, "dataset_id": dataset_id,
+                              "generated_at": generated_at.isoformat(), "model_version": MODEL_VERSION,
+                              "findings": findings},
+                    distribution={"analysis_id": analysis_id, **distribution(df, findings)}))
+    db.commit()
     return {"analysis_id": analysis_id, "dataset_id": dataset_id, "rows": len(df),
             "shipments": df.shipment_id.nunique(), "batches": df.batch_id.nunique(), "findings": len(findings)}
 
 
 @router.get("/{analysis_id}/findings")
-def get_findings(analysis_id: str):
-    return stored(analysis_id)["findings"]
+def get_findings(analysis_id: str, db: Session = Depends(get_db)):
+    return stored(db, analysis_id).findings
 
 
 @router.get("/{analysis_id}/distribution")
-def get_distribution(analysis_id: str):
-    return stored(analysis_id)["distribution"]
+def get_distribution(analysis_id: str, db: Session = Depends(get_db)):
+    return stored(db, analysis_id).distribution

@@ -1,14 +1,20 @@
 import os
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://tracefront:tracefront@localhost:5432/tracefront")
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, **({"connect_args": {"check_same_thread": False}}
+                                      if DATABASE_URL.startswith("sqlite") else {}))
+
+if engine.dialect.name == "sqlite":
+    @event.listens_for(engine, "connect")
+    def enable_foreign_keys(connection, _):
+        connection.execute("PRAGMA foreign_keys=ON")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

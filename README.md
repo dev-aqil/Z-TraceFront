@@ -17,6 +17,10 @@ API docs at http://localhost:8000/docs; [docs/schema-and-api.md](docs/schema-and
 Endpoints:
 - `GET /api/health`
 - `GET /api/batches`, `POST /api/batches`
+- `GET/POST /api/organizations`, `/api/shipments`, `/api/batch-relationships`
+- `GET /api/trace?batch_ids=<id>&batch_ids=<id>` — ingredients, related products, shipment locations and shared-ingredient ranking
+- `POST /api/demo/seed` — idempotent synthetic trace scenario; preserves existing records
+- `POST /api/analyses`, `GET /api/analyses/{id}/findings`, `GET /api/analyses/{id}/distribution` — database-backed upload results
 - `POST /api/sensor-readings`, `POST /api/lab-results`
 - `GET /api/batches/{id}/trace` — upstream/downstream via `app/graph.py` (NetworkX)
 - `GET /api/shipments/{id}/risk` — rule-based priority score (`app/risk.py`); swap for a trained XGBoost/GBM model later
@@ -31,7 +35,9 @@ ssh -L 8000:127.0.0.1:8000 -L 5432:127.0.0.1:5432 linux1@148.100.77.171
 
 While it is open, the API is at http://localhost:8000 and the database at `localhost:5432` (user and database `tracefront`, password in `~/tracefront/backend/.env` on the server).
 
-To ship committed backend changes, run `.\backend\deploy.ps1` in Windows PowerShell; pass `-Key <path>` if your key file is elsewhere, and use `powershell -ExecutionPolicy Bypass -File .\backend\deploy.ps1` if Windows blocks scripts. It deploys the last commit, not uncommitted edits, keeps the data, and reruns `setup_linuxone.sh` (install, tests, restart). Tables are created when missing but never altered, so a column change in `app/models.py` needs the table dropped or a migration.
+Run `.\backend\deploy.ps1` to ship committed backend **and ML** code/config, or add `-WorkingTree` to ship the current source without committing. Server-native model registries, data, database contents and credentials are preserved. Missing model sample tables are restored only when an archived copy matches the model's recorded SHA-256. The script backs up application code, verifies release bytes, runs backend checks, restarts both services and verifies all five pathogen models with explanations. It uses existing dependencies; package installs require the explicit `-InstallDependencies` switch. See [the demo runbook](docs/demo-runbook.md).
+
+For presentation, run `.\backend\demo-tunnel.ps1` and keep it open: this forwards both 8000 and 8100. Run `.\backend\.venv\Scripts\python backend/preflight.py` from the repository root to verify both tunneled services. Additive tables are created at startup; existing tables are not dropped or altered.
 
 ## Frontend (Next.js + Tailwind)
 
@@ -42,7 +48,11 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Upload page at http://localhost:3000. It matches the approved page-one mockup and uses the TraceFront logo. Its single upload button opens a simulated file-selection walkthrough; drag-and-drop checks a local file extension. Server upload is not connected yet. The earlier supplier-report dashboard is at http://localhost:3000/reports and still uses sample UI data.
+Upload page at http://localhost:3000. CSV/XLSX/JSON uploads are analyzed by the backend, and findings/distribution results survive backend restart. The upload dialogue includes a bundled example and a real device-file picker. The earlier supplier-report dashboard at `/reports` still uses sample UI data.
+
+Lot investigation is at http://localhost:3000/trace, linked from the start and distribution screens. Load the labelled synthetic scenario, select CW-42, then also CS-91: L-102 ranks first because both products used it. The view includes other connected products and shipment destinations across both factories. Unmapped uploaded lot codes are reported explicitly; ingredient relationships are never inferred from a route label. Lot codes are unique per producer, while existing integer batch IDs remain unchanged.
+
+For the final presentation, stop the development server, run `npm run build`, then `npm start` from `frontend/`. Do not build while `next dev` is running. `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_ML_URL` are embedded at build time and default to the two localhost tunnel ports.
 
 Design workspace at http://localhost:3000/design. It maps the two HTML mockups into six separate Next.js screens and keeps the original mockups under `frontend/design/reference/`. Page one and the step-two overlay demo are implemented; the later screens are design drafts.
 
@@ -50,7 +60,7 @@ The network animation preview is at http://localhost:3000/ml-process. The select
 
 ## Not built yet
 
-Decision engine, ML risk model training, Cytoscape graph visualization (dependency is in `package.json`, no component yet), human-approval flow. Per the project summary, don't build these until the batch → trace → risk → dashboard flow above works end to end.
+Containment decision/approval logging and live event replay remain pending. Five pathogen models and the SVG distribution/lot visualizations are implemented. Model predictions concern FSIS laboratory samples; cold-chain upload findings use transparent rules, not a trained contamination detector.
 
 ## Offline data pipeline — Person A
 
