@@ -1,0 +1,500 @@
+{
+  "file": "data\\raw\\fsis_raw_poultry\\zips\\raw_poultry_sampling_data_fy2026.zip",
+  "n_rows": 21102,
+  "n_columns": 30,
+  "n_exact_duplicate_rows": 0,
+  "columns": [
+    {
+      "column": "form_id",
+      "n_missing": 0,
+      "n_unique": 21102,
+      "top_values": {
+        "103678035": 1,
+        "103675084": 1,
+        "103675083": 1,
+        "103680732": 1,
+        "103679224": 1,
+        "103678936": 1,
+        "103678046": 1,
+        "103678425": 1,
+        "103680734": 1,
+        "103668347": 1
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 1.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "sample_number",
+      "n_missing": 0,
+      "n_unique": 21102,
+      "top_values": {
+        "300853446": 1,
+        "300853797": 1,
+        "300853413": 1,
+        "300853452": 1,
+        "300854117": 1,
+        "300854355": 1,
+        "300854232": 1,
+        "300853440": 1,
+        "300853818": 1,
+        "300853634": 1
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 1.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "establishment_id",
+      "n_missing": 0,
+      "n_unique": 750,
+      "top_values": {
+        "9259": 137,
+        "41": 124,
+        "589": 123,
+        "2278": 119,
+        "496": 116,
+        "2208": 114,
+        "6413": 102,
+        "5308": 101,
+        "6036": 96,
+        "734": 95
+      },
+      "date_parse_rate": {
+        "ISO8601": 0.609,
+        "%Y%m%d": 0.093
+      },
+      "numeric_parse_rate": 1.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "establishment_number",
+      "n_missing": 0,
+      "n_unique": 750,
+      "top_values": {
+        "M27389+P27389+V27389": 137,
+        "P1250": 124,
+        "P1243": 123,
+        "P2178": 119,
+        "M18726+P18726": 116,
+        "P20604+V20604": 114,
+        "M1015+P1015+V1015": 102,
+        "M6137+P6137": 101,
+        "P6164A": 96,
+        "P18285": 95
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "establishment_name",
+      "n_missing": 0,
+      "n_unique": 623,
+      "top_values": {
+        "Pilgrim's Pride Corporation": 1918,
+        "Tyson Foods, Inc.": 1673,
+        "Sanderson Farms, Inc.": 660,
+        "Wayne Farms LLC": 537,
+        "Perdue Foods LLC": 421,
+        "Foster Poultry Farms, LLC": 363,
+        "Peco Foods, Inc.": 362,
+        "Case Farms Processing": 295,
+        "Simmons Prepared Foods, Inc.": 265,
+        "Fieldale Farms Corporation": 230
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "establishment_state",
+      "n_missing": 0,
+      "n_unique": 44,
+      "top_values": {
+        "GA": 2171,
+        "AR": 1775,
+        "CA": 1763,
+        "TX": 1697,
+        "AL": 1616,
+        "NC": 1455,
+        "MS": 1106,
+        "NY": 773,
+        "VA": 626,
+        "PA": 617
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "project_code",
+      "n_missing": 0,
+      "n_unique": 9,
+      "top_values": {
+        "HC_CPT_LBW01": 10733,
+        "HC_CH_CARC01": 6349,
+        "HC_CH_COM01": 1259,
+        "HC_TU_COM01": 1000,
+        "F_CPT_LBW01": 805,
+        "HC_TU_CARC01": 532,
+        "F_CH_CARC01": 211,
+        "F_CH_COM01": 134,
+        "F_TU_COM01": 79
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "project_name",
+      "n_missing": 0,
+      "n_unique": 9,
+      "top_values": {
+        "Sampling for Chicken Parts \u2013 Legs, Breasts, and  Wings": 10733,
+        "HACCP Verification for Young Chicken Carcasses": 6349,
+        "Sampling for Ground and Other Comminuted Chicken (not Mechanically Separated)": 1259,
+        "Sampling for Ground and Other Comminuted Turkey (not Mechanically Separated)": 1000,
+        "Follow-up sampling of Chicken Parts \u2013 legs, breasts, wings": 805,
+        "HACCP Verification for Young Turkey Carcasses": 532,
+        "Follow-up sampling of Chicken Carcasses": 211,
+        "Follow-up sampling of Comminuted Chicken": 134,
+        "Follow-up sampling of Comminuted Turkey": 79
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "collection_date",
+      "n_missing": 0,
+      "n_unique": 229,
+      "top_values": {
+        "2025-11-12": 215,
+        "2026-01-20": 204,
+        "2025-12-29": 200,
+        "2026-02-17": 200,
+        "2025-11-24": 199,
+        "2026-01-06": 199,
+        "2025-12-09": 197,
+        "2026-02-10": 194,
+        "2026-04-07": 187,
+        "2026-01-13": 185
+      },
+      "date_parse_rate": {
+        "ISO8601": 1.0
+      },
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "sample_source_name",
+      "n_missing": 0,
+      "n_unique": 5,
+      "top_values": {
+        "Product-Raw-Intact-Chicken": 10387,
+        "Animal-Chicken-Broiler / Young Chicken Carcass Rinse": 6560,
+        "Product-Raw-Ground, Comminuted or Otherwise Nonintact-Chicken": 2544,
+        "Product-Raw-Ground, Comminuted or Otherwise Nonintact-Turkey": 1079,
+        "Animal-Turkey-Turkey Carcass Sponge": 532
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "product_type",
+      "n_missing": 0,
+      "n_unique": 4,
+      "top_values": {
+        "NULL": 9566,
+        "Breast": 5491,
+        "Leg": 4006,
+        "Wing": 2039
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": false
+    },
+    {
+      "column": "not_analyzed",
+      "n_missing": 0,
+      "n_unique": 3,
+      "top_values": {
+        "00": 21100,
+        "20": 1,
+        "14": 1
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 1.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "not_analyzed_explain",
+      "n_missing": 0,
+      "n_unique": 6,
+      "top_values": {
+        "NULL": 21097,
+        "0": 1,
+        "103693525": 1,
+        "103771370": 1,
+        "103776702": 1,
+        "103769076": 1
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.001,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "salmonella_sp_analysis",
+      "n_missing": 0,
+      "n_unique": 3,
+      "top_values": {
+        "Negative": 19053,
+        "Positive": 2041,
+        "NULL": 8
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "salmonella_sp_analysis_canceled",
+      "n_missing": 0,
+      "n_unique": 3,
+      "top_values": {
+        "NULL": 21096,
+        "25-21 Lab problem - Quality Control failure, unable to reanalyze": 3,
+        "26 Lab closed": 3
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "salmonellae_mpn_g",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "salmonellae_mpn_g_canceled",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "salmonellae_mpn_combination",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "salmonella_quantitative_cfu_g",
+      "n_missing": 0,
+      "n_unique": 23,
+      "top_values": {
+        "NULL": 20639,
+        "<10": 434,
+        "21": 4,
+        "18": 2,
+        "44": 2,
+        "14": 2,
+        "28": 2,
+        "11": 2,
+        "34": 1,
+        "89": 1
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.001,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "salmonella_quantitative_cfu_ml",
+      "n_missing": 0,
+      "n_unique": 77,
+      "top_values": {
+        "NULL": 20251,
+        "<10": 710,
+        "17": 7,
+        "18": 5,
+        "11": 5,
+        "26": 5,
+        "14": 4,
+        "15": 4,
+        "19": 4,
+        "60": 3
+      },
+      "date_parse_rate": {
+        "ISO8601": 0.001
+      },
+      "numeric_parse_rate": 0.009,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "salmonella_mpn_qualitative",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "campylobacter_analysis_1ml",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "campylobacter_analysis_1ml_canceled",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "campylobacter_analysis_30ml",
+      "n_missing": 0,
+      "n_unique": 3,
+      "top_values": {
+        "NULL": 9705,
+        "Negative": 9222,
+        "Positive": 2175
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "campylobacter_analysis_30ml_canceled",
+      "n_missing": 0,
+      "n_unique": 6,
+      "top_values": {
+        "NULL": 12792,
+        "86 Sample not selected for Campylobacter analysis": 8267,
+        "25-21 Lab problem - Quality Control failure, unable to reanalyze": 28,
+        "46  Temperature too low": 11,
+        "13  Insufficient tissue or sample": 3,
+        "25-7  Lab problem - sample inadvertently discarded": 1
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "aerobic_plate_count_mpn_ml",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "enterobacteriaceae_mpn_ml",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "aerobic_plate_count_mpn_100_sq_cm",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "enterobacteriaceae_mpn_100_sq_cm",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    },
+    {
+      "column": "aerobic_plate_count_mpn_g",
+      "n_missing": 0,
+      "n_unique": 1,
+      "top_values": {
+        "NULL": 21102
+      },
+      "date_parse_rate": {},
+      "numeric_parse_rate": 0.0,
+      "leakage_denylist_hit": true
+    }
+  ],
+  "candidate_columns_hint_only": {
+    "sample_id": [
+      "form_id",
+      "sample_number",
+      "establishment_id",
+      "establishment_number",
+      "sample_source_name"
+    ],
+    "sample_date": [
+      "collection_date"
+    ],
+    "establishment_id": [
+      "establishment_id",
+      "establishment_number",
+      "establishment_name",
+      "establishment_state"
+    ],
+    "product_category": [
+      "project_code",
+      "project_name",
+      "product_type"
+    ],
+    "salmonella_result": [
+      "salmonella_sp_analysis",
+      "salmonella_sp_analysis_canceled",
+      "salmonellae_mpn_g",
+      "salmonellae_mpn_g_canceled",
+      "salmonellae_mpn_combination",
+      "salmonella_quantitative_cfu_g",
+      "salmonella_quantitative_cfu_ml",
+      "salmonella_mpn_qualitative"
+    ]
+  }
+}
