@@ -3,3 +3,5 @@
 data/processed/** -text
 reports/m7_validation.json -text
 reports/modeling_handoff.json -text
+# Shell scripts run on the LinuxONE server; a CRLF from checkout or git archive breaks bash.
+*.sh text eol=lf

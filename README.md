@@ -21,6 +21,18 @@ Endpoints:
 - `GET /api/batches/{id}/trace` — upstream/downstream via `app/graph.py` (NetworkX)
 - `GET /api/shipments/{id}/risk` — rule-based priority score (`app/risk.py`); swap for a trained XGBoost/GBM model later
 
+### Shared backend on LinuxONE
+
+The team API and its PostgreSQL database run on the LinuxONE server and listen only on the server itself. Reach both through an SSH tunnel; your public key must be in the server's `~/.ssh/authorized_keys`:
+
+```
+ssh -L 8000:127.0.0.1:8000 -L 5432:127.0.0.1:5432 linux1@148.100.77.171
+```
+
+While it is open, the API is at http://localhost:8000 and the database at `localhost:5432` (user and database `tracefront`, password in `~/tracefront/backend/.env` on the server).
+
+To ship committed backend changes, run `.\backend\deploy.ps1` in Windows PowerShell; pass `-Key <path>` if your key file is elsewhere, and use `powershell -ExecutionPolicy Bypass -File .\backend\deploy.ps1` if Windows blocks scripts. It deploys the last commit, not uncommitted edits, keeps the data, and reruns `setup_linuxone.sh` (install, tests, restart). Tables are created when missing but never altered, so a column change in `app/models.py` needs the table dropped or a migration.
+
 ## Frontend (Next.js + Tailwind)
 
 ```

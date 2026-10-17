@@ -30,3 +30,7 @@ frontend/.next/
 frontend/.env.local
 frontend/next-env.d.ts
 frontend/*.tsbuildinfo
+
+# Backend local secrets and SQLite dev databases
+backend/.env
+backend/*.db
