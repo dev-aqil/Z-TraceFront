@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "analysis_id": "analysis-demo-001",
+  "dataset_id": "supplier-demo-001",
+  "generated_at": "2026-10-17T08:05:00Z",
+  "model_version": "demo-model-1",
+  "findings": [
+    {
+      "finding_id": "finding-001",
+      "batch_id": "RM-402",
+      "shipment_id": "SHIP-017",
+      "anomaly_type": "temperature_excursion",
+      "severity": "high",
+      "priority_score": 82,
+      "summary": "Shipment temperature exceeded the expected range.",
+      "evidence": [
+        {
+          "source_record_id": "sensor-reading-1842",
+          "field": "temperature_c",
+          "observed_value": 8.4,
+          "threshold_value": 7,
+          "unit": "C",
+          "observed_at": "2026-10-17T07:42:00Z"
+        }
+      ]
+    }
+  ]
+}

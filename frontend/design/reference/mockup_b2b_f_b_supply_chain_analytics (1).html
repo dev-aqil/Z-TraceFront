@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RawMat OS — B2B Kitchen Supply Chain Optical Telemetry</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            /* Default Mode: Studio Daylight (Apple VisionOS Alabaster Glass) */
+            --bg-primary: #eef2f7;
+            --bg-ambient-1: rgba(99, 102, 241, 0.16);
+            --bg-ambient-2: rgba(236, 72, 153, 0.14);
+            --bg-ambient-3: rgba(14, 165, 233, 0.14);
+            --glass-surface: rgba(255, 255, 255, 0.68);
+            --glass-surface-elevated: rgba(255, 255, 255, 0.84);
+            --glass-surface-subtle: rgba(255, 255, 255, 0.48);
+            --glass-pink-tint: linear-gradient(135deg, rgba(255, 240, 246, 0.78) 0%, rgba(255, 255, 255, 0.72) 55%, rgba(240, 249, 255, 0.75) 100%);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-glass: rgba(255, 255, 255, 0.75);
+            --prism-cyan: rgba(0, 195, 255, 0.28);
+            --prism-magenta: rgba(255, 55, 166, 0.22);
+            --prism-highlight: rgba(255, 255, 255, 0.92);
+            --shadow-ambient: 0 24px 60px -15px rgba(15, 23, 42, 0.09), 0 8px 24px -6px rgba(15, 23, 42, 0.05);
+            --accent-primary: #4f46e5;
+            --accent-rose: #e11d48;
+            --chord-stroke: #334155;
+            --tree-line: #64748b;
+        }
+
+        body.mode-obsidian {
+            /* Mode 2: Obsidian Lens (NVIDIA / Leica Darkroom Carbon Glass) */
+            --bg-primary: #07090e;
+            --bg-ambient-1: rgba(56, 189, 248, 0.14);
+            --bg-ambient-2: rgba(139, 92, 246, 0.15);
+            --bg-ambient-3: rgba(16, 185, 129, 0.10);
+            --glass-surface: rgba(17, 23, 36, 0.68);
+            --glass-surface-elevated: rgba(26, 35, 52, 0.84);
+            --glass-surface-subtle: rgba(15, 20, 32, 0.52);
+            --glass-pink-tint: linear-gradient(135deg, rgba(45, 24, 54, 0.68) 0%, rgba(19, 26, 41, 0.78) 55%, rgba(16, 36, 52, 0.72) 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-glass: rgba(255, 255, 255, 0.12);
+            --prism-cyan: rgba(56, 189, 248, 0.38);
+            --prism-magenta: rgba(244, 63, 94, 0.30);
+            --prism-highlight: rgba(255, 255, 255, 0.22);
+            --shadow-ambient: 0 28px 70px -12px rgba(0, 0, 0, 0.65), 0 10px 30px -8px rgba(0, 0, 0, 0.5);
+            --accent-primary: #38bdf8;
+            --accent-rose: #fb7185;
+            --chord-stroke: #94a3b8;
+            --tree-line: #64748b;
+        }
+
+        body.mode-thermal {
+            /* Mode 3: Thermal X-Ray (High-Contrast Anomaly & Cold-Chain Audit Mode) */
+            --bg-primary: #09050c;
+            --bg-ambient-1: rgba(245, 158, 11, 0.18);
+            --bg-ambient-2: rgba(225, 29, 72, 0.18);
+            --bg-ambient-3: rgba(6, 182, 212, 0.12);
+            --glass-surface: rgba(24, 13, 28, 0.74);
+            --glass-surface-elevated: rgba(38, 19, 43, 0.88);
+            --glass-surface-subtle: rgba(20, 10, 24, 0.58);
+            --glass-pink-tint: linear-gradient(135deg, rgba(68, 18, 42, 0.78) 0%, rgba(28, 14, 34, 0.84) 60%, rgba(48, 24, 14, 0.78) 100%);
+            --text-primary: #fffbeb;
+            --text-secondary: #fde68a;
+            --text-muted: #fca5a5;
+            --border-glass: rgba(251, 191, 36, 0.32);
+            --prism-cyan: rgba(245, 158, 11, 0.55);
+            --prism-magenta: rgba(239, 68, 68, 0.50);
+            --prism-highlight: rgba(254, 243, 199, 0.35);
+            --shadow-ambient: 0 28px 70px -12px rgba(225, 29, 72, 0.28), 0 10px 30px -8px rgba(0, 0, 0, 0.75);
+            --accent-primary: #f59e0b;
+            --accent-rose: #ef4444;
+            --chord-stroke: #fbbf24;
+            --tree-line: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: background-color 0.45s cubic-bezier(0.16, 1, 0.3, 1), color 0.35s ease;
+        }
+
+        .font-mono-tech {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* =====================================================================
+           OPTICAL CAMERA LENS & REAL FROSTED GLASS ENGINE
+           (Chromatic Aberration Rim + Multi-layer Blur + Squircle Geometry)
+        ====================================================================== */
+        .squircle-xl {
+            border-radius: 34px;
+        }
+        .squircle-lg {
+            border-radius: 26px;
+        }
+        .squircle-md {
+            border-radius: 20px;
+        }
+        .squircle-sm {
+            border-radius: 15px;
+        }
+
+        .optical-glass {
+            background: var(--glass-surface);
+            backdrop-filter: blur(28px) saturate(190%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%);
+            box-shadow:
+                var(--shadow-ambient),
+                inset 1.5px 1.5px 0px var(--prism-highlight),
+                inset -1.5px -1px 0px var(--prism-cyan),
+                inset 1px -1.5px 0px var(--prism-magenta),
+                0 0 0 1px var(--border-glass);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .optical-glass-elevated {
+            background: var(--glass-surface-elevated);
+            backdrop-filter: blur(36px) saturate(200%);
+            -webkit-backdrop-filter: blur(36px) saturate(200%);
+            box-shadow:
+                0 30px 80px -15px rgba(15, 23, 42, 0.22),
+                inset 1.5px 1.5px 0px var(--prism-highlight),
+                inset -2px -1.5px 1px var(--prism-cyan),
+                inset 1.5px -2px 1px var(--prism-magenta),
+                0 0 0 1px var(--border-glass);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .optical-glass-tinted {
+            background: var(--glass-pink-tint);
+            backdrop-filter: blur(28px) saturate(190%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%);
+            box-shadow:
+                var(--shadow-ambient),
+                inset 1.5px 1.5px 0px var(--prism-highlight),
+                inset -1.5px -1.5px 1px var(--prism-cyan),
+                inset 1.5px -1.5px 1px var(--prism-magenta),
+                0 0 0 1px var(--border-glass);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Subtle Chromatic Text Fringe on Hero Numbers */
+        .chromatic-text {
+            text-shadow: -1px 0 0 rgba(0, 195, 255, 0.25), 1px 0 0 rgba(255, 55, 166, 0.25);
+        }
+
+        /* Viewport Optical Camera Lens Vignette & Edge Blur */
+        #optical-lens-vignette {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            box-shadow:
+                inset 0 0 90px rgba(15, 23, 42, 0.12),
+                inset 2px 0 12px rgba(0, 195, 255, 0.08),
+                inset -2px 0 12px rgba(255, 55, 166, 0.08);
+            mask-image: radial-gradient(circle at center, transparent 74%, black 100%);
+            -webkit-mask-image: radial-gradient(circle at center, transparent 74%, black 100%);
+            backdrop-filter: blur(3px) saturate(130%);
+            -webkit-backdrop-filter: blur(3px) saturate(130%);
+            transition: opacity 0.4s ease;
+        }
+
+        /* Ambient Background Mesh Orbs */
+        .ambient-orb-1 {
+            background: radial-gradient(circle, var(--bg-ambient-1) 0%, transparent 70%);
+        }
+        .ambient-orb-2 {
+            background: radial-gradient(circle, var(--bg-ambient-2) 0%, transparent 70%);
+        }
+        .ambient-orb-3 {
+            background: radial-gradient(circle, var(--bg-ambient-3) 0%, transparent 70%);
+        }
+
+        /* Page Transition Animation */
+        .page-stage {
+            animation: opticalFocusIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes opticalFocusIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.985) translateY(8px);
+                filter: blur(8px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                filter: blur(0px);
+            }
+        }
+
+        /* Camera Aperture Depth-of-Field Blur when Modal is Active (Page 2 & Page 6) */
+        .aperture-bokeh-blur {
+            filter: blur(20px) saturate(140%);
+            transform: scale(0.982);
+            pointer-events: none;
+            user-select: none;
+            transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Tactile iOS 18 Button Physics */
+        .tactile-btn {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, background 0.25s ease;
+        }
+        .tactile-btn:hover {
+            transform: translateY(-1.5px) scale(1.01);
+        }
+        .tactile-btn:active {
+            transform: translateY(0.5px) scale(0.985);
+        }
+
+        /* Thermal Mode Anomaly Spotlight Pulse */
+        @keyframes beaconPulse {
+            0%, 100% { filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6)); transform: translateY(0px); }
+            50% { filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.95)); transform: translateY(-3px); }
+        }
+        .triangle-beacon {
+            animation: beaconPulse 2.4s infinite ease-in-out;
+        }
+
+        /* Audio Waveform Animation for Page 6 Urgent Call */
+        @keyframes waveBounce {
+            0%, 100% { height: 6px; }
+            50% { height: 24px; }
+        }
+        .wave-bar {
+            width: 4px;
+            border-radius: 999px;
+            background: #ffffff;
+            animation: waveBounce 0.9s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.35);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.6);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative selection:bg-indigo-500 selection:text-white">
+
+    <!-- CAMERA LENS PERIPHERAL OPTICAL VIGNETTE & CHROMATIC EDGE SOFTNESS -->
+    <div id="optical-lens-vignette"></div>
+
+    <!-- AMBIENT REFRACTIVE LIGHT ORBS BEHIND GLASS -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="ambient-orb-1 w-[650px] h-[650px] rounded-full absolute -top-40 -left-32 blur-3xl"></div>
+        <div class="ambient-orb-2 w-[600px] h-[600px] rounded-full absolute top-1/4 -right-32 blur-3xl"></div>
+        <div class="ambient-orb-3 w-[550px] h-[550px] rounded-full absolute -bottom-40 left-1/3 blur-3xl"></div>
+    </div>
+
+    <!-- =========================================================================
+         TOP VISION-OS GLASS COMMAND BAR (Navigation + 6-Page Stepper + MODE Engine)
+    ========================================================================== -->
+    <header class="sticky top-3 z-50 px-3 sm:px-6 lg:px-8 max-w-[1400px] w-full mx-auto">
+        <div class="optical-glass squircle-lg px-4 sm:px-6 py-3 flex flex-col xl:flex-row items-center justify-between gap-3">
+
+            <!-- Left: Brand Identity & Optical Telemetry Status -->
+            <div class="flex items-center justify-between w-full xl:w-auto gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 squircle-sm bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-800 text-white flex items-center justify-center shadow-lg border border-white/20 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-pink-500/20 via-transparent to-cyan-400/30"></div>
+                        <i class="fa-solid fa-cubes-stacked text-pink-400 text-lg relative z-10"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold tracking-tight text-base">RawMat<span class="text-indigo-500 font-black">OS</span></span>
+                            <span class="text-[10px] font-mono-tech font-semibold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                                B2B Kitchen Telemetry
+                            </span>
+                        </div>
+                        <p class="text-[11px] opacity-70 hidden sm:block">
+                            Rantai Pasok Bahan Mentah & Setengah Jadi • Central Kitchen, Restoran & Kantin
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Mobile Page Indicator -->
+                <span id="mobile-page-pill" class="xl:hidden text-xs font-mono-tech font-bold px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-500">
+                    P1 / 6
+                </span>
+            </div>
+
+            <!-- Center: Interactive 6-Page Optical Stepper (Direct Access to Pages 1 to 6) -->
+            <nav class="flex items-center gap-1 overflow-x-auto max-w-full p-1.5 squircle-md bg-slate-900/5 dark:bg-white/5 border border-slate-400/15" aria-label="6-Page Workflow">
+                <button onclick="goToPage(1)" id="nav-step-1" class="tactile-btn px-3 py-1.5 squircle-sm text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="step-badge w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono-tech font-bold">1</span>
+                    <span>Ingesti File</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-[9px] opacity-30"></i>
+                <button onclick="goToPage(2)" id="nav-step-2" class="tactile-btn px-3 py-1.5 squircle-sm text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="step-badge w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono-tech font-bold">2</span>
+                    <span>Fokus Confirm</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-[9px] opacity-30"></i>
+                <button onclick="goToPage(3)" id="nav-step-3" class="tactile-btn px-3 py-1.5 squircle-sm text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="step-badge w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono-tech font-bold">3</span>
+                    <span>Korelasi Data</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-[9px] opacity-30"></i>
+                <button onclick="goToPage(4)" id="nav-step-4" class="tactile-btn px-3 py-1.5 squircle-sm text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="step-badge w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono-tech font-bold">4</span>
+                    <span>6 Distribusi</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-[9px] opacity-30"></i>
+                <button onclick="goToPage(5)" id="nav-step-5" class="tactile-btn px-3 py-1.5 squircle-sm text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="step-badge w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono-tech font-bold">5</span>
+                    <span>Jaringan B2B</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-[9px] opacity-30"></i>
+                <button onclick="goToPage(6)" id="nav-step-6" class="tactile-btn px-3 py-1.5 squircle-sm text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="step-badge w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono-tech font-bold">6</span>
+                    <span>Notify & Call</span>
+                </button>
+            </nav>
+
+            <!-- Right: Custom "MODE" Engine Switcher + Lens & Mentor Toggles -->
+            <div class="flex items-center gap-2 w-full xl:w-auto justify-end">
+                <!-- 3-Mode Selector Pill -->
+                <div class="flex items-center bg-slate-900/5 border border-slate-400/20 p-1 squircle-sm text-[11px] font-semibold">
+                    <span class="px-2 py-1 opacity-60 font-mono-tech text-[10px] hidden sm:inline">MODE:</span>
+                    <button onclick="setVisualMode('daylight')" id="mode-btn-daylight" class="tactile-btn px-2.5 py-1 rounded-xl flex items-center gap-1 bg-white text-slate-900 shadow-sm">
+                        <i class="fa-solid fa-sun text-amber-500"></i>
+                        <span>Studio</span>
+                    </button>
+                    <button onclick="setVisualMode('obsidian')" id="mode-btn-obsidian" class="tactile-btn px-2.5 py-1 rounded-xl flex items-center gap-1 opacity-70 hover:opacity-100">
+                        <i class="fa-solid fa-moon text-sky-400"></i>
+                        <span>Obsidian</span>
+                    </button>
+                    <button onclick="setVisualMode('thermal')" id="mode-btn-thermal" class="tactile-btn px-2.5 py-1 rounded-xl flex items-center gap-1 opacity-70 hover:opacity-100">
+                        <i class="fa-solid fa-fire-flame-curved text-rose-500"></i>
+                        <span>X-Ray</span>
+                    </button>
+                </div>
+
+                <!-- Camera Lens Vignette Toggle -->
+                <button onclick="toggleOpticalLens()" id="btn-lens-toggle" title="Efek Lensa Kamera & Chromatic Edge" class="tactile-btn px-2.5 py-2 squircle-sm optical-glass text-xs font-semibold flex items-center gap-1.5">
+                    <i class="fa-solid fa-camera-retro text-pink-500"></i>
+                    <span class="hidden md:inline text-[11px]">Lens FX</span>
+                </button>
+
+                <!-- Mentor Guide Toggle -->
+                <button onclick="toggleMentorHUD()" id="btn-mentor-toggle" title="Panduan Mentor Interaktif" class="tactile-btn px-2.5 py-2 squircle-sm optical-glass text-xs font-semibold flex items-center gap-1.5 border border-indigo-400/30">
+                    <i class="fa-solid fa-compass text-indigo-500"></i>
+                    <span class="hidden md:inline text-[11px]">Mentor</span>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- =========================================================================
+         MAIN WORKSPACE CONTAINER (PAGES 1 TO 6)
+    ========================================================================== -->
+    <main class="flex-1 max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 relative z-10 pb-28">
+
+        <!-- =====================================================================
+             PAGE 1 & PAGE 2: OPTICAL DATA INGESTION STUDIO + APERTURE BLUR CONFIRM
+             (Honoring Wireframe Page 1 & Page 2 layout with iOS 18 Glass Squircles)
+        ====================================================================== -->
+        <section id="stage-page-1-2" class="page-stage relative">
+
+            <!-- Context Sub-bar -->
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-2">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse"></span>
+                    <span class="text-xs font-mono-tech uppercase tracking-wider opacity-75">
+                        STAGE 01 / 02 — B2B KITCHEN RAW MATERIAL INGESTION
+                    </span>
+                </div>
+                <div class="text-xs opacity-75 flex items-center gap-2">
+                    <i class="fa-solid fa-utensils text-pink-500"></i>
+                    <span>Fokus Pelanggan: <strong>Dapur Restoran, Central Kitchen & Kantin Industri</strong> (Bukan Konsumen Ritel Rumah)</span>
+                </div>
+            </div>
+
+            <!-- PAGE 1 MAIN GLASS SURFACE (Blurs smoothly like a camera lens when Page 2 is active) -->
+            <div id="page1-glass-canvas" class="optical-glass squircle-xl p-6 sm:p-10 transition-all duration-500">
+
+                <!-- WIREFRAME PAGE 1: LARGE UPPER CONTAINER (Frosted Rose-Quartz & Sapphire Glass Dropzone) -->
+                <div id="upload-glass-well" onclick="triggerSimulatedFilePicker()"
+                     class="optical-glass-tinted squircle-lg min-h-[380px] sm:min-h-[420px] p-6 sm:p-10 flex flex-col items-center justify-center text-center relative cursor-pointer group overflow-hidden border border-pink-400/30 hover:border-pink-500/60">
+
+                    <!-- Subtle Optical Lens Ring Decoration -->
+                    <div class="w-[420px] h-[420px] rounded-full border border-white/25 absolute pointer-events-none group-hover:scale-105 transition-transform duration-700"></div>
+                    <div class="w-[560px] h-[560px] rounded-full border border-pink-400/15 absolute pointer-events-none group-hover:scale-95 transition-transform duration-700"></div>
+
+                    <!-- Top Left & Right Glass Telemetry Pills -->
+                    <div class="w-full flex flex-wrap items-center justify-between gap-2 absolute top-5 left-0 px-6">
+                        <div class="flex items-center gap-2 px-3.5 py-1.5 squircle-sm optical-glass text-xs font-semibold">
+                            <i class="fa-solid fa-wave-square text-pink-500"></i>
+                            <span>Optical File Telemetry Dropzone</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-[11px] font-mono-tech">
+                            <span class="px-2.5 py-1 rounded-lg optical-glass">CSV</span>
+                            <span class="px-2.5 py-1 rounded-lg optical-glass">XLSX</span>
+                            <span class="px-2.5 py-1 rounded-lg optical-glass">ERP-JSON</span>
+                        </div>
+                    </div>
+
+                    <!-- Center Floating Glass Squircle Icon -->
+                    <div class="w-20 h-20 squircle-md optical-glass-elevated flex items-center justify-center text-3xl text-pink-500 mb-5 mt-8 group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 max-w-2xl">
+                        Masukkan File Distribusi Bahan Mentah & Setengah Jadi
+                    </h1>
+                    <p class="text-xs sm:text-sm opacity-75 max-w-xl mb-7 leading-relaxed">
+                        Unggah manifes pengiriman ke dapur komersial (daging marinasi, kaldu dasar, sayuran *pre-cut*, tepung komisari, & minyak curah). Klik kartu preset di bawah atau unggah file Anda sendiri.
+                    </p>
+
+                    <!-- Interactive Preset Batch Selector (Functional buttons inside Dropzone) -->
+                    <div class="w-full max-w-3xl grid grid-cols-1 md:grid-cols-3 gap-3 text-left relative z-10" onclick="event.stopPropagation()">
+                        <!-- Preset 1 -->
+                        <button type="button" onclick="selectDatasetPreset(0)" id="preset-card-0"
+                                class="tactile-btn squircle-md p-4 optical-glass-elevated border-2 border-pink-500 text-left flex flex-col justify-between gap-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-mono-tech font-bold uppercase px-2 py-0.5 rounded-md bg-pink-500 text-white">BATCH #884 • AKTIF</span>
+                                <i class="fa-solid fa-circle-check text-pink-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold truncate">B2B_Kitchen_RawMaterial_Oct2026.csv</p>
+                                <p class="text-[11px] opacity-70 mt-0.5">6 Distribusi • 142 Dapur Resto & Kantin</p>
+                            </div>
+                        </button>
+
+                        <!-- Preset 2 -->
+                        <button type="button" onclick="selectDatasetPreset(1)" id="preset-card-1"
+                                class="tactile-btn squircle-md p-4 optical-glass border border-transparent hover:border-pink-400/50 text-left flex flex-col justify-between gap-2 opacity-80 hover:opacity-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-mono-tech font-bold uppercase px-2 py-0.5 rounded-md bg-slate-500/15">BATCH #912 • COLD-CHAIN</span>
+                                <i class="fa-regular fa-circle opacity-40"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold truncate">CentralKitchen_WagyuPoultry_Q4.xlsx</p>
+                                <p class="text-[11px] opacity-70 mt-0.5">6 Distribusi • Fokus Suhu Chiller & Marinasi</p>
+                            </div>
+                        </button>
+
+                        <!-- Preset 3 -->
+                        <button type="button" onclick="selectDatasetPreset(2)" id="preset-card-2"
+                                class="tactile-btn squircle-md p-4 optical-glass border border-transparent hover:border-pink-400/50 text-left flex flex-col justify-between gap-2 opacity-80 hover:opacity-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-mono-tech font-bold uppercase px-2 py-0.5 rounded-md bg-slate-500/15">BATCH #940 • KANTIN B2B</span>
+                                <i class="fa-regular fa-circle opacity-40"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold truncate">IndustrialCanteen_PreCutVeg_Bulk.json</p>
+                                <p class="text-[11px] opacity-70 mt-0.5">6 Distribusi • Katering Pabrik & Komisari</p>
+                            </div>
+                        </button>
+                    </div>
+
+                    <input type="file" id="hidden-file-input" class="hidden" onchange="handleCustomFileUpload(event)">
+                </div>
+
+                <!-- WIREFRAME PAGE 1: BOTTOM-LEFT PRIMARY ACTION BUTTON + LIVE TELEMETRY METRICS -->
+                <div class="mt-7 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+
+                    <!-- Bottom-Left Button (Matching the pink lower-left rectangle in Wireframe Page 1) -->
+                    <button onclick="goToPage(2)"
+                            class="tactile-btn w-full lg:w-[370px] py-4 px-7 squircle-md bg-gradient-to-r from-pink-500 via-rose-500 to-indigo-600 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-pink-500/25 flex items-center justify-between group border border-white/30">
+                        <span class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+                                <i class="fa-solid fa-aperture"></i>
+                            </span>
+                            <span>Proses & Analisis File</span>
+                        </span>
+                        <span class="flex items-center gap-1.5 text-xs font-mono-tech bg-black/20 px-2.5 py-1 rounded-lg">
+                            <span>PAGE 2</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </span>
+                    </button>
+
+                    <!-- Pre-Flight Telemetry Readout Pills -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
+                        <div class="optical-glass squircle-sm px-3.5 py-2.5">
+                            <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Baris Log B2B</span>
+                            <span id="metric-rows" class="text-sm font-extrabold font-mono-tech">4,820 Baris</span>
+                        </div>
+                        <div class="optical-glass squircle-sm px-3.5 py-2.5">
+                            <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Klaster Distribusi</span>
+                            <span class="text-sm font-extrabold font-mono-tech text-pink-500">6 Jalur Utama</span>
+                        </div>
+                        <div class="optical-glass squircle-sm px-3.5 py-2.5">
+                            <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Dapur Penerima</span>
+                            <span id="metric-kitchens" class="text-sm font-extrabold font-mono-tech">142 Dapur B2B</span>
+                        </div>
+                        <div class="optical-glass squircle-sm px-3.5 py-2.5">
+                            <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Pra-Deteksi Anomali</span>
+                            <span class="text-sm font-extrabold font-mono-tech text-amber-500">4 Titik Kritis</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =================================================================
+                 PAGE 2 OVERLAY: CAMERA APERTURE DEPTH-OF-FIELD BLUR + CONFIRM MODAL
+                 (Honoring Wireframe Page 2: Blurred Page 1 in background + Center Modal)
+            ================================================================== -->
+            <div id="page2-confirm-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950/35 backdrop-blur-md animate-[opticalFocusIn_0.3s_ease-out]">
+
+                <!-- Center Frosted Glass Modal (Matching the centered grey rectangle in Wireframe Page 2) -->
+                <div class="optical-glass-elevated squircle-xl w-full max-w-xl p-6 sm:p-9 relative border border-white/40 shadow-2xl">
+
+                    <!-- Modal Header -->
+                    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-400/20">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span class="text-xs font-mono-tech font-bold uppercase tracking-wider">
+                                PAGE 2 — KONFIRMASI INGESTI & ANALISIS
+                            </span>
+                        </div>
+                        <button onclick="goToPage(1)" class="tactile-btn w-8 h-8 rounded-full optical-glass flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Center Optical Lens Icon -->
+                    <div class="w-16 h-16 squircle-md bg-gradient-to-br from-pink-500/20 to-indigo-500/20 border border-pink-400/40 flex items-center justify-center text-2xl text-pink-500 mx-auto mb-4 shadow-inner">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-center tracking-tight mb-2">
+                        Confirm Masuk & Jalankan Analisis Korelasi
+                    </h2>
+                    <p class="text-xs sm:text-sm opacity-75 text-center mb-6 leading-relaxed">
+                        Latar belakang telah di-<em>blur</em> secara optik untuk memfokuskan verifikasi batch bahan baku dapur B2B Anda sebelum memetakan korelasi jaringan.
+                    </p>
+
+                    <!-- Verification Summary Grid -->
+                    <div class="grid grid-cols-2 gap-3 mb-5 text-left">
+                        <div class="optical-glass squircle-sm p-3.5">
+                            <span class="text-[10px] font-mono-tech uppercase opacity-60 block">File Terverifikasi</span>
+                            <span id="p2-file-label" class="text-xs font-bold truncate block mt-0.5">B2B_Kitchen_RawMaterial_Oct2026.csv</span>
+                        </div>
+                        <div class="optical-glass squircle-sm p-3.5">
+                            <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Segmen Pelanggan</span>
+                            <span class="text-xs font-bold block mt-0.5 text-indigo-500">Dapur Resto, Kantin & Komisari</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Sensitivity Selector inside Page 2 -->
+                    <div class="mb-6 text-left">
+                        <label class="text-[11px] font-mono-tech uppercase opacity-70 block mb-2">
+                            Sensitivitas Deteksi Korelasi & Cold-Chain:
+                        </label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" onclick="setSensitivity('standard')" id="sens-standard" class="tactile-btn py-2 px-3 squircle-sm optical-glass text-xs font-semibold opacity-75">
+                                Standar (r ≥ 0.65)
+                            </button>
+                            <button type="button" onclick="setSensitivity('strict')" id="sens-strict" class="tactile-btn py-2 px-3 squircle-sm bg-indigo-600 text-white text-xs font-bold shadow">
+                                Ketat Dapur B2B (r ≥ 0.80)
+                            </button>
+                            <button type="button" onclick="setSensitivity('audit')" id="sens-audit" class="tactile-btn py-2 px-3 squircle-sm optical-glass text-xs font-semibold opacity-75">
+                                Audit Penuh (Semua)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal Action Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center gap-3">
+                        <button onclick="goToPage(1)" class="tactile-btn w-full sm:w-1/3 py-3.5 px-4 squircle-md optical-glass text-xs sm:text-sm font-bold">
+                            Kembali (Page 1)
+                        </button>
+                        <button onclick="goToPage(3)" class="tactile-btn w-full sm:w-2/3 py-3.5 px-6 squircle-md bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 text-white text-xs sm:text-sm font-extrabold shadow-xl flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Confirm & Buka Korelasi Data (Page 3)</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================================
+             PAGE 3: RADIAL SUPPLY CORRELATION MATRIX
+             (Honoring Wireframe Page 3: Left Pink-Tinted Control Panel + Large Circular Chord Network)
+        ====================================================================== -->
+        <section id="stage-page-3" class="hidden page-stage">
+            <div class="optical-glass squircle-xl p-5 sm:p-8">
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+                    <!-- LEFT PANEL (Matching the Pink Left Block in Wireframe Page 3) -->
+                    <div class="lg:col-span-4 optical-glass-tinted squircle-lg p-6 flex flex-col justify-between border border-pink-400/30">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="px-3 py-1 rounded-full bg-pink-500 text-white text-[10px] font-mono-tech font-bold uppercase tracking-wider">
+                                    PAGE 3 — KORELASI DATA
+                                </span>
+                                <span class="text-xs font-mono-tech font-bold text-pink-500">142 Relasi Aktif</span>
+                            </div>
+
+                            <h2 class="text-xl font-extrabold tracking-tight leading-snug mb-2">
+                                Matriks Korelasi Pasokan Bahan Baku & Dapur B2B
+                            </h2>
+                            <p class="text-xs opacity-75 leading-relaxed mb-5">
+                                Memetakan hubungan ketergantungan antara <strong>6 Hub Bahan Olahan</strong> dengan <strong>Dapur Restoran, Central Kitchen, dan Kantin Industri</strong> (akurasi suhu, jadwal persiapan masak, & volume batch).
+                            </p>
+
+                            <!-- Interactive Correlation Lens Filter Buttons -->
+                            <div class="space-y-2 mb-5">
+                                <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Filter Lensa Korelasi:</span>
+
+                                <button onclick="setChordLens('all')" id="lens-btn-all"
+                                        class="tactile-btn w-full p-3 squircle-sm bg-slate-900 text-white text-xs font-bold flex items-center justify-between shadow-md">
+                                    <span class="flex items-center gap-2"><i class="fa-solid fa-atom text-pink-400"></i> Seluruh Korelasi Jaringan</span>
+                                    <span class="font-mono-tech text-[11px] opacity-80">100%</span>
+                                </button>
+
+                                <button onclick="setChordLens('coldchain')" id="lens-btn-coldchain"
+                                        class="tactile-btn w-full p-3 squircle-sm optical-glass text-xs font-semibold flex items-center justify-between">
+                                    <span class="flex items-center gap-2"><i class="fa-solid fa-snowflake text-sky-500"></i> Korelasi Suhu Cold-Chain & Daging</span>
+                                    <span class="font-mono-tech text-[11px] text-rose-500 font-bold">r = 0.89</span>
+                                </button>
+
+                                <button onclick="setChordLens('prep')" id="lens-btn-prep"
+                                        class="tactile-btn w-full p-3 squircle-sm optical-glass text-xs font-semibold flex items-center justify-between">
+                                    <span class="flex items-center gap-2"><i class="fa-solid fa-clock text-amber-500"></i> Korelasi Jam Masak Dapur & Sayur</span>
+                                    <span class="font-mono-tech text-[11px] text-amber-500 font-bold">r = 0.82</span>
+                                </button>
+                            </div>
+
+                            <!-- Live Node Telemetry Inspector Box -->
+                            <div class="optical-glass-elevated squircle-md p-4 border border-pink-400/30">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[10px] font-mono-tech font-bold uppercase text-pink-500">Inspector Titik Korelasi</span>
+                                    <span id="chord-score-pill" class="text-[11px] font-mono-tech font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500">r = 0.91</span>
+                                </div>
+                                <h3 id="chord-node-title" class="text-sm font-extrabold">Hub Ayam Marinasi ↔ Central Kitchen A</h3>
+                                <p id="chord-node-detail" class="text-xs opacity-75 mt-1 leading-relaxed">
+                                    Arahkan kursor atau klik pada titik nama dapur/supplier di keliling lingkaran kanan untuk menginspeksi kekuatan korelasi pasokan.
+                                </p>
+                                <div class="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-slate-400/15 text-[11px] font-mono-tech">
+                                    <div>
+                                        <span class="opacity-60 block text-[10px]">Volume Harian:</span>
+                                        <strong id="chord-node-vol">1,840 kg / hari</strong>
+                                    </div>
+                                    <div>
+                                        <span class="opacity-60 block text-[10px]">SLA Suhu Dapur:</span>
+                                        <strong id="chord-node-sla" class="text-emerald-500">98.4% Sesuai</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Next Button to Page 4 -->
+                        <div class="mt-6 pt-4 border-t border-slate-400/20">
+                            <button onclick="goToPage(4)"
+                                    class="tactile-btn w-full py-4 px-5 squircle-md bg-gradient-to-r from-slate-900 via-indigo-950 to-pink-700 text-white font-extrabold text-xs sm:text-sm shadow-xl flex items-center justify-between group">
+                                <span>Next: Buka 6 Detail Distribusi</span>
+                                <span class="flex items-center gap-1.5 font-mono-tech text-xs bg-white/15 px-2.5 py-1 rounded-lg">
+                                    <span>PAGE 4</span>
+                                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT PANEL: LARGE RADIAL CHORD DIAGRAM (Matching Wireframe Page 3) -->
+                    <div class="lg:col-span-8 optical-glass squircle-lg p-4 sm:p-6 flex flex-col items-center justify-between relative">
+
+                        <!-- Top Pink Extension Bar (Matching the L-shaped top bar in Wireframe Page 3) -->
+                        <div class="w-full flex flex-wrap items-center justify-between gap-2 pb-3 mb-2 border-b border-slate-400/15">
+                            <div class="flex items-center gap-3 text-xs">
+                                <span class="flex items-center gap-1.5 font-semibold">
+                                    <span class="w-3 h-3 rounded-full bg-pink-500 inline-block"></span> Hub Bahan Baku (Supplier)
+                                </span>
+                                <span class="flex items-center gap-1.5 font-semibold">
+                                    <span class="w-3 h-3 rounded-full bg-indigo-500 inline-block"></span> Dapur Komersial & Kantin
+                                </span>
+                                <span class="flex items-center gap-1.5 font-semibold">
+                                    <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Jalur Risiko Anomali
+                                </span>
+                            </div>
+                            <button onclick="renderOpticalChord('all')" class="text-xs font-mono-tech text-indigo-500 hover:underline">
+                                <i class="fa-solid fa-rotate-right mr-1"></i>Reset Fokus Lingkaran
+                            </button>
+                        </div>
+
+                        <!-- Interactive SVG Radial Chord Graph -->
+                        <div class="w-full max-w-[560px] aspect-square flex items-center justify-center my-auto">
+                            <svg id="optical-chord-svg" viewBox="0 0 620 620" class="w-full h-full select-none"></svg>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =====================================================================
+             PAGE 4: THE "6" B2B DISTRIBUTION CLUSTERS (SCROLLABLE & EXPANDABLE)
+             (Honoring Wireframe Page 4: Top "6" Header Box + Expandable Cards + Right "NEXT" Button)
+        ====================================================================== -->
+        <section id="stage-page-4" class="hidden page-stage">
+            <div class="optical-glass squircle-xl p-5 sm:p-8">
+
+                <div class="max-w-5xl mx-auto">
+
+                    <!-- WIREFRAME PAGE 4: TOP "6" SUMMARY GLASS HEADER -->
+                    <div class="w-full lg:w-10/12 optical-glass-tinted squircle-lg p-6 mb-6 text-center relative overflow-hidden border border-pink-400/40">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="text-left">
+                                <span class="text-[11px] font-mono-tech font-bold uppercase tracking-widest text-pink-500 block">
+                                    PAGE 4 — KLASTER DISTRIBUSI BAHAN BAKU DAPUR
+                                </span>
+                                <h2 class="text-lg sm:text-xl font-extrabold mt-0.5">
+                                    6 Jalur Distribusi Utama ke Dapur Restoran & Kantin B2B
+                                </h2>
+                                <p class="text-xs opacity-75 mt-1">
+                                    Klik pada mana-mana kotak distribusi di bawah untuk membuka pandangan penuh (*expanded view*) yang bersih dan detail.
+                                </p>
+                            </div>
+
+                            <!-- Prominent "6" Badge matching Wireframe Page 4 -->
+                            <div class="w-24 h-20 squircle-md optical-glass-elevated flex flex-col items-center justify-center shrink-0 border border-pink-400/40 shadow-lg">
+                                <span class="text-4xl font-black chromatic-text leading-none">6</span>
+                                <span class="text-[9px] font-mono-tech font-bold uppercase opacity-70 mt-1">DISTRIBUSI</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WIREFRAME PAGE 4: LEFT = SCROLLABLE 6 DISTRIBUTION CARDS, RIGHT = STICKY "NEXT" BUTTON -->
+                    <div class="flex flex-col lg:flex-row items-start gap-6 relative">
+
+                        <!-- Left 10/12: Scrollable & Expandable 6 Distribution Cards -->
+                        <div id="p4-distributions-list" class="w-full lg:w-10/12 space-y-4">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+
+                        <!-- Right 2/12: Sticky Glass "NEXT" Dock (Matching the right-side "NEXT" box in Wireframe Page 4) -->
+                        <div class="w-full lg:w-2/12 lg:sticky lg:top-24 flex flex-col gap-3">
+                            <button onclick="goToPage(5)"
+                                    class="tactile-btn w-full py-8 px-4 squircle-lg optical-glass-tinted hover:bg-pink-500 hover:text-white border-2 border-pink-400/60 font-black text-base tracking-wider shadow-xl flex flex-col items-center justify-center gap-2 group">
+                                <span>NEXT</span>
+                                <div class="w-10 h-10 rounded-full bg-pink-500/20 group-hover:bg-white/20 flex items-center justify-center transition-colors">
+                                    <i class="fa-solid fa-arrow-right text-lg group-hover:translate-x-1 transition-transform"></i>
+                                </div>
+                                <span class="text-[10px] font-mono-tech font-semibold opacity-75 text-center leading-tight mt-1">
+                                    Ke Jaringan & Anomali (Page 5)
+                                </span>
+                            </button>
+
+                            <!-- Quick Jump Pill for the 6 Cards -->
+                            <div class="optical-glass squircle-md p-3.5 text-left hidden lg:block">
+                                <span class="text-[10px] font-mono-tech uppercase opacity-60 block mb-2">Loncat ke Distribusi:</span>
+                                <div class="grid grid-cols-2 gap-1.5">
+                                    <button onclick="expandDistribution(0)" class="py-1.5 rounded-lg optical-glass text-[11px] font-mono-tech font-bold hover:text-pink-500">#01</button>
+                                    <button onclick="expandDistribution(1)" class="py-1.5 rounded-lg optical-glass text-[11px] font-mono-tech font-bold hover:text-pink-500">#02</button>
+                                    <button onclick="expandDistribution(2)" class="py-1.5 rounded-lg optical-glass text-[11px] font-mono-tech font-bold hover:text-pink-500">#03</button>
+                                    <button onclick="expandDistribution(3)" class="py-1.5 rounded-lg optical-glass text-[11px] font-mono-tech font-bold hover:text-pink-500">#04</button>
+                                    <button onclick="expandDistribution(4)" class="py-1.5 rounded-lg optical-glass text-[11px] font-mono-tech font-bold hover:text-pink-500">#05</button>
+                                    <button onclick="expandDistribution(5)" class="py-1.5 rounded-lg optical-glass text-[11px] font-mono-tech font-bold hover:text-pink-500">#06</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- =====================================================================
+             PAGE 5 & PAGE 6: B2B KITCHEN SUPPLY NETWORK TOPOLOGY + 4 ANOMALY BEACONS
+             + PAGE 6 GLASS DISPATCH COMMAND & URGENT NOTIFY CALL OVERLAY
+             (Honoring Wireframe Page 5 & Page 6)
+        ====================================================================== -->
+        <section id="stage-page-5-6" class="hidden page-stage relative">
+
+            <!-- PAGE 5 MAIN GLASS CONTAINER (Blurs when Page 6 overlay opens) -->
+            <div id="page5-glass-canvas" class="optical-glass squircle-xl p-5 sm:p-8 border-2 border-violet-500/40 transition-all duration-500">
+
+                <!-- Top Header of Page 5 -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 mb-6 border-b border-slate-400/20">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="px-3 py-1 rounded-full bg-violet-600 text-white text-[10px] font-mono-tech font-bold uppercase tracking-wider">
+                                PAGE 5 — TOPOLOGI JARINGAN PASOKAN DAPUR B2B
+                            </span>
+                            <span class="text-xs font-mono-tech font-semibold text-amber-500">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i>4 Segitiga Anomali Aktif
+                            </span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight">
+                            Alur Distribusi Bahan Baku Olahan ke Dapur Restoran, Central Kitchen & Kantin
+                        </h2>
+                        <p class="text-xs opacity-75 mt-1">
+                            Bukan untuk konsumen rumah tangga — setiap titik biru di kanan adalah <strong>dapur komersial (back-of-house)</strong> yang mengolah bahan baku. Klik segitiga kuning <i class="fa-solid fa-play -rotate-90 text-amber-500"></i> untuk melihat anomali, atau tekan <strong>Notify</strong> di kanan.
+                        </p>
+                    </div>
+
+                    <!-- Interactive Node Legend -->
+                    <div class="flex flex-wrap items-center gap-3 text-xs optical-glass squircle-md px-4 py-2.5 shrink-0">
+                        <span class="flex items-center gap-1.5 font-semibold">
+                            <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span> Hub Bahan Baku
+                        </span>
+                        <span class="flex items-center gap-1.5 font-semibold">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Kategori Proses
+                        </span>
+                        <span class="flex items-center gap-1.5 font-semibold">
+                            <span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Dapur B2B
+                        </span>
+                        <span class="flex items-center gap-1.5 font-bold text-amber-500">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Anomali
+                        </span>
+                    </div>
+                </div>
+
+                <!-- WIREFRAME PAGE 5: LEFT 9 COLS = SUPPLY TREE TOPOLOGY, RIGHT 3 COLS = "NOTIFY" MODULE -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+
+                    <!-- Left 9 Cols: Functional Optical Supply Chain Tree SVG -->
+                    <div class="lg:col-span-9 optical-glass squircle-lg p-4 overflow-x-auto">
+                        <div class="min-w-[800px]">
+                            <svg id="b2b-network-svg" viewBox="0 0 940 560" class="w-full h-auto select-none">
+                                <defs>
+                                    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#fbbf24" />
+                                        <stop offset="100%" stop-color="#d97706" />
+                                    </linearGradient>
+                                    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#10b981" />
+                                        <stop offset="100%" stop-color="#047857" />
+                                    </linearGradient>
+                                    <linearGradient id="blueKitchenGrad" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#3b82f6" />
+                                        <stop offset="100%" stop-color="#1d4ed8" />
+                                    </linearGradient>
+                                </defs>
+
+                                <!-- Smooth Cubic Bezier Supply Lines (Root -> 4 Processing Categories) -->
+                                <g stroke="var(--tree-line)" stroke-width="2.4" fill="none" opacity="0.65">
+                                    <path d="M 180 280 C 235 280, 225 75, 280 75" />
+                                    <path d="M 180 280 C 235 280, 225 195, 280 195" />
+                                    <path d="M 180 280 C 235 280, 225 355, 280 355" />
+                                    <path d="M 180 280 C 235 280, 225 485, 280 485" />
+                                </g>
+
+                                <!-- Category -> Sub-Hubs -> Commercial Kitchens Lines -->
+                                <g stroke="var(--tree-line)" stroke-width="1.8" fill="none" opacity="0.55">
+                                    <path d="M 415 75 L 470 75" />
+                                    <path d="M 415 195 C 442 195, 442 155, 470 155" />
+                                    <path d="M 415 195 C 442 195, 442 235, 470 235" />
+                                    <path d="M 595 155 C 620 155, 620 124, 645 124" />
+                                    <path d="M 595 155 C 620 155, 620 158, 645 158" />
+                                    <path d="M 595 155 C 620 155, 620 192, 645 192" />
+                                    <path d="M 595 235 C 620 235, 620 228, 645 228" />
+                                    <path d="M 595 235 C 620 235, 620 262, 645 262" />
+
+                                    <path d="M 415 355 C 442 355, 442 320, 470 320" />
+                                    <path d="M 415 355 C 442 355, 442 395, 470 395" />
+                                    <path d="M 595 320 C 620 320, 620 300, 645 300" />
+                                    <path d="M 595 320 C 620 320, 620 334, 645 334" />
+                                    <path d="M 595 395 C 620 395, 620 380, 645 380" />
+                                    <path d="M 595 395 C 620 395, 620 416, 645 416" />
+
+                                    <path d="M 415 485 C 442 485, 442 465, 470 465" />
+                                    <path d="M 415 485 C 442 485, 442 515, 470 515" />
+                                    <path d="M 595 465 L 645 465" />
+                                    <path d="M 595 515 L 645 515" />
+                                </g>
+
+                                <!-- ROOT NODE: HUB BAHAN BAKU (Matching the yellow oval on the left of Wireframe Page 5) -->
+                                <g class="cursor-pointer" onclick="inspectAnomaly(0)">
+                                    <rect x="20" y="246" width="160" height="68" rx="34" fill="url(#amberGrad)" stroke="#fef3c7" stroke-width="2" />
+                                    <text x="100" y="276" text-anchor="middle" fill="#0f172a" font-weight="900" font-size="12.5">HUB BAHAN BAKU</text>
+                                    <text x="100" y="295" text-anchor="middle" fill="#1e293b" font-weight="700" font-size="10">Raw & Semi-Processed</text>
+                                </g>
+
+                                <!-- LEVEL 1: 4 PROCESSING CATEGORIES (Green Squircles) -->
+                                <g>
+                                    <rect x="280" y="54" width="135" height="42" rx="12" fill="url(#emeraldGrad)" />
+                                    <text x="347" y="79" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="11">1. Protein Cold-Chain</text>
+
+                                    <rect x="280" y="174" width="135" height="42" rx="12" fill="url(#emeraldGrad)" />
+                                    <text x="347" y="199" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="11">2. Bumbu & Marinasi</text>
+
+                                    <rect x="280" y="334" width="135" height="42" rx="12" fill="url(#emeraldGrad)" />
+                                    <text x="347" y="359" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="11">3. Sayur Pre-Cut</text>
+
+                                    <rect x="280" y="464" width="135" height="42" rx="12" fill="url(#emeraldGrad)" />
+                                    <text x="347" y="489" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="11">4. Tepung & Curah</text>
+                                </g>
+
+                                <!-- LEVEL 2: B2B DISTRIBUTION SUB-HUBS (Rose-Pink Squircles) -->
+                                <g>
+                                    <rect x="470" y="57" width="310" height="36" rx="10" fill="#ffe4e6" stroke="#fda4af" stroke-width="1.5" />
+                                    <text x="625" y="79" text-anchor="middle" fill="#881337" font-weight="700" font-size="10.5">Potongan Daging Sapi, Ayam Marinasi Vakum & Kaldu</text>
+
+                                    <rect x="470" y="139" width="125" height="32" rx="10" fill="#ffe4e6" stroke="#fda4af" stroke-width="1.5" />
+                                    <text x="532" y="159" text-anchor="middle" fill="#881337" font-weight="700" font-size="10.5">Central Kitchen</text>
+
+                                    <rect x="470" y="219" width="125" height="32" rx="10" fill="#ffe4e6" stroke="#fda4af" stroke-width="1.5" />
+                                    <text x="532" y="239" text-anchor="middle" fill="#881337" font-weight="700" font-size="10.5">Restoran & Grill</text>
+
+                                    <rect x="470" y="304" width="125" height="32" rx="10" fill="#ffe4e6" stroke="#fda4af" stroke-width="1.5" />
+                                    <text x="532" y="324" text-anchor="middle" fill="#881337" font-weight="700" font-size="10.5">Kantin Pabrik</text>
+
+                                    <rect x="470" y="379" width="125" height="32" rx="10" fill="#ffe4e6" stroke="#fda4af" stroke-width="1.5" />
+                                    <text x="532" y="399" text-anchor="middle" fill="#881337" font-weight="700" font-size="10.5">Cloud Kitchen</text>
+
+                                    <rect x="470" y="449" width="125" height="32" rx="10" fill="#ffe4e6" stroke="#fda4af" stroke-width="1.5" />
+                                    <text x="532" y="469" text-anchor="middle" fill="#881337" font-weight="700" font-size="10.5">Komisari Bakery</text>
+
+                                    <rect x="470" y="499" width="125" height="32" rx="10" fill="#ffe4e6" stroke="#fda4af" stroke-width="1.5" />
+                                    <text x="532" y="519" text-anchor="middle" fill="#881337" font-weight="700" font-size="10.5">Dapur Horeka</text>
+                                </g>
+
+                                <!-- LEVEL 3: COMMERCIAL KITCHENS & CANTEENS (Blue Squircles) -->
+                                <g>
+                                    <rect x="645" y="110" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="127" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Sentral QSR Grup A</text>
+
+                                    <rect x="645" y="144" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="161" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Produksi Ramen B2B</text>
+
+                                    <rect x="645" y="178" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="195" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Commissary Saus & Kaldu</text>
+
+                                    <rect x="645" y="214" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="231" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Resto Steak & Hotpot</text>
+
+                                    <rect x="645" y="248" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="265" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Jaringan Bistro</text>
+
+                                    <rect x="645" y="286" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="303" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Kantin Pabrik Kawasan Industri</text>
+
+                                    <rect x="645" y="320" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="337" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Katering Korporat</text>
+
+                                    <rect x="645" y="366" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="383" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Cloud Kitchen Hub Utara</text>
+
+                                    <rect x="645" y="402" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="419" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Cloud Kitchen Hub Selatan</text>
+
+                                    <rect x="645" y="451" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="468" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Pabrik Roti & Pastry B2B</text>
+
+                                    <rect x="645" y="501" width="170" height="26" rx="8" fill="url(#blueKitchenGrad)" />
+                                    <text x="730" y="518" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Banquet & Hotel</text>
+                                </g>
+
+                                <!-- =================================================================
+                                     4 PULSING AMBER TRIANGLE ANOMALY BEACONS (Matching Wireframe Page 5)
+                                ================================================================== -->
+                                <!-- Beacon #1 -->
+                                <g class="cursor-pointer triangle-beacon" onclick="inspectAnomaly(1)">
+                                    <polygon points="865,92 833,152 897,152" fill="url(#amberGrad)" stroke="#fffbeb" stroke-width="2.5" stroke-linejoin="round" />
+                                    <text x="865" y="143" text-anchor="middle" fill="#0f172a" font-weight="900" font-size="16">!</text>
+                                </g>
+
+                                <!-- Beacon #2 -->
+                                <g class="cursor-pointer triangle-beacon" onclick="inspectAnomaly(2)">
+                                    <polygon points="882,208 850,268 914,268" fill="url(#amberGrad)" stroke="#fffbeb" stroke-width="2.5" stroke-linejoin="round" />
+                                    <text x="882" y="259" text-anchor="middle" fill="#0f172a" font-weight="900" font-size="16">!</text>
+                                </g>
+
+                                <!-- Beacon #3 -->
+                                <g class="cursor-pointer triangle-beacon" onclick="inspectAnomaly(3)">
+                                    <polygon points="890,322 858,382 922,382" fill="url(#amberGrad)" stroke="#fffbeb" stroke-width="2.5" stroke-linejoin="round" />
+                                    <text x="890" y="373" text-anchor="middle" fill="#0f172a" font-weight="900" font-size="16">!</text>
+                                </g>
+
+                                <!-- Beacon #4 -->
+                                <g class="cursor-pointer triangle-beacon" onclick="inspectAnomaly(4)">
+                                    <polygon points="868,442 836,502 900,502" fill="url(#amberGrad)" stroke="#fffbeb" stroke-width="2.5" stroke-linejoin="round" />
+                                    <text x="868" y="493" text-anchor="middle" fill="#0f172a" font-weight="900" font-size="16">!</text>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- Live Bottom Diagnostic Drawer inside Page 5 -->
+                        <div class="mt-3 optical-glass-elevated squircle-md p-4 border border-amber-400/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-start gap-3.5">
+                                <div class="w-10 h-10 squircle-sm bg-amber-500 text-slate-950 flex items-center justify-center font-black text-lg shrink-0">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span id="p5-anomaly-badge" class="text-[10px] font-mono-tech font-bold uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-500">
+                                            ANOMALI #01 • SEGITIGA KUNING ATAS
+                                        </span>
+                                        <span id="p5-anomaly-delta" class="text-xs font-mono-tech font-bold text-rose-500">+8.4°C Deviasi Chiller</span>
+                                    </div>
+                                    <h4 id="p5-anomaly-title" class="text-sm font-extrabold mt-0.5">
+                                        Risiko Suhu Batch Ayam Marinasi & Kaldu Pekat — Dapur Sentral QSR Grup A
+                                    </h4>
+                                    <p id="p5-anomaly-desc" class="text-xs opacity-75 mt-0.5">
+                                        Sensor mendeteksi fluktuasi kompresor pendingin armada. Berisiko menghambat persiapan masak shift pagi di 18 cabang dapur.
+                                    </p>
+                                </div>
+                            </div>
+                            <button onclick="goToPage(6)" class="tactile-btn px-4 py-2.5 squircle-sm bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs shrink-0 shadow-md">
+                                Eskalasi ke Distribusi <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right 3 Cols: Floating "Notify" Glass Dock (Matching the grey "Notify" rectangle on the right of Wireframe Page 5) -->
+                    <div class="lg:col-span-3 flex flex-col justify-between gap-4">
+                        <div class="optical-glass-elevated squircle-lg p-5 text-center border border-slate-400/25">
+                            <span class="text-[10px] font-mono-tech uppercase tracking-widest opacity-60 block mb-3">
+                                COMMAND DISPATCH DOCK
+                            </span>
+
+                            <!-- Prominent "Notify" Button matching Wireframe Page 5 -->
+                            <button onclick="goToPage(6)"
+                                    class="tactile-btn w-full py-10 px-6 squircle-lg optical-glass hover:bg-gradient-to-br hover:from-pink-600 hover:to-indigo-700 hover:text-white border-2 border-slate-400/40 font-black text-2xl tracking-tight shadow-2xl flex flex-col items-center justify-center gap-2.5 group">
+                                <div class="w-14 h-14 rounded-2xl bg-amber-500/15 group-hover:bg-white/20 flex items-center justify-center text-amber-500 group-hover:text-white text-2xl transition-colors">
+                                    <i class="fa-solid fa-bell"></i>
+                                </div>
+                                <span>Notify</span>
+                                <span class="text-[11px] font-mono-tech font-medium opacity-75">
+                                    Buka Kontak & Urgent Call (Page 6)
+                                </span>
+                            </button>
+
+                            <!-- Quick Selector for the 4 Anomaly Triangles -->
+                            <div class="mt-5 pt-4 border-t border-slate-400/20 text-left space-y-2">
+                                <span class="text-[10px] font-mono-tech uppercase opacity-65 block">Pilih Segitiga Anomali:</span>
+
+                                <button onclick="inspectAnomaly(1)" id="anom-pill-1" class="tactile-btn w-full p-2.5 squircle-sm optical-glass text-xs font-bold flex items-center justify-between border border-amber-500/50">
+                                    <span class="truncate"><i class="fa-solid fa-play -rotate-90 text-amber-500 mr-1.5"></i>#1 Suhu Chiller QSR</span>
+                                    <span class="font-mono-tech text-[10px] text-rose-500">+8.4°C</span>
+                                </button>
+
+                                <button onclick="inspectAnomaly(2)" id="anom-pill-2" class="tactile-btn w-full p-2.5 squircle-sm optical-glass text-xs font-semibold flex items-center justify-between opacity-80">
+                                    <span class="truncate"><i class="fa-solid fa-play -rotate-90 text-amber-500 mr-1.5"></i>#2 Delay Daging Iris</span>
+                                    <span class="font-mono-tech text-[10px] text-amber-500">+95m</span>
+                                </button>
+
+                                <button onclick="inspectAnomaly(3)" id="anom-pill-3" class="tactile-btn w-full p-2.5 squircle-sm optical-glass text-xs font-semibold flex items-center justify-between opacity-80">
+                                    <span class="truncate"><i class="fa-solid fa-play -rotate-90 text-amber-500 mr-1.5"></i>#3 Sayur Pre-Cut Kantin</span>
+                                    <span class="font-mono-tech text-[10px] text-amber-500">QC Lembab</span>
+                                </button>
+
+                                <button onclick="inspectAnomaly(4)" id="anom-pill-4" class="tactile-btn w-full p-2.5 squircle-sm optical-glass text-xs font-semibold flex items-center justify-between opacity-80">
+                                    <span class="truncate"><i class="fa-solid fa-play -rotate-90 text-amber-500 mr-1.5"></i>#4 Selisih Sak Tepung</span>
+                                    <span class="font-mono-tech text-[10px] text-amber-500">-4 Sak</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- =================================================================
+                 PAGE 6 OVERLAY: CUSTOMER / DISTRIBUTOR CONTACT DETAILS & URGENT NOTIFY CALL
+                 (Honoring Wireframe Page 6: Large Pink-Tinted Center Overlay + Red "Urgent Notify Call" Box)
+            ================================================================== -->
+            <div id="page6-dispatch-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-3 sm:p-6 bg-slate-950/45 backdrop-blur-md animate-[opticalFocusIn_0.3s_ease-out]">
+
+                <!-- Large Pink-Tinted Optical Glass Command Overlay (Matching Wireframe Page 6) -->
+                <div class="optical-glass-tinted squircle-xl w-full max-w-4xl p-6 sm:p-10 relative border-2 border-pink-400/60 shadow-2xl">
+
+                    <!-- Top Header of Page 6 Modal -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-6 border-b border-pink-400/30">
+                        <div class="flex items-center gap-2.5">
+                            <span class="px-3 py-1 rounded-full bg-pink-600 text-white text-[10px] font-mono-tech font-bold uppercase tracking-wider">
+                                PAGE 6 — DISPATCH NOTIFIKASI & PANGGILAN DARURAT
+                            </span>
+                            <span class="text-xs font-semibold opacity-80 hidden sm:inline">
+                                Eskalasi Langsung ke Supplier & Distribusi Bahan Baku
+                            </span>
+                        </div>
+                        <button onclick="goToPage(5)" class="tactile-btn px-3.5 py-1.5 squircle-sm optical-glass text-xs font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Kembali ke Jaringan (Page 5)</span>
+                        </button>
+                    </div>
+
+                    <!-- WIREFRAME PAGE 6 INNER LAYOUT: LEFT = CONTACT DETAILS & EMAIL SENT, RIGHT = RED "URGENT NOTIFY CALL" -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+
+                        <!-- Left 7 Cols: Customer / Distributor Contact Details & Email Sent? -->
+                        <div class="md:col-span-7 optical-glass-elevated squircle-lg p-5 sm:p-6 flex flex-col justify-between border border-white/40">
+                            <div>
+                                <!-- Status Header matching "customer: Contact details: email sent?" in Wireframe Page 6 -->
+                                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                                    <div>
+                                        <span class="text-[10px] font-mono-tech uppercase text-pink-500 font-bold block">
+                                            CUSTOMER & DISTRIBUTOR CONTACT DETAILS
+                                        </span>
+                                        <h3 id="p6-target-heading" class="text-base sm:text-lg font-extrabold mt-0.5">
+                                            Hub Distribusi Cold-Chain & Dapur Sentral QSR
+                                        </h3>
+                                    </div>
+                                    <span id="p6-email-badge" class="px-3 py-1 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 text-xs font-mono-tech font-bold">
+                                        Email Sent: Pending
+                                    </span>
+                                </div>
+
+                                <!-- Contact Metadata Grid -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4 text-xs">
+                                    <div class="optical-glass squircle-sm p-3">
+                                        <span class="text-[10px] font-mono-tech uppercase opacity-60 block">PIC Distribusi Supplier:</span>
+                                        <strong id="p6-pic-name" class="block mt-0.5">Hendra Wijaya (Cold-Chain Dispatch)</strong>
+                                    </div>
+                                    <div class="optical-glass squircle-sm p-3">
+                                        <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Dapur Penerima (B2B Customer):</span>
+                                        <strong id="p6-kitchen-name" class="block mt-0.5">Chef Operasional — Central Kitchen A</strong>
+                                    </div>
+                                    <div class="optical-glass squircle-sm p-3">
+                                        <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Email Eskalasi Distribusi:</span>
+                                        <strong id="p6-email-addr" class="font-mono-tech text-[11px] text-pink-500 block mt-0.5">dispatch-coldchain@rawmat-b2b.com</strong>
+                                    </div>
+                                    <div class="optical-glass squircle-sm p-3">
+                                        <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Batch & Prioritas Masak:</span>
+                                        <strong id="p6-batch-code" class="font-mono-tech text-[11px] text-rose-500 block mt-0.5">BATCH #RM-402 • Shift Pagi 05:00</strong>
+                                    </div>
+                                </div>
+
+                                <!-- Editable Anomaly Notification Message -->
+                                <div class="mb-4">
+                                    <label class="text-[11px] font-mono-tech uppercase opacity-75 block mb-1.5">
+                                        Laporan Anomali Otomatis (Siap Dikirim ke Distribusi):
+                                    </label>
+                                    <textarea id="p6-email-textarea" rows="3"
+                                              class="w-full squircle-sm optical-glass p-3 text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-pink-500">PERINGATAN ANOMALI: Terdeteksi deviasi suhu chiller (+8.4°C) pada pengiriman bahan baku setengah jadi (Batch #RM-402 Ayam Marinasi & Kaldu) menuju Dapur Sentral QSR Grup A. Mohon konfirmasi pengiriman armada pengganti segera.</textarea>
+                                </div>
+                            </div>
+
+                            <!-- Send Email Button + Live Confirmation Banner -->
+                            <div class="space-y-3">
+                                <button onclick="sendAnomalyEmailReport()" id="btn-p6-send-email"
+                                        class="tactile-btn w-full py-3.5 px-5 squircle-md bg-slate-900 hover:bg-emerald-600 text-white font-extrabold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                    <span>Hantar Email Laporan Anomali ke Distribusi</span>
+                                </button>
+
+                                <div id="p6-email-toast" class="hidden squircle-sm bg-emerald-500/15 border border-emerald-500/40 p-3 text-xs flex items-center gap-2.5 text-emerald-500 font-semibold">
+                                    <i class="fa-solid fa-circle-check text-base"></i>
+                                    <span id="p6-email-timestamp">Email Sent! Laporan anomali telah diterima oleh server Distribusi & Kepala Dapur.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right 5 Cols: RED "URGENT NOTIFY CALL" MODULE (Matching the Red Box on the right of Wireframe Page 6) -->
+                        <div class="md:col-span-5 flex flex-col">
+                            <div class="w-full h-full squircle-lg bg-gradient-to-br from-red-600 via-rose-600 to-red-700 text-white p-6 sm:p-7 border-2 border-red-300/60 shadow-2xl flex flex-col justify-between text-center relative overflow-hidden">
+
+                                <!-- Subtle Optical Glow inside Red Call Box -->
+                                <div class="w-48 h-48 rounded-full bg-white/10 blur-2xl absolute -top-12 -right-12 pointer-events-none"></div>
+
+                                <div>
+                                    <span class="px-3 py-1 rounded-full bg-black/25 text-red-100 text-[10px] font-mono-tech font-bold uppercase tracking-widest">
+                                        EMERGENCY KITCHEN HOTLINE
+                                    </span>
+
+                                    <div class="w-16 h-16 squircle-md bg-white/20 border border-white/40 flex items-center justify-center text-2xl mx-auto my-4 shadow-lg">
+                                        <i class="fa-solid fa-phone-volume animate-bounce"></i>
+                                    </div>
+
+                                    <h4 class="text-2xl font-black tracking-tight mb-2">
+                                        Urgent Notify Call
+                                    </h4>
+                                    <p class="text-xs text-red-100 leading-relaxed mb-5">
+                                        Jika anomali bahan baku mengancam operasional memasak dapur saat ini juga, tekan untuk panggilan suara langsung (*Direct Line*) ke Dispatcher Distribusi.
+                                    </p>
+                                </div>
+
+                                <!-- Call Trigger Button -->
+                                <div>
+                                    <button onclick="toggleUrgentDirectCall()" id="btn-urgent-direct-call"
+                                            class="tactile-btn w-full py-4 px-5 squircle-md bg-white text-red-700 hover:bg-red-50 font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-phone"></i>
+                                        <span>Direct Call Distribusi Sekarang</span>
+                                    </button>
+
+                                    <!-- Live Interactive Voice Call HUD (Appears when clicked) -->
+                                    <div id="live-call-hud" class="hidden mt-4 squircle-md bg-black/40 backdrop-blur-md border border-white/25 p-4 text-left">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-[10px] font-mono-tech font-bold uppercase text-emerald-300 flex items-center gap-1.5">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> DIRECT LINE CONNECTED
+                                            </span>
+                                            <span id="live-call-clock" class="font-mono-tech text-xs font-bold">00:01</span>
+                                        </div>
+
+                                        <!-- Animated Audio Waveform Bars -->
+                                        <div class="flex items-center justify-center gap-1.5 h-8 my-2 bg-white/10 rounded-xl px-3">
+                                            <div class="wave-bar" style="animation-delay: 0.0s"></div>
+                                            <div class="wave-bar" style="animation-delay: 0.2s"></div>
+                                            <div class="wave-bar" style="animation-delay: 0.4s"></div>
+                                            <div class="wave-bar" style="animation-delay: 0.1s"></div>
+                                            <div class="wave-bar" style="animation-delay: 0.3s"></div>
+                                            <div class="wave-bar" style="animation-delay: 0.5s"></div>
+                                            <div class="wave-bar" style="animation-delay: 0.2s"></div>
+                                            <div class="wave-bar" style="animation-delay: 0.0s"></div>
+                                        </div>
+
+                                        <p class="text-[11px] text-red-100 leading-snug">
+                                            <strong>Dispatcher Hendra:</strong> "Kami terima peringatan anomali Anda. Armada chiller cadangan sedang dialihkan ke Dapur Sentral sekarang."
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- =========================================================================
+         FLOATING INTERACTIVE MENTOR GUIDE HUD (Non-intrusive, explains each page)
+    ========================================================================== -->
+    <aside id="mentor-hud-bar" class="fixed bottom-4 inset-x-0 z-50 px-4 pointer-events-none flex justify-center">
+        <div class="optical-glass-elevated squircle-lg px-4 sm:px-6 py-3 max-w-3xl w-full pointer-events-auto flex flex-col sm:flex-row items-center justify-between gap-3 border border-indigo-400/35 shadow-2xl">
+            <div class="flex items-center gap-3.5 text-left">
+                <div class="w-10 h-10 squircle-sm bg-gradient-to-br from-indigo-500 to-pink-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span id="mentor-step-tag" class="text-[10px] font-mono-tech font-bold uppercase tracking-wider text-indigo-500">
+                            PANDUAN MENTOR • PAGE 1 DARI 6
+                        </span>
+                    </div>
+                    <p id="mentor-guide-text" class="text-xs font-medium leading-snug mt-0.5">
+                        Pilih salah satu preset file distribusi bahan baku dapur di atas, lalu tekan tombol <strong>"Proses & Analisis File"</strong> di kiri bawah.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
+                <button onclick="mentorNextStepAction()" id="mentor-action-btn"
+                        class="tactile-btn px-4 py-2 squircle-sm bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow">
+                    <span id="mentor-action-label">Lanjut ke Page 2</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </button>
+                <button onclick="toggleMentorHUD()" title="Sembunyikan Panduan Mentor" class="w-8 h-8 rounded-full optical-glass flex items-center justify-center text-xs opacity-60 hover:opacity-100">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- =========================================================================
+         APPLICATION LOGIC (6-PAGE WORKFLOW, CHORD SVG, 6 EXPANDABLE CARDS, CALL HUD)
+    ========================================================================== -->
+    <script>
+        let currentPage = 1;
+        let currentVisualMode = 'daylight';
+        let lensEffectEnabled = true;
+        let mentorHudVisible = true;
+        let expandedDistIndex = 1; // Defaults to 2nd card expanded matching the purple-bordered box in Page 4 wireframe
+        let selectedAnomalyIndex = 1;
+        let activeCallInterval = null;
+
+        // Preset Datasets for Page 1
+        const datasetPresets = [
+            {
+                name: "B2B_Kitchen_RawMaterial_Oct2026.csv",
+                rows: "4,820 Baris",
+                kitchens: "142 Dapur B2B"
+            },
+            {
+                name: "CentralKitchen_WagyuPoultry_Q4.xlsx",
+                rows: "3,190 Baris",
+                kitchens: "96 Dapur Resto"
+            },
+            {
+                name: "IndustrialCanteen_PreCutVeg_Bulk.json",
+                rows: "6,410 Baris",
+                kitchens: "185 Kantin & Katering"
+            }
+        ];
+
+        // Mentor HUD Explanations per Page
+        const mentorMessages = {
+            1: {
+                tag: "PANDUAN MENTOR • PAGE 1 (DATA INGESTION STUDIO)",
+                text: "Halaman pertama untuk memasukkan file log distribusi bahan mentah/setengah jadi. Klik preset batch atau tekan tombol 'Proses & Analisis File' di kiri bawah.",
+                actionLabel: "Ke Page 2 (Confirm Blur)",
+                nextPage: 2
+            },
+            2: {
+                tag: "PANDUAN MENTOR • PAGE 2 (APERTURE BLUR CONFIRMATION)",
+                text: "Perhatikan latar belakang Page 1 kini menjadi blur seperti lensa kamera untuk memfokuskan konfirmasi analisis. Tekan 'Confirm & Buka Korelasi Data'.",
+                actionLabel: "Ke Page 3 (Korelasi)",
+                nextPage: 3
+            },
+            3: {
+                tag: "PANDUAN MENTOR • PAGE 3 (RADIAL SUPPLY CORRELATION)",
+                text: "Menampilkan korelasi menyeluruh antara hub bahan baku dan dapur B2B. Arahkan kursor ke titik lingkaran untuk melihat nilai korelasi, lalu tekan Next.",
+                actionLabel: "Ke Page 4 (6 Distribusi)",
+                nextPage: 4
+            },
+            4: {
+                tag: "PANDUAN MENTOR • PAGE 4 (6 DISTRIBUTION DETAILS)",
+                text: "Terdapat 6 klaster distribusi bahan baku dapur yang dapat di-scroll. Klik mana-mana kartu untuk memperbesar (expand) tabel SKU detail, lalu tekan NEXT di kanan.",
+                actionLabel: "Ke Page 5 (Jaringan B2B)",
+                nextPage: 5
+            },
+            5: {
+                tag: "PANDUAN MENTOR • PAGE 5 (B2B KITCHEN NETWORK & ANOMALIES)",
+                text: "Peta alur bahan baku ke dapur restoran & kantin industri. Klik 4 segitiga kuning untuk melihat detail anomali, atau tekan tombol 'Notify' di kanan.",
+                actionLabel: "Ke Page 6 (Notify & Call)",
+                nextPage: 6
+            },
+            6: {
+                tag: "PANDUAN MENTOR • PAGE 6 (DISPATCH & URGENT NOTIFY CALL)",
+                text: "Kirim laporan email anomali ke pihak distribusi dengan sekali klik, atau tekan tombol merah 'Urgent Notify Call' untuk simulasi telepon darurat langsung.",
+                actionLabel: "Ulangi dari Page 1",
+                nextPage: 1
+            }
+        };
+
+        // 6 Distribution Clusters Data for Page 4 (B2B Raw & Semi-Processed Kitchen Ingredients)
+        const distributionsList = [
+            {
+                id: 0,
+                code: "DIST-01",
+                title: "1. Distribusi Protein & Daging Marinasi (Cold-Chain Dapur)",
+                subtitle: "Potongan daging sapi siap masak, fillet ayam marinasi vakum, dan konsentrat kaldu tulang untuk Central Kitchen & Restoran.",
+                kitchenCount: "38 Dapur Restoran & 6 Central Kitchen",
+                tempTelemetry: "-18.2°C (Freezer) / +1.8°C (Chiller)",
+                slaScore: "96.4% Tepat Jadwal Masak",
+                anomalyBadge: "1 Peringatan Suhu Chiller",
+                headChefPIC: "Chef Ronald (Central Kitchen Grup A)",
+                skus: [
+                    { code: "RM-PRO-101", name: "Fillet Ayam Marinasi Bumbu Dasar (Vakum 5kg)", dest: "Dapur Sentral QSR Grup A", batch: "#RM-402", status: "Anomali Suhu (+8.4°C)", alert: true },
+                    { code: "RM-PRO-104", name: "Daging Sapi Slice Shortplate (Siap Grill/Hotpot)", dest: "Dapur Resto Steak & Hotpot", batch: "#RM-405", status: "Tepat Waktu (-18°C)", alert: false },
+                    { code: "RM-PRO-109", name: "Konsentrat Kaldu Kolagen Ayam & Sapi (Jerigen 20L)", dest: "Dapur Produksi Ramen B2B", batch: "#RM-411", status: "Tepat Waktu (+2°C)", alert: false }
+                ]
+            },
+            {
+                id: 1,
+                code: "DIST-02",
+                title: "2. Bahan Setengah Jadi, Saus Dasar & Pasta Bumbu Masak",
+                subtitle: "Bumbu dasar giling matang, saus demi-glace industri, dan pasta rempah siap tumis untuk mempercepat produksi dapur komersial.",
+                kitchenCount: "44 Dapur Restoran, Bistro & Cloud Kitchen",
+                tempTelemetry: "+3.8°C (Chiller Terkontrol)",
+                slaScore: "94.1% Tepat Jadwal Masak",
+                anomalyBadge: "Keterlambatan Rute 95 Menit",
+                headChefPIC: "Chef Farhan (Komisari Saus & Bistro)",
+                skus: [
+                    { code: "RM-SAU-201", name: "Pasta Bumbu Dasar Merah & Putih Matang (Pail 15kg)", dest: "Dapur Katering Korporat", batch: "#RM-201", status: "Tepat Waktu", alert: false },
+                    { code: "RM-SAU-205", name: "Saus Demi-Glace & Marinasi Lada Hitam Komersial", dest: "Dapur Jaringan Bistro", batch: "#RM-205", status: "Delay 95 Menit", alert: true },
+                    { code: "RM-SAU-210", name: "Base Kuah Kari & Laksa Pekat B2B (Kemasan 10kg)", dest: "Cloud Kitchen Hub Utara", batch: "#RM-214", status: "Tepat Waktu", alert: false }
+                ]
+            },
+            {
+                id: 2,
+                code: "DIST-03",
+                title: "3. Sayuran Pre-Cut, Kupas Bersih & Bahan Segar Siap Kuali",
+                subtitle: "Sayuran yang telah dikupas, dipotong presisi, dan dicuci sanitasi untuk langsung dimasak di kantin pabrik & katering.",
+                kitchenCount: "29 Kantin Industri & Dapur Katering",
+                tempTelemetry: "+5.6°C (Kelembaban Tinggi)",
+                slaScore: "91.8% Tepat Jadwal Masak",
+                anomalyBadge: "Kondensasi Kemasan Sayur",
+                headChefPIC: "Ibu Ratna (Manajer Dapur Kantin Kawasan Industri)",
+                skus: [
+                    { code: "RM-VEG-301", name: "Kentang Potong Wedges & Dadu Pre-Blanched (10kg)", dest: "Kantin Pabrik Kawasan Industri", batch: "#RM-301", status: "Perlu Cek QC Lembab", alert: true },
+                    { code: "RM-VEG-308", name: "Bawang Bombay & Bawang Putih Kupas Cincang", dest: "Dapur Sentral QSR Grup A", batch: "#RM-309", status: "Tepat Waktu", alert: false }
+                ]
+            },
+            {
+                id: 3,
+                code: "DIST-04",
+                title: "4. Tepung Premiks Industri, Beras Karung & Adonan Beku",
+                subtitle: "Tepung bumbu krispi B2B, tepung protein tinggi komisari roti, dan adonan *frozen dough* siap panggang.",
+                kitchenCount: "19 Komisari Bakery & 22 Dapur Restoran",
+                tempTelemetry: "Suhu Ruang Kering / -16°C Dough",
+                slaScore: "98.5% Tepat Jadwal Masak",
+                anomalyBadge: "Selisih Muatan -4 Sak",
+                headChefPIC: "Chef Daniel (Pabrik Roti & Pastry B2B)",
+                skus: [
+                    { code: "RM-DRY-401", name: "Tepung Premiks Ayam Krispi B2B (Sak 25kg)", dest: "Dapur Sentral QSR Grup A", batch: "#RM-480", status: "Tepat Waktu", alert: false },
+                    { code: "RM-DRY-405", name: "Tepung Terigu Protein Tinggi Komisari (Sak 25kg)", dest: "Pabrik Roti & Pastry B2B", batch: "#RM-488", status: "Selisih -4 Sak", alert: true }
+                ]
+            },
+            {
+                id: 4,
+                code: "DIST-05",
+                title: "5. Olahan Susu Masak, Keju Blok 10kg & Butter Pastry",
+                subtitle: "Keju mozzarella blok parut, *cooking cream* kemasan gastro, dan *butter sheet* untuk dapur hotel dan kafe B2B.",
+                kitchenCount: "18 Dapur Hotel (Horeka) & Cloud Kitchen",
+                tempTelemetry: "+2.6°C (Sangat Stabil)",
+                slaScore: "99.1% Tepat Jadwal Masak",
+                anomalyBadge: "Normal • Tanpa Anomali",
+                headChefPIC: "Chef Nadia (Dapur Banquet & Hotel)",
+                skus: [
+                    { code: "RM-DAI-501", name: "Keju Mozzarella Blok & Parut Industri (5kg)", dest: "Cloud Kitchen Hub Selatan", batch: "#RM-510", status: "Tepat Waktu", alert: false },
+                    { code: "RM-DAI-504", name: "Unsalted Butter Lembaran Lapis Croissant B2B", dest: "Pabrik Roti & Pastry B2B", batch: "#RM-512", status: "Tepat Waktu", alert: false }
+                ]
+            },
+            {
+                id: 5,
+                code: "DIST-06",
+                title: "6. Minyak Goreng Deep-Fry Curah & Lemak Masak Dapur",
+                subtitle: "Minyak goreng padat (*solid frying fat*) dan minyak sawit jerigen 20L tahan suhu tinggi untuk penggorengan dapur komersial.",
+                kitchenCount: "Seluruh 142 Titik Dapur & Kantin",
+                tempTelemetry: "28.0°C Ambient Gudang",
+                slaScore: "99.6% Tepat Jadwal Masak",
+                anomalyBadge: "Normal • Tanpa Anomali",
+                headChefPIC: "Koordinator Gudang Dapur Sentral",
+                skus: [
+                    { code: "RM-OIL-601", name: "Minyak Padat Deep-Frying Komersial (Karton 15kg)", dest: "Dapur Sentral QSR Grup A", batch: "#RM-601", status: "Tepat Waktu", alert: false },
+                    { code: "RM-OIL-603", name: "Minyak Goreng Sawit Industri (Jerigen 20L)", dest: "Kantin Pabrik Kawasan Industri", batch: "#RM-609", status: "Tepat Waktu", alert: false }
+                ]
+            }
+        ];
+
+        // 4 Anomaly Beacons Data for Page 5 & Page 6
+        const anomalyDetails = {
+            0: {
+                badge: "ROOT HUB BAHAN BAKU • STATUS KESELURUHAN",
+                delta: "96.2% SLA Aktif",
+                title: "Pusat Pengolahan & Gudang Bahan Baku Dapur B2B",
+                desc: "Menyuplai bahan mentah & setengah jadi ke 142 dapur restoran, central kitchen, dan kantin. Klik salah satu dari 4 segitiga kuning di kanan untuk menginspeksi anomali.",
+                targetHeading: "Pusat Komando Distribusi Bahan Baku B2B",
+                picName: "Hendra Wijaya (Kepala Logistik Bahan Baku)",
+                kitchenName: "Seluruh Kepala Dapur Sentral & Kantin",
+                emailAddr: "command-center@rawmat-b2b.com",
+                batchCode: "SEMUA BATCH AKTIF (4 ANOMALI)",
+                emailBody: "LAPORAN STATUS JARINGAN: Terdeteksi 4 titik anomali pada pengiriman bahan baku dapur pagi ini. Mohon seluruh koordinator sub-hub melakukan sinkronisasi jadwal masak."
+            },
+            1: {
+                badge: "ANOMALI #01 • SEGITIGA KUNING ATAS",
+                delta: "+8.4°C Deviasi Chiller",
+                title: "Risiko Suhu Batch Ayam Marinasi & Kaldu Pekat — Dapur Sentral QSR Grup A",
+                desc: "Sensor mendeteksi kenaikan suhu boks pendingin armada menuju Dapur Sentral QSR & Dapur Produksi Ramen B2B. Berisiko mengganggu persiapan masak shift pukul 05:00.",
+                targetHeading: "Hub Distribusi Cold-Chain & Dapur Sentral QSR",
+                picName: "Hendra Wijaya (Cold-Chain Dispatch)",
+                kitchenName: "Chef Operasional — Central Kitchen A",
+                emailAddr: "dispatch-coldchain@rawmat-b2b.com",
+                batchCode: "BATCH #RM-402 • Shift Pagi 05:00",
+                emailBody: "PERINGATAN ANOMALI #01: Terdeteksi deviasi suhu chiller (+8.4°C) pada pengiriman bahan baku setengah jadi (Batch #RM-402 Ayam Marinasi & Kaldu) menuju Dapur Sentral QSR Grup A. Mohon kirimkan armada pengganti segera."
+            },
+            2: {
+                badge: "ANOMALI #02 • SEGITIGA KUNING TENGAH-ATAS",
+                delta: "+95 Menit Terlambat",
+                title: "Keterlambatan Armada Daging Iris & Saus Marinasi — Dapur Resto Steak & Bistro",
+                desc: "Kemacetan di jalur arteri menghambat pengiriman bahan baku grill & saus dasar demi-glace untuk persiapan masak makan siang di jaringan restoran.",
+                targetHeading: "Sub-Hub Distribusi Restoran & Grill",
+                picName: "Budi Santoso (Koordinator Rute Resto)",
+                kitchenName: "Chef Farhan — Dapur Steak & Bistro Group",
+                emailAddr: "resto-fleet@rawmat-b2b.com",
+                batchCode: "BATCH #RM-205 • Persiapan Siang",
+                emailBody: "PERINGATAN ANOMALI #02: Pengiriman Daging Sapi Slice & Saus Dasar Marinasi (Batch #RM-205) mengalami keterlambatan 95 menit menuju Dapur Resto Steak & Bistro. Mohon aktifkan stok penyangga dari komisari terdekat."
+            },
+            3: {
+                badge: "ANOMALI #03 • SEGITIGA KUNING TENGAH-BAWAH",
+                delta: "Kelembaban > 88%",
+                title: "Kondensasi Kemasan Sayur Pre-Cut & Kentang Kupas — Kantin Pabrik Industri",
+                desc: "Fluktuasi ventilasi menyebabkan embun berlebih pada kemasan sayur siap masak untuk kebutuhan katering 5.000 porsi pekerja pabrik.",
+                targetHeading: "Unit QC Sayur Pre-Cut & Logistik Kantin Pabrik",
+                picName: "Siti Rahma (Supervisor QC Pre-Cut)",
+                kitchenName: "Ibu Ratna — Dapur Kantin Kawasan Industri",
+                emailAddr: "qc-precut@rawmat-b2b.com",
+                batchCode: "BATCH #RM-301 • Katering 5,000 Porsi",
+                emailBody: "PERINGATAN ANOMALI #03: Terdeteksi kelembaban tinggi pada kemasan Sayur Pre-Cut & Kentang Kupas (Batch #RM-301) tujuan Kantin Pabrik Kawasan Industri. Mohon lakukan pengecekan kualitas prioritas saat tiba di loading dock dapur."
+            },
+            4: {
+                badge: "ANOMALI #04 • SEGITIGA KUNING BAWAH",
+                delta: "Selisih -4 Sak (100kg)",
+                title: "Selisih Muatan Tepung Premiks & Adonan Roti Beku — Komisari Bakery B2B",
+                desc: "Pemindaian RFID di gerbang gudang mencatat kekurangan 4 sak tepung premiks industri untuk produksi pagi di Pabrik Roti & Dapur Banquet.",
+                targetHeading: "Gudang Bahan Kering & Komisari Bakery B2B",
+                picName: "Kevin Tan (Manajer Manifes Gudang Kering)",
+                kitchenName: "Chef Daniel — Pabrik Roti & Pastry B2B",
+                emailAddr: "drybulk-komisari@rawmat-b2b.com",
+                batchCode: "BATCH #RM-488 • Produksi Bakery",
+                emailBody: "PERINGATAN ANOMALI #04: Ditemukan selisih kurang 4 sak Tepung Premiks Industri pada Batch #RM-488 tujuan Pabrik Roti & Pastry B2B. Mohon segera jadwalkan van kurir ekspres untuk mengirim kekurangan 100kg tersebut."
+            }
+        };
+
+        // =========================================================================
+        // CORE NAVIGATION ENGINE (PAGES 1 TO 6)
+        // =========================================================================
+        function goToPage(pageNum) {
+            currentPage = pageNum;
+
+            // Hide all stages and overlays first
+            document.getElementById('stage-page-1-2').classList.add('hidden');
+            document.getElementById('page2-confirm-modal').classList.add('hidden');
+            document.getElementById('page1-glass-canvas').classList.remove('aperture-bokeh-blur');
+
+            document.getElementById('stage-page-3').classList.add('hidden');
+            document.getElementById('stage-page-4').classList.add('hidden');
+
+            document.getElementById('stage-page-5-6').classList.add('hidden');
+            document.getElementById('page6-dispatch-modal').classList.add('hidden');
+            document.getElementById('page5-glass-canvas').classList.remove('aperture-bokeh-blur');
+
+            // Activate the requested page
+            if (pageNum === 1) {
+                document.getElementById('stage-page-1-2').classList.remove('hidden');
+            } else if (pageNum === 2) {
+                document.getElementById('stage-page-1-2').classList.remove('hidden');
+                document.getElementById('page1-glass-canvas').classList.add('aperture-bokeh-blur');
+                document.getElementById('page2-confirm-modal').classList.remove('hidden');
+            } else if (pageNum === 3) {
+                document.getElementById('stage-page-3').classList.remove('hidden');
+                renderOpticalChord('all');
+            } else if (pageNum === 4) {
+                document.getElementById('stage-page-4').classList.remove('hidden');
+                renderDistributionList();
+            } else if (pageNum === 5) {
+                document.getElementById('stage-page-5-6').classList.remove('hidden');
+            } else if (pageNum === 6) {
+                document.getElementById('stage-page-5-6').classList.remove('hidden');
+                document.getElementById('page5-glass-canvas').classList.add('aperture-bokeh-blur');
+                document.getElementById('page6-dispatch-modal').classList.remove('hidden');
+            }
+
+            updateTopNavigationStepper(pageNum);
+            updateMentorHUD(pageNum);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateTopNavigationStepper(activePage) {
+            document.getElementById('mobile-page-pill').textContent = `P${activePage} / 6`;
+
+            for (let i = 1; i <= 6; i++) {
+                const btn = document.getElementById(`nav-step-${i}`);
+                const badge = btn.querySelector('.step-badge');
+                if (i === activePage) {
+                    btn.className = "tactile-btn px-3 py-1.5 squircle-sm text-xs font-extrabold flex items-center gap-1.5 whitespace-nowrap bg-gradient-to-r from-indigo-600 to-pink-600 text-white shadow-md";
+                    badge.className = "step-badge w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono-tech font-bold bg-white text-indigo-700";
+                } else if (i < activePage) {
+                    btn.className = "tactile-btn px-3 py-1.5 squircle-sm text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap optical-glass opacity-90";
+                    badge.className = "step-badge w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono-tech font-bold bg-emerald-500/20 text-emerald-500";
+                } else {
+                    btn.className = "tactile-btn px-3 py-1.5 squircle-sm text-xs font-medium flex items-center gap-1.5 whitespace-nowrap opacity-60 hover:opacity-100";
+                    badge.className = "step-badge w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono-tech font-bold bg-slate-500/15";
+                }
+            }
+        }
+
+        // =========================================================================
+        // CUSTOM 3-MODE ENGINE (Studio Daylight / Obsidian Lens / Thermal X-Ray)
+        // =========================================================================
+        function setVisualMode(mode) {
+            currentVisualMode = mode;
+            document.body.classList.remove('mode-obsidian', 'mode-thermal');
+
+            if (mode === 'obsidian') {
+                document.body.classList.add('mode-obsidian');
+            } else if (mode === 'thermal') {
+                document.body.classList.add('mode-thermal');
+            }
+
+            // Update Mode Switcher button styles
+            ['daylight', 'obsidian', 'thermal'].forEach(m => {
+                const btn = document.getElementById(`mode-btn-${m}`);
+                if (m === mode) {
+                    btn.className = "tactile-btn px-2.5 py-1 rounded-xl flex items-center gap-1 bg-indigo-600 text-white shadow-sm font-bold";
+                } else {
+                    btn.className = "tactile-btn px-2.5 py-1 rounded-xl flex items-center gap-1 opacity-70 hover:opacity-100";
+                }
+            });
+
+            if (currentPage === 3) renderOpticalChord('all');
+            if (currentPage === 4) renderDistributionList();
+        }
+
+        function toggleOpticalLens() {
+            lensEffectEnabled = !lensEffectEnabled;
+            const vignette = document.getElementById('optical-lens-vignette');
+            const btn = document.getElementById('btn-lens-toggle');
+            if (lensEffectEnabled) {
+                vignette.style.opacity = '1';
+                btn.classList.add('border', 'border-pink-400/40');
+            } else {
+                vignette.style.opacity = '0';
+                btn.classList.remove('border', 'border-pink-400/40');
+            }
+        }
+
+        // =========================================================================
+        // MENTOR HUD GUIDE ENGINE
+        // =========================================================================
+        function updateMentorHUD(pageNum) {
+            const info = mentorMessages[pageNum];
+            if (!info) return;
+            document.getElementById('mentor-step-tag').textContent = info.tag;
+            document.getElementById('mentor-guide-text').textContent = info.text;
+            document.getElementById('mentor-action-label').textContent = info.actionLabel;
+        }
+
+        function mentorNextStepAction() {
+            const info = mentorMessages[currentPage];
+            if (info && info.nextPage) {
+                goToPage(info.nextPage);
+            }
+        }
+
+        function toggleMentorHUD() {
+            mentorHudVisible = !mentorHudVisible;
+            const bar = document.getElementById('mentor-hud-bar');
+            if (mentorHudVisible) {
+                bar.classList.remove('hidden');
+            } else {
+                bar.classList.add('hidden');
+            }
+        }
+
+        // =========================================================================
+        // PAGE 1 & PAGE 2: DATASET PRESETS & SENSITIVITY CONTROLS
+        // =========================================================================
+        function selectDatasetPreset(index) {
+            const preset = datasetPresets[index];
+            document.getElementById('p2-file-label').textContent = preset.name;
+            document.getElementById('metric-rows').textContent = preset.rows;
+            document.getElementById('metric-kitchens').textContent = preset.kitchens;
+
+            for (let i = 0; i < 3; i++) {
+                const card = document.getElementById(`preset-card-${i}`);
+                if (i === index) {
+                    card.className = "tactile-btn squircle-md p-4 optical-glass-elevated border-2 border-pink-500 text-left flex flex-col justify-between gap-2";
+                } else {
+                    card.className = "tactile-btn squircle-md p-4 optical-glass border border-transparent hover:border-pink-400/50 text-left flex flex-col justify-between gap-2 opacity-80 hover:opacity-100";
+                }
+            }
+        }
+
+        function triggerSimulatedFilePicker() {
+            document.getElementById('hidden-file-input').click();
+        }
+
+        function handleCustomFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('p2-file-label').textContent = file.name;
+                goToPage(2);
+            }
+        }
+
+        function setSensitivity(level) {
+            ['standard', 'strict', 'audit'].forEach(l => {
+                const btn = document.getElementById(`sens-${l}`);
+                if (l === level) {
+                    btn.className = "tactile-btn py-2 px-3 squircle-sm bg-indigo-600 text-white text-xs font-bold shadow";
+                } else {
+                    btn.className = "tactile-btn py-2 px-3 squircle-sm optical-glass text-xs font-semibold opacity-75";
+                }
+            });
+        }
+
+        // =========================================================================
+        // PAGE 3: RADIAL SUPPLY CORRELATION MATRIX (SVG CHORD ENGINE)
+        // =========================================================================
+        const radialNodes = [
+            { name: "Hub Protein Beku", type: "hub", vol: "2,450 kg/hari", sla: "97.2%" },
+            { name: "Hub Ayam Marinasi", type: "hub", vol: "1,840 kg/hari", sla: "94.8%" },
+            { name: "Hub Sayur Pre-Cut", type: "hub", vol: "3,120 kg/hari", sla: "91.8%" },
+            { name: "Hub Saus & Bumbu", type: "hub", vol: "1,290 kg/hari", sla: "95.4%" },
+            { name: "Hub Tepung B2B", type: "hub", vol: "4,100 kg/hari", sla: "98.5%" },
+            { name: "Hub Olahan Susu", type: "hub", vol: "980 kg/hari", sla: "99.1%" },
+            { name: "Hub Minyak Curah", type: "hub", vol: "2,900 kg/hari", sla: "99.6%" },
+            { name: "Central Kitchen A", type: "kitchen", vol: "1,650 kg/hari", sla: "96.0%" },
+            { name: "Central Kitchen B", type: "kitchen", vol: "1,420 kg/hari", sla: "97.5%" },
+            { name: "Dapur Ramen B2B", type: "kitchen", vol: "620 kg/hari", sla: "95.2%" },
+            { name: "Dapur Steak & Grill", type: "kitchen", vol: "890 kg/hari", sla: "93.8%" },
+            { name: "Dapur Hotpot Group", type: "kitchen", vol: "740 kg/hari", sla: "96.9%" },
+            { name: "Kantin Pabrik #1", type: "kitchen", vol: "2,100 kg/hari", sla: "92.1%" },
+            { name: "Kantin Pabrik #2", type: "kitchen", vol: "1,850 kg/hari", sla: "94.7%" },
+            { name: "Kantin Industri #3", type: "kitchen", vol: "1,590 kg/hari", sla: "96.3%" },
+            { name: "Katering Korporat", type: "kitchen", vol: "1,320 kg/hari", sla: "97.8%" },
+            { name: "Cloud Kitchen Utara", type: "kitchen", vol: "940 kg/hari", sla: "98.1%" },
+            { name: "Cloud Kitchen Selatan", type: "kitchen", vol: "880 kg/hari", sla: "97.4%" },
+            { name: "Komisari Bakery B2B", type: "kitchen", vol: "1,760 kg/hari", sla: "95.9%" },
+            { name: "Dapur Pastry Hotel", type: "kitchen", vol: "540 kg/hari", sla: "99.0%" },
+            { name: "Dapur Banquet B2B", type: "kitchen", vol: "1,120 kg/hari", sla: "98.2%" },
+            { name: "Dapur QSR Cepat Saji", type: "kitchen", vol: "2,300 kg/hari", sla: "94.5%" },
+            { name: "Dapur Bistro Group", type: "kitchen", vol: "670 kg/hari", sla: "93.9%" },
+            { name: "Dapur Kantin Kampus", type: "kitchen", vol: "1,150 kg/hari", sla: "97.1%" },
+            { name: "Dapur Katering Medis", type: "kitchen", vol: "830 kg/hari", sla: "99.4%" },
+            { name: "Sub-Hub Cold Chain", type: "hub", vol: "2,050 kg/hari", sla: "96.6%" },
+            { name: "Unit Marinasi Vakum", type: "hub", vol: "1,490 kg/hari", sla: "97.3%" },
+            { name: "Unit Cuci Sayur B2B", type: "hub", vol: "1,920 kg/hari", sla: "92.8%" }
+        ];
+
+        function renderOpticalChord(filterMode = 'all') {
+            const svg = document.getElementById('optical-chord-svg');
+            if (!svg) return;
+            svg.innerHTML = '';
+
+            const cx = 310, cy = 310, radius = 215;
+            const total = radialNodes.length;
+            const pts = [];
+
+            for (let i = 0; i < total; i++) {
+                const angle = (i / total) * Math.PI * 2 - Math.PI / 2;
+                pts.push({
+                    x: cx + radius * Math.cos(angle),
+                    y: cy + radius * Math.sin(angle),
+                    angle,
+                    data: radialNodes[i],
+                    idx: i
+                });
+            }
+
+            // Outer Subtle Optical Ring
+            const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            ring.setAttribute("cx", cx);
+            ring.setAttribute("cy", cy);
+            ring.setAttribute("r", radius);
+            ring.setAttribute("fill", "none");
+            ring.setAttribute("stroke", "currentColor");
+            ring.setAttribute("stroke-opacity", "0.12");
+            ring.setAttribute("stroke-width", "1.5");
+            svg.appendChild(ring);
+
+            const chordsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            svg.appendChild(chordsGroup);
+
+            // Generate dense interconnected supply correlation curves
+            for (let i = 0; i < total; i++) {
+                for (let step = 3; step <= 13; step += 3) {
+                    const j = (i + step + (i % 2)) % total;
+                    if (filterMode === 'coldchain' && (i % 2 !== 0)) continue;
+                    if (filterMode === 'prep' && (i % 3 === 0)) continue;
+
+                    const p1 = pts[i];
+                    const p2 = pts[j];
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+                    const cX = cx + Math.sin(i * 1.9) * 26;
+                    const cY = cy + Math.cos(j * 1.5) * 26;
+                    path.setAttribute("d", `M ${p1.x} ${p1.y} Q ${cX} ${cY} ${p2.x} ${p2.y}`);
+                    path.setAttribute("fill", "none");
+
+                    const isAnomalyEdge = (i === 1 || i === 2 || j === 12);
+                    if (currentVisualMode === 'thermal' && isAnomalyEdge) {
+                        path.setAttribute("stroke", "#f59e0b");
+                        path.setAttribute("stroke-opacity", "0.75");
+                        path.setAttribute("stroke-width", "1.9");
+                    } else if (filterMode !== 'all' && isAnomalyEdge) {
+                        path.setAttribute("stroke", "#e11d48");
+                        path.setAttribute("stroke-opacity", "0.65");
+                        path.setAttribute("stroke-width", "1.7");
+                    } else {
+                        path.setAttribute("stroke", "var(--chord-stroke)");
+                        path.setAttribute("stroke-opacity", "0.24");
+                        path.setAttribute("stroke-width", "1.15");
+                    }
+
+                    path.dataset.source = i;
+                    path.dataset.target = j;
+                    chordsGroup.appendChild(path);
+                }
+            }
+
+            // Perimeter Nodes & Labels
+            const nodesGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            svg.appendChild(nodesGroup);
+
+            pts.forEach((pt, idx) => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("class", "cursor-pointer");
+
+                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                dot.setAttribute("cx", pt.x);
+                dot.setAttribute("cy", pt.y);
+                dot.setAttribute("r", pt.data.type === 'hub' ? "5" : "3.8");
+                dot.setAttribute("fill", pt.data.type === 'hub' ? "#ec4899" : "#6366f1");
+                g.appendChild(dot);
+
+                const labelR = radius + 11;
+                const lx = cx + labelR * Math.cos(pt.angle);
+                const ly = cy + labelR * Math.sin(pt.angle);
+                const deg = (pt.angle * 180) / Math.PI;
+
+                const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                txt.setAttribute("x", lx);
+                txt.setAttribute("y", ly);
+                txt.setAttribute("font-size", "8.2");
+                txt.setAttribute("font-weight", pt.data.type === 'hub' ? "700" : "500");
+                txt.setAttribute("fill", "currentColor");
+
+                if (deg > 90 || deg < -90) {
+                    txt.setAttribute("text-anchor", "end");
+                    txt.setAttribute("transform", `rotate(${deg + 180}, ${lx}, ${ly})`);
+                } else {
+                    txt.setAttribute("text-anchor", "start");
+                    txt.setAttribute("transform", `rotate(${deg}, ${lx}, ${ly})`);
+                }
+                txt.textContent = pt.data.name;
+                g.appendChild(txt);
+
+                g.addEventListener("mouseenter", () => focusChordNode(idx));
+                g.addEventListener("click", () => focusChordNode(idx));
+                nodesGroup.appendChild(g);
+            });
+        }
+
+        function focusChordNode(nodeIdx) {
+            const node = radialNodes[nodeIdx];
+            const paths = document.querySelectorAll("#optical-chord-svg path");
+            paths.forEach(p => {
+                if (Number(p.dataset.source) === nodeIdx || Number(p.dataset.target) === nodeIdx) {
+                    p.setAttribute("stroke", "#ec4899");
+                    p.setAttribute("stroke-opacity", "0.92");
+                    p.setAttribute("stroke-width", "2.4");
+                } else {
+                    p.setAttribute("stroke-opacity", "0.08");
+                    p.setAttribute("stroke-width", "0.8");
+                }
+            });
+
+            const corrVal = (0.81 + ((nodeIdx * 7) % 17) / 100).toFixed(2);
+            document.getElementById('chord-score-pill').textContent = `r = ${corrVal}`;
+            document.getElementById('chord-node-title').textContent = node.name;
+            document.getElementById('chord-node-detail').textContent =
+                `Korelasi rantai pasok aktif antara ${node.name} dengan jadwal persiapan masak dapur komersial B2B.`;
+            document.getElementById('chord-node-vol').textContent = node.vol;
+            document.getElementById('chord-node-sla').textContent = `${node.sla} Sesuai`;
+        }
+
+        function setChordLens(mode) {
+            ['all', 'coldchain', 'prep'].forEach(m => {
+                const btn = document.getElementById(`lens-btn-${m}`);
+                if (m === mode) {
+                    btn.className = "tactile-btn w-full p-3 squircle-sm bg-slate-900 text-white text-xs font-bold flex items-center justify-between shadow-md";
+                } else {
+                    btn.className = "tactile-btn w-full p-3 squircle-sm optical-glass text-xs font-semibold flex items-center justify-between";
+                }
+            });
+            renderOpticalChord(mode);
+        }
+
+        // =========================================================================
+        // PAGE 4: RENDER 6 SCROLLABLE & EXPANDABLE DISTRIBUTION CARDS
+        // =========================================================================
+        function renderDistributionList() {
+            const container = document.getElementById('p4-distributions-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            distributionsList.forEach((dist) => {
+                const isExpanded = (dist.id === expandedDistIndex);
+                const wrapper = document.createElement('div');
+                wrapper.onclick = () => expandDistribution(dist.id);
+
+                if (isExpanded) {
+                    // Expanded Glass Card with Violet Optical Rim (Matching the purple-outlined box in Wireframe Page 4)
+                    wrapper.className = "optical-glass-elevated squircle-lg p-6 sm:p-8 border-[2.5px] border-violet-500 shadow-2xl cursor-pointer transition-all duration-300";
+
+                    const rowsHtml = dist.skus.map(s => `
+                        <tr class="border-b border-slate-400/15 last:border-none">
+                            <td class="py-3 px-3 font-mono-tech text-xs font-bold text-indigo-500">${s.code}</td>
+                            <td class="py-3 px-3 text-xs font-bold">${s.name}</td>
+                            <td class="py-3 px-3 text-xs opacity-80">${s.dest}</td>
+                            <td class="py-3 px-3 font-mono-tech text-xs">${s.batch}</td>
+                            <td class="py-3 px-3 text-right">
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-mono-tech font-bold ${s.alert ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40' : 'bg-emerald-500/15 text-emerald-500'}">
+                                    ${s.status}
+                                </span>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    wrapper.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-400/20">
+                            <div class="flex items-center gap-2">
+                                <span class="px-3 py-1 rounded-full bg-violet-600 text-white text-[10px] font-mono-tech font-bold uppercase tracking-wider">
+                                    ${dist.code} • PANDANGAN DETAIL DIPERBESAR
+                                </span>
+                                <span class="text-xs font-mono-tech font-semibold text-violet-500">
+                                    <i class="fa-solid fa-eye mr-1"></i>Fokus Aktif
+                                </span>
+                            </div>
+                            <span class="text-[11px] opacity-65">Klik kartu distribusi lain di bawah untuk memindahkan fokus</span>
+                        </div>
+
+                        <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight mb-1.5">${dist.title}</h3>
+                        <p class="text-xs sm:text-sm opacity-80 leading-relaxed mb-5">${dist.subtitle}</p>
+
+                        <!-- 4 Optical Telemetry Metrics -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                            <div class="optical-glass squircle-sm p-3.5">
+                                <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Cakupan Dapur B2B</span>
+                                <strong class="text-xs sm:text-sm block mt-0.5">${dist.kitchenCount}</strong>
+                            </div>
+                            <div class="optical-glass squircle-sm p-3.5">
+                                <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Telemetri Suhu</span>
+                                <strong class="text-xs sm:text-sm font-mono-tech text-sky-500 block mt-0.5">${dist.tempTelemetry}</strong>
+                            </div>
+                            <div class="optical-glass squircle-sm p-3.5">
+                                <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Ketepatan Jadwal Masak</span>
+                                <strong class="text-xs sm:text-sm text-emerald-500 block mt-0.5">${dist.slaScore}</strong>
+                            </div>
+                            <div class="optical-glass squircle-sm p-3.5">
+                                <span class="text-[10px] font-mono-tech uppercase opacity-60 block">Status Anomali</span>
+                                <strong class="text-xs sm:text-sm text-amber-500 block mt-0.5">${dist.anomalyBadge}</strong>
+                            </div>
+                        </div>
+
+                        <!-- Clean High-Density B2B Kitchen SKU Table -->
+                        <div class="optical-glass squircle-md overflow-hidden border border-slate-400/20">
+                            <div class="px-4 py-2.5 bg-slate-900/5 border-b border-slate-400/15 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                <span class="font-bold"><i class="fa-solid fa-boxes-stacked text-pink-500 mr-1.5"></i>Daftar SKU Bahan Baku & Alokasi Dapur</span>
+                                <span class="font-mono-tech text-[11px] opacity-75">PIC Penerima: <strong>${dist.headChefPIC}</strong></span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="text-[10px] font-mono-tech uppercase opacity-60 border-b border-slate-400/15">
+                                            <th class="py-2.5 px-3">Kode SKU</th>
+                                            <th class="py-2.5 px-3">Bahan Baku / Setengah Jadi</th>
+                                            <th class="py-2.5 px-3">Dapur Komersial Tujuan</th>
+                                            <th class="py-2.5 px-3">Batch</th>
+                                            <th class="py-2.5 px-3 text-right">Status Telemetri</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${rowsHtml}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Collapsed Pink-Tinted Optical Glass Card
+                    wrapper.className = "optical-glass-tinted squircle-md p-5 border border-pink-400/35 hover:border-violet-500/70 cursor-pointer transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4";
+                    wrapper.innerHTML = `
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] font-mono-tech font-bold uppercase px-2.5 py-0.5 rounded-full bg-pink-500/15 text-pink-500 border border-pink-500/25">
+                                    ${dist.code}
+                                </span>
+                                <span class="text-xs font-medium opacity-75">${dist.kitchenCount}</span>
+                            </div>
+                            <h3 class="text-base font-extrabold">${dist.title}</h3>
+                            <p class="text-xs opacity-70 mt-0.5 line-clamp-1">${dist.subtitle}</p>
+                        </div>
+                        <div class="shrink-0">
+                            <span class="tactile-btn px-3.5 py-2 squircle-sm optical-glass text-xs font-bold flex items-center gap-1.5">
+                                <i class="fa-solid fa-up-right-and-down-left-from-center text-pink-500"></i>
+                                <span>Perbesar Detail</span>
+                            </span>
+                        </div>
+                    `;
+                }
+
+                container.appendChild(wrapper);
+            });
+        }
+
+        function expandDistribution(id) {
+            expandedDistIndex = id;
+            renderDistributionList();
+        }
+
+        // =========================================================================
+        // PAGE 5 & PAGE 6: ANOMALY INSPECTOR, EMAIL DISPATCH & LIVE URGENT CALL HUD
+        // =========================================================================
+        function inspectAnomaly(id) {
+            selectedAnomalyIndex = id;
+            const info = anomalyDetails[id];
+            if (!info) return;
+
+            document.getElementById('p5-anomaly-badge').textContent = info.badge;
+            document.getElementById('p5-anomaly-delta').textContent = info.delta;
+            document.getElementById('p5-anomaly-title').textContent = info.title;
+            document.getElementById('p5-anomaly-desc').textContent = info.desc;
+
+            // Sync with Page 6 Dispatch Overlay
+            document.getElementById('p6-target-heading').textContent = info.targetHeading;
+            document.getElementById('p6-pic-name').textContent = info.picName;
+            document.getElementById('p6-kitchen-name').textContent = info.kitchenName;
+            document.getElementById('p6-email-addr').textContent = info.emailAddr;
+            document.getElementById('p6-batch-code').textContent = info.batchCode;
+            document.getElementById('p6-email-textarea').value = info.emailBody;
+
+            for (let i = 1; i <= 4; i++) {
+                const pill = document.getElementById(`anom-pill-${i}`);
+                if (pill) {
+                    if (i === id) {
+                        pill.className = "tactile-btn w-full p-2.5 squircle-sm optical-glass text-xs font-bold flex items-center justify-between border border-amber-500";
+                    } else {
+                        pill.className = "tactile-btn w-full p-2.5 squircle-sm optical-glass text-xs font-semibold flex items-center justify-between opacity-75";
+                    }
+                }
+            }
+        }
+
+        function sendAnomalyEmailReport() {
+            const badge = document.getElementById('p6-email-badge');
+            const toast = document.getElementById('p6-email-toast');
+            const btn = document.getElementById('btn-p6-send-email');
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            badge.className = "px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/40 text-xs font-mono-tech font-bold";
+            badge.innerHTML = `<i class="fa-solid fa-check mr-1"></i>Email Sent (${now})`;
+
+            toast.classList.remove('hidden');
+            document.getElementById('p6-email-timestamp').textContent =
+                `Email Sent (${now})! Laporan anomali telah diterima oleh Distribusi & Kepala Dapur Sentral.`;
+
+            btn.className = "tactile-btn w-full py-3.5 px-5 squircle-md bg-emerald-600 text-white font-extrabold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2";
+            btn.innerHTML = `<i class="fa-solid fa-circle-check"></i><span>Laporan Email Anomali Terkirim</span>`;
+        }
+
+        function toggleUrgentDirectCall() {
+            const hud = document.getElementById('live-call-hud');
+            const btn = document.getElementById('btn-urgent-direct-call');
+            const clock = document.getElementById('live-call-clock');
+
+            if (hud.classList.contains('hidden')) {
+                hud.classList.remove('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-phone-slash"></i><span>Akhiri Panggilan Darurat</span>`;
+                btn.className = "tactile-btn w-full py-4 px-5 squircle-md bg-black/50 hover:bg-black/70 text-white border border-white/30 font-black text-sm shadow-xl flex items-center justify-center gap-2";
+
+                let sec = 1;
+                if (activeCallInterval) clearInterval(activeCallInterval);
+                activeCallInterval = setInterval(() => {
+                    sec++;
+                    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+                    const s = String(sec % 60).padStart(2, '0');
+                    clock.textContent = `${m}:${s}`;
+                }, 1000);
+            } else {
+                hud.classList.add('hidden');
+                if (activeCallInterval) clearInterval(activeCallInterval);
+                btn.innerHTML = `<i class="fa-solid fa-phone"></i><span>Direct Call Distribusi Sekarang</span>`;
+                btn.className = "tactile-btn w-full py-4 px-5 squircle-md bg-white text-red-700 hover:bg-red-50 font-black text-sm shadow-xl flex items-center justify-center gap-2";
+            }
+        }
+
+        window.onload = function () {
+            goToPage(1);
+        };
+    </script>
+</body>
+</html>
