@@ -16,6 +16,33 @@ from sklearn.metrics import (
 )
 
 
+def recall_at_budget(y: np.ndarray, p: np.ndarray, budget: float) -> dict:
+    """If inspectors can only test the top `budget` share of samples ranked by score, what share of all positives
+    do they catch, and how precise is that set? Samples tied with the cut-off score are taken proportionally
+    (expected value of a random tie-break), so row order never changes the result."""
+    y, p = np.asarray(y).astype(int), np.asarray(p, dtype=float)
+    k = max(1, int(round(budget * len(y))))
+    cut = np.sort(p)[::-1][k - 1]
+    above, tied = p > cut, p == cut
+    caught = y[above].sum() + y[tied].sum() * (k - above.sum()) / tied.sum()
+    return {"budget": budget, "recall": caught / y.sum() if y.sum() else None, "precision": caught / k,
+            "lift": (caught / y.sum()) / budget if y.sum() else None}
+
+
+def bootstrap_ci(metric, y: np.ndarray, p: np.ndarray, n: int = 200, seed: int = 0,
+                 level: float = 0.95) -> tuple[float, float]:
+    """Percentile bootstrap CI of metric(y, p) over resampled rows. Resamples lacking a class are skipped."""
+    rng = np.random.default_rng(seed)
+    y, p = np.asarray(y), np.asarray(p)
+    vals = []
+    for _ in range(n):
+        idx = rng.integers(0, len(y), len(y))
+        if len(np.unique(y[idx])) == 2:
+            vals.append(metric(y[idx], p[idx]))
+    a = (1 - level) / 2
+    return float(np.quantile(vals, a)), float(np.quantile(vals, 1 - a))
+
+
 def regression_metrics(y: np.ndarray, pred: np.ndarray) -> dict:
     """MAE/RMSE in target units, R^2, and a residual summary (bias and spread) for residual analysis."""
     y, pred = np.asarray(y, dtype=float), np.asarray(pred, dtype=float)

@@ -1,0 +1,62 @@
+==================================================================
+step:      06_train
+utc:       2026-10-17T10:18:12Z
+host:      ibmdatatontest   kernel: Linux 6.8.0-147-generic   arch: s390x
+machine:   Manufacturer: IBM  Type: 9175
+os:        "Ubuntu 24.04.5 LTS"
+python:    3.12.3 big-endian
+command:   python -m src.cli train
+==================================================================
+2026-10-17 10:18:12,284 INFO numexpr.utils: NumExpr defaulting to 3 threads.
+2026-10-17 10:18:14,043 INFO src.features.split: chronological split on sample_date; 0 rows without a date excluded; train: 2013-10-01..2023-02-21; val: 2023-02-22..2024-10-10; test: 2024-10-11..2026-06-30 | sizes train=227543 val=48671 test=48707
+2026-10-17 10:18:14,853 INFO src.models.train: fitting dummy_prior
+2026-10-17 10:18:16,141 INFO src.models.train: fitting logistic_regression
+2026-10-17 10:18:35,270 INFO src.models.train: fitting random_forest
+2026-10-17 10:19:19,303 INFO src.models.train: fitting xgboost
+2026-10-17 10:19:27,624 INFO src.models.registry: registered /home/linux1/tracefront/food-risk-ml/artifacts/registry/salmonella-xgboost-20261017T101927Z
+{
+  "model_version": "salmonella-xgboost-20261017T101927Z",
+  "selected_model": "xgboost",
+  "threshold": 0.06052492431067421,
+  "test": {
+    "n": 48707,
+    "prevalence": 0.09797359722421828,
+    "threshold": 0.06052492431067421,
+    "precision": 0.14322389354932022,
+    "recall": 0.8300502933780386,
+    "f1": 0.24429505365733317,
+    "specificity": 0.46068055081370207,
+    "false_negative_rate": 0.16994970662196143,
+    "pr_auc": 0.30130758204935604,
+    "roc_auc": 0.7386490019785571,
+    "brier": 0.07919394933900542,
+    "tn": 20240,
+    "fp": 23695,
+    "fn": 811,
+    "tp": 3961
+  }
+}
+	Command being timed: "python -m src.cli train"
+	User time (seconds): 162.87
+	System time (seconds): 1.46
+	Percent of CPU this job got: 217%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:15.62
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1431328
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 1165726
+	Voluntary context switches: 13761
+	Involuntary context switches: 13373
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 13152
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+exit_code: 0

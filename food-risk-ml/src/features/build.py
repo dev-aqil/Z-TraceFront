@@ -60,7 +60,9 @@ def add_history_features(df: pd.DataFrame, daily: pd.DataFrame, lag_days: int, p
     out["est_prior_samples"] = n
     out["est_prior_positives"] = pos
     out["est_prior_rate_smoothed"] = (pos + smoothing * prior_rate) / (n + smoothing)
-    out["est_days_since_prior"] = (left[SAMPLE_DATE] - merged["_prior_date"]).dt.days.to_numpy()
+    # positional, not index-aligned: df may carry any index (e.g. a filtered slice)
+    gap = pd.Series(left[SAMPLE_DATE].to_numpy()) - merged["_prior_date"].reset_index(drop=True)
+    out["est_days_since_prior"] = gap.dt.days.to_numpy()
     return out
 
 

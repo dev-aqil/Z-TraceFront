@@ -1,0 +1,36 @@
+==================================================================
+step:      04_tests_s390x
+utc:       2026-10-17T10:17:24Z
+host:      ibmdatatontest   kernel: Linux 6.8.0-147-generic   arch: s390x
+machine:   Manufacturer: IBM  Type: 9175
+os:        "Ubuntu 24.04.5 LTS"
+python:    3.12.3 big-endian
+command:   python -m pytest -q -p no:cacheprovider -o addopts= -W ignore
+==================================================================
+........................................................................ [ 80%]
+..................                                                       [100%]
+90 passed in 4.80s
+	Command being timed: "python -m pytest -q -p no:cacheprovider -o addopts= -W ignore"
+	User time (seconds): 6.27
+	System time (seconds): 0.32
+	Percent of CPU this job got: 113%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:05.83
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 228664
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 52599
+	Voluntary context switches: 80867
+	Involuntary context switches: 8475
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 3560
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+exit_code: 0

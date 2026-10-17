@@ -54,6 +54,18 @@ colsample_bytree = 0.8
 policy = "min_recall"
 target_recall = 0.80
 
+[backtest]
+# Rows on/after this date are SEALED: excluded from development, history and backtests. It equals the start of
+# the test partition of the first real run (reports/metrics.json), which has already been looked at once, so
+# from now on it is scored exactly once more, for the final model.
+sealed_test_start = "2024-10-11"
+# Rolling folds: one fiscal year each (FSIS FY starts 1 October); each trains on everything before its start.
+fold_starts = ["2020-10-01", "2021-10-01", "2022-10-01", "2023-10-01"]
+fold_months = 12
+budgets = [0.10, 0.20, 0.30]
+bootstrap = 200
+min_programme_rows = 300
+
 [explain]
 top_k = 5
 # Test rows sampled for global SHAP importance.

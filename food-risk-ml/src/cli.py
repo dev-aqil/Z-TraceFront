@@ -37,6 +37,10 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("predict", help="score a JSON request file (object or list) with a registered model")
     p.add_argument("request", type=Path)
     p.add_argument("--model-dir", type=Path)
+    p = sub.add_parser("backtest", help="rolling yearly backtest on development data (sealed test untouched)")
+    p.add_argument("--canonical", type=Path)
+    p.add_argument("--label", default="baseline")
+    p.add_argument("--models", help="comma-separated subset, e.g. logistic_regression,xgboost")
     p = sub.add_parser("check-handoff", help="validate a Person A model-ready handoff manifest (no training)")
     p.add_argument("manifest", type=Path)
     p = sub.add_parser("experiment", help="baseline experiment on a validated Person A handoff")
@@ -96,6 +100,11 @@ def main(argv: list[str] | None = None) -> int:
             req = json.loads(args.request.read_text())
             predictor = Predictor(args.model_dir or latest_model_dir(resolve(paths["registry"])))
             print(json.dumps(predictor.predict(req if isinstance(req, list) else [req]), indent=2))
+        elif args.cmd == "backtest":
+            from src.evaluation.backtest import run_backtest
+            rep = run_backtest(load_canonical(canonical, cfg["pathogen"]), cfg, resolve(paths["reports"]) / "backtest",
+                               args.label, args.models.split(",") if args.models else None)
+            print(json.dumps(rep["summary"], indent=2))
         elif args.cmd == "check-handoff":
             from src.models.contracts import load_handoff
             h = load_handoff(args.manifest)

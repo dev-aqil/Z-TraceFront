@@ -1,0 +1,70 @@
+utc: 2026-10-17T10:17:56Z  host: ibmdatatontest
+== uname -a
+Linux ibmdatatontest 6.8.0-147-generic #147-Ubuntu SMP Thu Sep 24 10:59:43 UTC 2026 s390x s390x s390x GNU/Linux
+== lscpu
+Architecture:                            s390x
+CPU op-mode(s):                          32-bit, 64-bit
+Byte Order:                              Big Endian
+CPU(s):                                  3
+On-line CPU(s) list:                     0-2
+Vendor ID:                               IBM/S390
+Model name:                              -
+Machine type:                            9175
+Thread(s) per core:                      1
+Core(s) per socket:                      1
+Socket(s) per book:                      1
+Book(s) per drawer:                      1
+Drawer(s):                               3
+CPU dynamic MHz:                         5508
+CPU static MHz:                          5508
+BogoMIPS:                                28901.00
+Dispatching mode:                        horizontal
+Flags:                                   esan3 zarch stfle msa ldisp eimm dfp edat etf3eh highgprs te vx vxd vxe gs vxe2 vxp sort dflt vxp2 nnpa sie
+Hypervisor:                              z/VM 7.3.0
+Hypervisor vendor:                       IBM
+Virtualization type:                     full
+L1d cache:                               384 KiB (3 instances)
+L1i cache:                               384 KiB (3 instances)
+L2 cache:                                108 MiB (3 instances)
+L3 cache:                                360 MiB
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-2
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Not affected
+Vulnerability Spectre v1:                Mitigation; __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; etokens
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+== /proc/sysinfo (IBM Z machine identification)
+Manufacturer:         IBM             
+Type:                 9175
+Model:                702              ME1             
+Sequence Code:        00000000000CDFD8
+Plant:                02  
+Model Capacity:       702              00000582
+Model Perm. Capacity: 702              00000582
+Model Temp. Capacity: 702              00000582
+Model Var. Capacity:  702              00000582
+Type 1 Percentage:    0
+Type 2 Percentage:    0
+Type 3 Percentage:    0
+Type 4 Percentage:    0
+Type 5 Percentage:    0
+LPAR Name:            SSI41   
+VM00 Name:            L5014E35
+VM00 Control Program: z/VM    7.3.0   
+== memory
+               total        used        free      shared  buff/cache   available
+Mem:           7.8Gi       1.3Gi       4.5Gi        24Mi       2.2Gi       6.5Gi
+Swap:             0B          0B          0B

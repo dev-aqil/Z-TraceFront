@@ -1,0 +1,50 @@
+{
+  "model_version": "salmonella-xgboost-20261017T101927Z",
+  "selected_model": "xgboost",
+  "selection": "max validation PR-AUC (dummy excluded)",
+  "calibration": {
+    "raw_brier": 0.1389219551996829,
+    "platt_oof_brier": 0.07484670552373097,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "threshold": 0.06052492431067421,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "val": {
+    "n": 48671,
+    "prevalence": 0.0903207248669639,
+    "threshold": 0.06052492431067421,
+    "precision": 0.1361542332855871,
+    "recall": 0.8000454959053686,
+    "f1": 0.2327058590002316,
+    "specificity": 0.4960135516657256,
+    "false_negative_rate": 0.19995450409463147,
+    "pr_auc": 0.26919645388114966,
+    "roc_auc": 0.7296142892594212,
+    "brier": 0.07484203714762173,
+    "tn": 21961,
+    "fp": 22314,
+    "fn": 879,
+    "tp": 3517
+  },
+  "test": {
+    "n": 48707,
+    "prevalence": 0.09797359722421828,
+    "threshold": 0.06052492431067421,
+    "precision": 0.14322389354932022,
+    "recall": 0.8300502933780386,
+    "f1": 0.24429505365733317,
+    "specificity": 0.46068055081370207,
+    "false_negative_rate": 0.16994970662196143,
+    "pr_auc": 0.30130758204935604,
+    "roc_auc": 0.7386490019785571,
+    "brier": 0.07919394933900542,
+    "tn": 20240,
+    "fp": 23695,
+    "fn": 811,
+    "tp": 3961
+  },
+  "model_dir": "/home/linux1/tracefront/food-risk-ml/artifacts/registry/salmonella-xgboost-20261017T101927Z",
+  "synthetic": false,
+  "top_features": null
+}

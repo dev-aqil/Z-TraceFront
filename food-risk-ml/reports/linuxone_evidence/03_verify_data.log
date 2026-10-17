@@ -1,0 +1,47 @@
+==================================================================
+step:      03_verify_data
+utc:       2026-10-17T10:16:10Z
+host:      ibmdatatontest   kernel: Linux 6.8.0-147-generic   arch: s390x
+machine:   Manufacturer: IBM  Type: 9175
+os:        "Ubuntu 24.04.5 LTS"
+python:    3.12.3 big-endian
+command:   python /home/linux1/tracefront-evidence/verify_data.py
+==================================================================
+OK   raw_poultry_sampling_data_fy2014.zip 1fd3e0cd3d09640168d0f984bb227b6d77f33bbf773f29c1841bc321778b9a02
+OK   raw_poultry_sampling_data_fy2015.zip f405b1ebb328ec8c5b6629389a2ee3ee5b06e4d49420d499a32a4e6dc650365f
+OK   raw_poultry_sampling_data_fy2016.zip f0f871c8f3a9097ad34aecbde55563f63855473d7a68228ce59627bd8ac62407
+OK   raw_poultry_sampling_data_fy2017.zip feef32f1761a9dc590465de2c06df204a7bf7881e0aac73623bec425149f830a
+OK   raw_poultry_sampling_data_fy2018.zip 483d069c71450854f7ca5610fb098d7d3016cb2dc699605032a7f622da96bd65
+OK   raw_poultry_sampling_data_fy2019.zip fb75287a07e3c5cd980724675a8c8e65061ab8d384e5dc604baf5cb32482eafb
+OK   raw_poultry_sampling_data_fy2020.zip e63123948ef109d4a02d24a03a10398b9ae217394b852ad36dd977528a26c160
+OK   raw_poultry_sampling_data_fy2021.zip d7d2214ed00f9476c9967dbadb04bdc96907667e47a0f075c01050523d50e1d8
+OK   raw_poultry_sampling_data_fy2022.zip cb53c004144010b3330d9f64932ada1c472889e8336200e29b2b1cd9038c8714
+OK   raw_poultry_sampling_data_fy2023.zip 0059938f4348d34e4de643bba03dd541a49097788bda4f64fbe5c0c6e83548e6
+OK   raw_poultry_sampling_data_fy2024.zip 3e253d6d1a1e74244ad5dac59cb76ae01383f87dcb51f6481ba3f90da417dcf9
+OK   raw_poultry_sampling_data_fy2025.zip 6c92d40a374304c19e39fad0acb4d6126962c9036fba2c78ad394be0a0fe6beb
+OK   raw_poultry_sampling_data_fy2026.zip 5a687e561081170ddce289d18a867d7e30ed90986a0527bc949fb45156c21bd7
+13 verified, 0 mismatched
+	Command being timed: "python /home/linux1/tracefront-evidence/verify_data.py"
+	User time (seconds): 0.02
+	System time (seconds): 0.01
+	Percent of CPU this job got: 97%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.03
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 21732
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 6575
+	Voluntary context switches: 1
+	Involuntary context switches: 4
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+exit_code: 0

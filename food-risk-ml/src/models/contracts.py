@@ -144,7 +144,10 @@ def _type_columns(table: pd.DataFrame, m: dict[str, Any], contract: dict[str, An
         t[m["target_column"]] = codes.astype("Int8")
     elif contract["task_type"] == "regression":
         t[m["target_column"]] = pd.to_numeric(y, errors="raise")
-    return t[t[m["target_column"]].notna()].reset_index(drop=True)
+    t = t[t[m["target_column"]].notna()].reset_index(drop=True)
+    if contract["task_type"] == "binary":  # plain int: scikit-learn < 1.5 rejects nullable-integer object arrays
+        t[m["target_column"]] = t[m["target_column"]].astype("int64")
+    return t
 
 
 def experiment_definition(handoff: Handoff, split: dict, seed: int, model_type: str, params: dict) -> dict:

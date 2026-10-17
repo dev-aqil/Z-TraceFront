@@ -1,0 +1,197 @@
+{
+  "model_version": "salmonella-xgboost-20261017T101927Z",
+  "task": "biological_pathogen_positive",
+  "pathogen": "Salmonella",
+  "target": "salmonella_positive: laboratory sample tested positive (not batch safety)",
+  "created_at": "2026-10-17T10:19:27.204169+00:00",
+  "provenance": {
+    "canonical_file": "/home/linux1/tracefront/food-risk-ml/data/processed/canonical.csv",
+    "canonical_sha256": "90d797a385aa8b03cf7edf9ed7154f93c7d9976880bc2854e26fa71d33334d3e",
+    "upstream": {
+      "raw_files": {
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2014.zip": "1fd3e0cd3d09640168d0f984bb227b6d77f33bbf773f29c1841bc321778b9a02",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2015.zip": "f405b1ebb328ec8c5b6629389a2ee3ee5b06e4d49420d499a32a4e6dc650365f",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2016.zip": "f0f871c8f3a9097ad34aecbde55563f63855473d7a68228ce59627bd8ac62407",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2017.zip": "feef32f1761a9dc590465de2c06df204a7bf7881e0aac73623bec425149f830a",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2018.zip": "483d069c71450854f7ca5610fb098d7d3016cb2dc699605032a7f622da96bd65",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2019.zip": "fb75287a07e3c5cd980724675a8c8e65061ab8d384e5dc604baf5cb32482eafb",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2020.zip": "e63123948ef109d4a02d24a03a10398b9ae217394b852ad36dd977528a26c160",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2021.zip": "d7d2214ed00f9476c9967dbadb04bdc96907667e47a0f075c01050523d50e1d8",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2022.zip": "cb53c004144010b3330d9f64932ada1c472889e8336200e29b2b1cd9038c8714",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2023.zip": "0059938f4348d34e4de643bba03dd541a49097788bda4f64fbe5c0c6e83548e6",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2024.zip": "3e253d6d1a1e74244ad5dac59cb76ae01383f87dcb51f6481ba3f90da417dcf9",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2025.zip": "6c92d40a374304c19e39fad0acb4d6126962c9036fba2c78ad394be0a0fe6beb",
+        "data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2026.zip": "5a687e561081170ddce289d18a867d7e30ed90986a0527bc949fb45156c21bd7"
+      },
+      "mapping": "configs/source_mapping.toml",
+      "mapping_sha256": "369919ad528654797118aecefc932551298c334616f02ad55e5506faee6e4e1f"
+    },
+    "synthetic": false,
+    "git_commit": null
+  },
+  "split": {
+    "method": "temporal",
+    "notes": "chronological split on sample_date; 0 rows without a date excluded; train: 2013-10-01..2023-02-21; val: 2023-02-22..2024-10-10; test: 2024-10-11..2026-06-30",
+    "sizes": {
+      "train": 227543,
+      "val": 48671,
+      "test": 48707
+    }
+  },
+  "features": {
+    "all": [
+      "product_category",
+      "sample_month",
+      "meta_cat_sample_source_name",
+      "meta_cat_product_type",
+      "meta_cat_establishment_state",
+      "est_prior_samples",
+      "est_prior_positives",
+      "est_prior_rate_smoothed",
+      "est_days_since_prior"
+    ],
+    "categorical": [
+      "product_category",
+      "sample_month",
+      "meta_cat_sample_source_name",
+      "meta_cat_product_type",
+      "meta_cat_establishment_state"
+    ],
+    "numeric": [
+      "est_prior_samples",
+      "est_prior_positives",
+      "est_prior_rate_smoothed",
+      "est_days_since_prior"
+    ],
+    "uses_history": true,
+    "prior_rate": 0.12532576260311237,
+    "history_params": {
+      "label_lag_days": 7,
+      "history_smoothing": 20.0
+    }
+  },
+  "threshold": 0.06052492431067421,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "risk_bands": {
+    "high_from": 0.06052492431067421,
+    "medium_from": 0.03431865908330743,
+    "definition": "high: score >= operating threshold; medium: within validation 95%-recall net; low: below. Low does not mean safe."
+  },
+  "calibration": {
+    "raw_brier": 0.1389219551996829,
+    "platt_oof_brier": 0.07484670552373097,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "imbalance_strategy": "class_weight",
+  "explain_top_k": 5,
+  "metrics": {
+    "val": {
+      "n": 48671,
+      "prevalence": 0.0903207248669639,
+      "threshold": 0.06052492431067421,
+      "precision": 0.1361542332855871,
+      "recall": 0.8000454959053686,
+      "f1": 0.2327058590002316,
+      "specificity": 0.4960135516657256,
+      "false_negative_rate": 0.19995450409463147,
+      "pr_auc": 0.26919645388114966,
+      "roc_auc": 0.7296142892594212,
+      "brier": 0.07484203714762173,
+      "tn": 21961,
+      "fp": 22314,
+      "fn": 879,
+      "tp": 3517
+    },
+    "test": {
+      "n": 48707,
+      "prevalence": 0.09797359722421828,
+      "threshold": 0.06052492431067421,
+      "precision": 0.14322389354932022,
+      "recall": 0.8300502933780386,
+      "f1": 0.24429505365733317,
+      "specificity": 0.46068055081370207,
+      "false_negative_rate": 0.16994970662196143,
+      "pr_auc": 0.30130758204935604,
+      "roc_auc": 0.7386490019785571,
+      "brier": 0.07919394933900542,
+      "tn": 20240,
+      "fp": 23695,
+      "fn": 811,
+      "tp": 3961
+    }
+  },
+  "versions": {
+    "python": "3.12.3",
+    "sklearn": "1.4.1.post1",
+    "xgboost": "2.0.3",
+    "shap": null,
+    "pandas": "2.1.4"
+  },
+  "config": {
+    "seed": 42,
+    "pathogen": "Salmonella",
+    "paths": {
+      "mapping": "configs/source_mapping.toml",
+      "processed": "data/processed/canonical.csv",
+      "registry": "artifacts/registry",
+      "reports": "reports"
+    },
+    "split": {
+      "train_frac": 0.7,
+      "val_frac": 0.15,
+      "max_missing_date_frac": 0.05
+    },
+    "features": {
+      "label_lag_days": 7,
+      "history_smoothing": 20.0,
+      "min_category_count": 10
+    },
+    "imbalance": {
+      "strategy": "class_weight"
+    },
+    "models": {
+      "logistic_regression": {
+        "C": 1.0,
+        "max_iter": 2000
+      },
+      "random_forest": {
+        "n_estimators": 400,
+        "min_samples_leaf": 5,
+        "n_jobs": -1
+      },
+      "xgboost": {
+        "n_estimators": 400,
+        "max_depth": 4,
+        "learning_rate": 0.05,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8
+      }
+    },
+    "threshold": {
+      "policy": "min_recall",
+      "target_recall": 0.8
+    },
+    "backtest": {
+      "sealed_test_start": "2024-10-11",
+      "fold_starts": [
+        "2020-10-01",
+        "2021-10-01",
+        "2022-10-01",
+        "2023-10-01"
+      ],
+      "fold_months": 12,
+      "budgets": [
+        0.1,
+        0.2,
+        0.3
+      ],
+      "bootstrap": 200,
+      "min_programme_rows": 300
+    },
+    "explain": {
+      "top_k": 5,
+      "shap_sample": 1000
+    }
+  }
+}

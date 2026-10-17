@@ -67,3 +67,13 @@ def test_disjoint_split_check_catches_overlap(synthetic_df):
     a, b = synthetic_df.iloc[:100], synthetic_df.iloc[90:200]
     with pytest.raises(LeakageError):
         assert_disjoint_splits({"train": a, "test": b}, temporal=False)
+
+
+def test_history_features_ignore_dataframe_index(synthetic_df):
+    # Regression: a filtered slice (non-range index) must give the same features as a reset one.
+    df = synthetic_df.head(400)
+    sliced = df.iloc[100:300]
+    daily = build_daily_history(df)
+    a = add_history_features(sliced, daily, 7, 0.1, 20)
+    b = add_history_features(sliced.reset_index(drop=True), daily, 7, 0.1, 20)
+    pd.testing.assert_frame_equal(a[list(HISTORY_FEATURES)].reset_index(drop=True), b[list(HISTORY_FEATURES)])
