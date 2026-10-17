@@ -1,0 +1,99 @@
+"""Command line entry point:  python -m src.cli <command> --help"""
+
+import argparse
+import hashlib
+import json
+import logging
+import sys
+from pathlib import Path
+
+from src.config import DEFAULT_CONFIG, load_config, resolve, setup_logging
+
+log = logging.getLogger("food_risk")
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(prog="food-risk", description=__doc__)
+    ap.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("inspect", help="profile raw FSIS file(s) to fill configs/source_mapping.toml")
+    p.add_argument("raw", type=Path, nargs="+")
+    p = sub.add_parser("prepare", help="raw FSIS file(s) with identical columns + mapping -> validated canonical CSV")
+    p.add_argument("raw", type=Path, nargs="+")
+    p = sub.add_parser("validate", help="validate a canonical CSV (e.g. delivered by Person A)")
+    p.add_argument("canonical", type=Path)
+    p = sub.add_parser("eda", help="exploratory analysis of the canonical CSV")
+    p.add_argument("--canonical", type=Path)
+    p = sub.add_parser("train", help="train/evaluate baselines and register the selected model")
+    p.add_argument("--canonical", type=Path)
+    p = sub.add_parser("predict", help="score a JSON request file (object or list) with a registered model")
+    p.add_argument("request", type=Path)
+    p.add_argument("--model-dir", type=Path)
+    args = ap.parse_args(argv)
+
+    setup_logging()
+    cfg = load_config(args.config)
+    paths = cfg["paths"]
+    canonical = getattr(args, "canonical", None) or resolve(paths["processed"])
+
+    # Imports are local so `inspect` works before the heavier ML stack is needed.
+    from src.data.contract import SchemaError
+    from src.data.loader import MappingIncompleteError, load_canonical, load_fsis
+
+    try:
+        if args.cmd == "inspect":
+            from src.data.inspect import inspect_file
+            for raw in args.raw:
+                rep = inspect_file(raw, resolve(paths["reports"]))
+                print(f"{raw}: {rep['n_rows']} rows, {rep['n_columns']} columns "
+                      f"-> reports/schema_inspection_{raw.stem}.md")
+        elif args.cmd == "prepare":
+            df = load_fsis(args.raw, resolve(paths["mapping"]))
+            out = resolve(paths["processed"])
+            out.parent.mkdir(parents=True, exist_ok=True)
+            df.to_csv(out, index=False, date_format="%Y-%m-%d")
+            (out.with_suffix(".provenance.json")).write_text(json.dumps(
+                {"raw_files": {str(p): _sha256(p) for p in args.raw}, "mapping": str(paths["mapping"]),
+                 "mapping_sha256": _sha256(resolve(paths["mapping"]))}, indent=2))
+            print(f"wrote {len(df)} canonical rows -> {out}")
+        elif args.cmd == "validate":
+            df = load_canonical(args.canonical, cfg["pathogen"])
+            print(f"OK: {len(df)} rows, {int(df['salmonella_positive'].notna().sum())} labelled")
+        elif args.cmd == "eda":
+            from src.data.eda import run_eda
+            print(json.dumps(run_eda(load_canonical(canonical, cfg["pathogen"]),
+                                     resolve(paths["reports"]) / "eda"), indent=2))
+        elif args.cmd == "train":
+            if not Path(canonical).exists():
+                print(f"BLOCKED: {canonical} not found. Obtain the FSIS data (README 'Getting the data'), "
+                      "fill configs/source_mapping.toml, then run `prepare`.", file=sys.stderr)
+                return 2
+            from src.models.train import run_training
+            prov_file = Path(canonical).with_suffix(".provenance.json")
+            provenance = {"canonical_file": str(canonical), "canonical_sha256": _sha256(Path(canonical)),
+                          "upstream": json.loads(prov_file.read_text()) if prov_file.exists() else None}
+            rep = run_training(load_canonical(canonical, cfg["pathogen"]), cfg, resolve(paths["reports"]),
+                               resolve(paths["registry"]), provenance)
+            print(json.dumps({k: rep[k] for k in ("model_version", "selected_model", "threshold", "test")}, indent=2))
+        elif args.cmd == "predict":
+            from src.models.predict import Predictor
+            from src.models.registry import latest_model_dir
+            req = json.loads(args.request.read_text())
+            predictor = Predictor(args.model_dir or latest_model_dir(resolve(paths["registry"])))
+            print(json.dumps(predictor.predict(req if isinstance(req, list) else [req]), indent=2))
+    except (MappingIncompleteError, SchemaError, FileNotFoundError) as e:
+        print(f"BLOCKED: {e}", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

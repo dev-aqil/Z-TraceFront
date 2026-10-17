@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Datasets: never committed. See data/README.md for how to obtain them.
+data/raw/*
+data/processed/*
+!data/raw/README.md
+!data/processed/README.md
+
+# Trained model binaries: never committed by default. metadata.json is small and may be committed deliberately.
+artifacts/registry/*
+!artifacts/README.md
+
+# Generated plots and per-run outputs (regenerate with the CLI)
+reports/**/*.png
