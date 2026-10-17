@@ -1,0 +1,155 @@
+{
+  "artifacts": {
+    "README.md": "3e51b8751d3eaba9438485c9402bc200d227fadf161ceb813a4c8d9586153087",
+    "configs/m6_join_proposals.json": "396c9f23a68a32fa9c05e1888ec34fec529fd1db28fb344b72e90d3ad0af4852",
+    "configs/m7_chemical_detection_v1.json": "3f83182269e23b09122534042030e7086390af8815f442c224dc48d196b66dca",
+    "data/interim/enriched/m6_v1/pdp_imidacloprid_context.csv": "8b3a287530963e1d5b9109e56d9fdd5fc7c6ed3de5b559dafc2d76c2b5de6105",
+    "data/interim/enriched/m6_v1/pdp_imidacloprid_context.schema.json": "f7b5ddb131de0e00dce1a4a3a44f4fc681b6eb6e04009a33d812007d79c47154",
+    "data/interim/modeling/m7_v1/chemical_imidacloprid_detection_training_v1.csv": "686885fa458a9f098df9133058b0e007482d92307ba495eb996436c9c664afde",
+    "data/interim/modeling/m7_v1/chemical_imidacloprid_detection_training_v1.schema.json": "268cd9374c70421cf014920a8872bbb6e98cbababa348e0bca998790ece089a3",
+    "data/processed/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "data/processed/chemical_imidacloprid_detection_training_v1.csv": "686885fa458a9f098df9133058b0e007482d92307ba495eb996436c9c664afde",
+    "data/processed/chemical_imidacloprid_detection_training_v1.features.json": "ced00126dcf178529e02456c76a2e54d4939aee09e2768954c421404e93e03dd",
+    "data/processed/chemical_imidacloprid_detection_training_v1.provenance.json": "0767a5bfe419b4d12cea1bed0e5910c034834382afce866c09a4ba6ad4849426",
+    "data/processed/chemical_imidacloprid_detection_training_v1.readiness.json": "58172c184fe83c0c486f70704160ac41af360879b1c503bc69b676d5747e577d",
+    "data/processed/chemical_imidacloprid_detection_training_v1.schema.json": "0456a029bbbe74658b48daec4776903e3ed05974f486b8ca6ddf30242ff18a5e",
+    "reports/data_leakage_audit.md": "7ccd2cbf7c447925c029f8e6541e658daefe63a524a2d129e29a36ba35cb0c11",
+    "reports/m6_enrichment_summary.json": "5d017fc97506256a6e7bbfac62e585bd0cce57ca7b86071612989656392a7810",
+    "reports/m6_join_audit.md": "327945c3fbcd50f9b8aace93c2a9f3ef5322c363d3ad65fb850cc653d2eece80",
+    "reports/m6_validation.json": "70a7b06d473f479517d061ef2b3a3c6744bb9e23ec92a23d7d2e3bbbf976e57b",
+    "reports/m7_validation.json": "4056852c6926e2f93a4fcb8b26c37737983836f2b2f5cef621bed29f13037a3b",
+    "reports/m7_validation_report.md": "7fa565cdef046156389ef077f17e77a0ae9e32a0ac036a967cc032ceacc581f4",
+    "reports/m8_rebuild_validation.json": "f617a7fcc4fc64fb48ea339496e8781ce06e5b1a716e0dff3d748e0f3e22e4d6",
+    "reports/modeling_handoff.json": "476239261b90bcf3c6e9d7352161f37e22abf5151140f2d08a5b8aca48c54330",
+    "reports/modeling_handoff.md": "e6cf4c8934332883dada7efa37099a7c957c33877e61b1f70f396e7b307394f9",
+    "src/tracefront_data/enrichment.py": "ff057d0c268df44be98ff170e352d404e28d2c34a58c3a4e15708052d62cd6d6",
+    "src/tracefront_data/modeling_handoff.py": "d4e2db6636057be6f583ae32ba6d281011b6c65edf28224654228cecdd004192",
+    "src/tracefront_data/reproduce_handoff.py": "4629b96ba156ac4e6a57790acb49bee292ae4ea1ba0bfbf6fff1eb355e35db1d",
+    "tests/test_enrichment.py": "ad3fc7ed0ec951c431a61c073f649889f40509f0417ea57fa860583ba87a90eb",
+    "tests/test_modeling_handoff.py": "313074c1bd08311c2eb62c3011a9c65d2aea08ffe888344dbbdfa7c9c45d22df"
+  },
+  "checkpoint": {
+    "branch": "predictive-ml",
+    "commit": "ca6875af69ada860b1da7aa25bb1885578e5392e",
+    "initial_tree_after_checkpoint": "clean"
+  },
+  "determinism": {
+    "dataset_sha256": "686885fa458a9f098df9133058b0e007482d92307ba495eb996436c9c664afde",
+    "evidence": "reports/m8_rebuild_validation.json",
+    "feature_manifest_sha256": "ced00126dcf178529e02456c76a2e54d4939aee09e2768954c421404e93e03dd",
+    "final_csv_schema_byte_identical": true,
+    "format_specific_nondeterminism": "None observed",
+    "independent_frozen_raw_rebuilds": 2,
+    "m2_output_files_equal_each_rebuild": 30,
+    "m5_csv_schema_equal_each_rebuild": true,
+    "m6_csv_schema_equal_each_rebuild": true,
+    "m7_candidate_equal_each_rebuild": true,
+    "python_3_11_and_3_14_final_generation_byte_identical": true
+  },
+  "git_diff_check_passed": true,
+  "m2_through_m5_checkpoint_hashes_unchanged": true,
+  "milestone": "M8",
+  "person_a_workflow_complete": true,
+  "person_b_contract_tests": {
+    "compatibility_boundary": "Existing FSIS/Salmonella canonical contract is not a chemical task loader. Person B needs a separate adapter. Full modeling/backend suites not claimed to pass.",
+    "existing_suite_attempt": {
+      "command": "../.venv/bin/python -m pytest -q tests/test_leakage.py tests/test_split.py -k 'denylist or temporal_split_is_ordered_disjoint'",
+      "cwd": "food-risk-ml",
+      "exit_code": 4,
+      "result": "Collection unavailable: shared conftest imports src.models.train, which requires absent matplotlib. pandas/numpy/scikit-learn also absent in Person A environment. No training fixture or model fitting executed."
+    },
+    "portable_pure_leakage_guard": "PASS: unchanged DENYLIST, leakage_hits and assert_no_leaky_features definitions executed via AST in tests/test_modeling_handoff.py; safe features accepted and target/outcome/recall names rejected.",
+    "split_invariants": "PASS: same whole-day cumulative 70/15/15 boundary rule as existing Person B; sample disjointness, chronological ordering and both classes tested."
+  },
+  "pipeline_versions": {
+    "M1_source": "USDA PDP 2024, dictionary 8 August 2025, pinned 20261017T060123145416Z-29c44de9 receipt",
+    "cleaning": "m2_v1",
+    "enrichment": "m6_v1",
+    "feature_generation": "m5_v1",
+    "final_dataset": "1.0",
+    "leakage_audit": "m7_v1",
+    "source_contract": "1.0.0"
+  },
+  "portability": {
+    "dependencies": "Python standard library including sqlite3; no native data wheel",
+    "formats": [
+      "UTF-8 CSV/LF",
+      "UTF-8 JSON"
+    ],
+    "limitation": "No actual LinuxONE validation. Person B modeling dependencies require independent s390x review.",
+    "python_minimum": "3.11",
+    "s390x_executed": false,
+    "supported_python_versions": [
+      "3.11.17",
+      "3.14.7"
+    ],
+    "validated_architecture": "x86_64",
+    "validated_os": "Linux"
+  },
+  "push_performed": false,
+  "raw_immutability": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 28,
+    "failures": [],
+    "integrity_ok": true
+  },
+  "readiness_reader": {
+    "features": 9,
+    "positive_labels": 390,
+    "rows": 9871,
+    "target_missing": 0,
+    "unique_samples": 9871
+  },
+  "reproduction_command": "PYTHONPATH=src python -m tracefront_data.modeling_handoff --rebuild-check",
+  "status": "COMPLETE",
+  "task_readiness": {
+    "BIOLOGICAL": {
+      "reason": "BLOCKED_PENDING_FSIS: official raw pathogen samples and matching dictionary not acquired.",
+      "status": "BLOCKED"
+    },
+    "CHEMICAL": {
+      "reason": "Original imidacloprid detection; retrospective release-cohort scope only.",
+      "status": "MODEL_READY"
+    },
+    "COLD_CHAIN": {
+      "reason": "BLOCKED_PENDING_SENSOR_DATA: no validated specimen-linked storage/sensor/microbial series.",
+      "status": "BLOCKED"
+    }
+  },
+  "test_coverage": [
+    "formal join proposals",
+    "strict event and availability clocks",
+    "focal sample exclusion",
+    "no unknown-entity history",
+    "duplicate right-key/many-to-many refusal",
+    "no US/Malaysia or fuzzy-company/recall-as-label join",
+    "ND/NP/O/R target policy",
+    "duplicate sample group exclusion",
+    "safe feature whitelist",
+    "target/ID/time/assay separation",
+    "schema/datatype/null/domain validation",
+    "calendar formula readback",
+    "no overlapping sample/date splits",
+    "both classes in proposed partitions",
+    "non-ready refusal",
+    "dataset/schema/feature-manifest tamper detection",
+    "source provenance",
+    "deterministic CSV typed roundtrip"
+  ],
+  "tests": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q tests",
+      "exit_code": 0,
+      "passed": 145,
+      "python": "3.11.17",
+      "subtests_passed": 61
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests -q",
+      "exit_code": 0,
+      "passed": 145,
+      "python": "3.14.7"
+    }
+  ],
+  "training_performed": false
+}

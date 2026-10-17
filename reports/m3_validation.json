@@ -1,0 +1,147 @@
+{
+  "baseline_commit": "30746b39b90e78ae68b2f97d7fe84077725a2c0d",
+  "checks": {
+    "all_null_counts_match_m2": true,
+    "all_numeric_histograms_account_for_nonnull_values": true,
+    "all_profile_and_rejection_row_counts_match_m2": true,
+    "generated_reports_byte_identical_after_json_roundtrip_and_cross_version_render": true,
+    "git_diff_check_passed": true,
+    "html_has_no_scripts_or_iframes": true,
+    "html_meter_values_valid": true,
+    "m2_input_hashes_and_producer_code_verified": true,
+    "no_m1_m2_or_person_b_code_changes": true,
+    "noaa_coverage_and_flag_denominators_reconcile": true,
+    "pdp_mean_codes_match_m2": true,
+    "same_m1_eligible_cohort": true
+  },
+  "code_sha256": {
+    "src/tracefront_data/eda.py": "5355b140548e7f55a80d3a7a0753c91adbad84692e4db4f940456f80481a961b",
+    "tests/test_eda.py": "631dfec810b6f0fe06d9ae35293f655627e13e82535f4f9bf56c972063ffdf04"
+  },
+  "data_status": "NOT MODEL-READY",
+  "determinism_scope": "Full census ran once on Python 3.11. Generated reports were re-rendered from the complete JSON on Python 3.14 and matched byte-for-byte. A second full census was not run.",
+  "full_census": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m tracefront_data.eda",
+    "complete_source_tables": 7,
+    "exit_code": 0,
+    "python_version": "3.11.17",
+    "row_sampling_used": false,
+    "rows_sampled": 0
+  },
+  "html_validation": {
+    "browser_visual_inspection_performed": false,
+    "count_bars": 167,
+    "expandable_profiles": 8,
+    "method": "Python HTMLParser plus meter-range assertions"
+  },
+  "m2_verification": {
+    "accepted_row_counts": {
+      "noaa_ghcn_daily/daily_observations": 80693,
+      "opendosm_crops_district_area/crops_district_area": 10010,
+      "opendosm_crops_district_production/crops_district_production": 10471,
+      "opendosm_crops_state/crops_state": 1584,
+      "openfda_enforcement/recalls": 29484,
+      "usda_pdp/results": 2872073,
+      "usda_pdp/samples": 9872
+    },
+    "integrity_ok": true,
+    "no_cross_source_joins": true,
+    "output_files_checked": 30,
+    "raw_integrity": {
+      "acquisition_status": "partial",
+      "checked_artifacts": 28,
+      "failures": [],
+      "integrity_ok": true
+    },
+    "same_source_pdp_references_valid": true,
+    "typed_tables_read": 7
+  },
+  "milestone": "M3",
+  "not_performed": [
+    "source joins",
+    "predictive feature engineering",
+    "new ML labels",
+    "imputation",
+    "model training",
+    "M4 canonical schema work"
+  ],
+  "pending_sources": {
+    "fda_inspections": "Pending; excluded from M2",
+    "fsis_raw_poultry": "official source confirmed, raw file not yet acquired"
+  },
+  "portability": {
+    "implementation": "Python 3.11+ standard library; HTML visuals use native browser elements without external assets",
+    "local_architecture": "x86_64",
+    "runtime_dependencies_added": [],
+    "s390x_executed": false
+  },
+  "preexisting_worktree_changes_preserved": [
+    "reports/m2_revalidation.json (untracked at start; unchanged)"
+  ],
+  "raw_integrity_after": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 28,
+    "failures": [],
+    "integrity_ok": true
+  },
+  "report_artifacts": {
+    "reports/m3_eda_report.md": {
+      "sha256": "ac7780090e861964f211296b5c01c8ba5d7ac50981de289f4634a52b938e7fed",
+      "size_bytes": 18140
+    },
+    "reports/m3_eda_summary.json": {
+      "sha256": "d2eb5aa9df39f97f01ca38a37a68627ce8a3eeefb8f3c829916e62435cd53ae0",
+      "size_bytes": 419264
+    },
+    "reports/m3_eda_visuals.html": {
+      "sha256": "30cdeb2b096853d40b9a4a5d5444812bb23cd869d63d4eb88456b9616f736bca",
+      "size_bytes": 460045
+    },
+    "reports/m3_quality_findings.md": {
+      "sha256": "2f9fe2df9d3bcdd10976484a69bc3a3140716253ea5de052ebb51c38f4feab7a",
+      "size_bytes": 8747
+    }
+  },
+  "scientific_holds": [
+    "OpenDOSM crop-specific production units require confirmation, especially flowers; source-declared units retained unchanged.",
+    "Historical availability/versioning of recall fields is unproven.",
+    "NOAA station coverage, missing slots and flags require a future explicit enrichment policy.",
+    "PDP target/outcome definition, censoring and repeated-sample evaluation require later contracts.",
+    "District aggregate conflicts remain quarantined pending publisher clarification."
+  ],
+  "sources_audited": [
+    "noaa_ghcn_daily",
+    "opendosm_crops_district_area",
+    "opendosm_crops_district_production",
+    "opendosm_crops_state",
+    "openfda_enforcement",
+    "usda_pdp"
+  ],
+  "status": "COMPLETE",
+  "table_rows": {
+    "noaa_ghcn_daily/daily_observations": 80693,
+    "opendosm_crops_district_area/crops_district_area": 10010,
+    "opendosm_crops_district_production/crops_district_production": 10471,
+    "opendosm_crops_state/crops_state": 1584,
+    "openfda_enforcement/recalls": 29484,
+    "usda_pdp/results": 2872073,
+    "usda_pdp/samples": 9872
+  },
+  "test_scope": "Configured Person A suite only. No training fixtures executed, following the prior user instruction. Separate unchanged ML/backend suites were not rerun; their missing-dependency collection limitations remain documented in M2 revalidation.",
+  "tests": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q tests",
+      "new_m3_tests": 11,
+      "passed": 67,
+      "python_version": "3.11.17",
+      "status": "PASS"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests -q",
+      "passed": 67,
+      "python_version": "3.14.7",
+      "status": "PASS"
+    }
+  ],
+  "verified_at_utc": "2026-10-17T07:05:55.326107+00:00"
+}

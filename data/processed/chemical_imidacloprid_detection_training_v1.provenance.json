@@ -1,0 +1,320 @@
+{
+  "publisher_member_evidence": {
+    "analyte_reference_row": [
+      "967",
+      "Imidacloprid",
+      "A",
+      "9872"
+    ],
+    "archive_path": "data/raw/usda_pdp/sha256/de916ba119f8d6dd5a4d5596c69b00c476fceeb31a96b1389dd005031c9c4d79/2024PDPDatabase.zip",
+    "archive_sha256": "de916ba119f8d6dd5a4d5596c69b00c476fceeb31a96b1389dd005031c9c4d79",
+    "dictionary_member": "PDP DataDictionary 2024.pdf",
+    "dictionary_relationship": "SAMPLE_PK uniquely identifies samples and is the analytical table foreign key.",
+    "mean_code_definitions": {
+      "ND": "Non-Detect: Validated, well-recovered",
+      "NP": "Non-Detect: Marginal Performing Analyte",
+      "O": "Detect: Original Extraction Value",
+      "R": "Detect - Re-extraction Analysis Value"
+    },
+    "reference_member": "PDP ReferenceTables 2024.xlsx",
+    "reference_member_sha256": "f530bd5dd31256733d4f9302f153111aeee14dcf3a04ebc8a88265203d108158"
+  },
+  "raw_artifacts": {
+    "fda_inspections": [
+      {
+        "artifact_id": "fda_classification_page",
+        "path": "data/raw/fda_inspections/sha256/7113e6b41a7ba98f99e93c2f4e073550636a653992ab555d1763b0127873a3f6/inspection-classification-database.html",
+        "retrieved_at": "2026-10-17T05:55:45.750521+00:00",
+        "sha256": "7113e6b41a7ba98f99e93c2f4e073550636a653992ab555d1763b0127873a3f6",
+        "size_bytes": 42257,
+        "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/inspection-classification-database",
+        "source_version": null
+      },
+      {
+        "artifact_id": "fda_inspection_dashboard",
+        "path": "data/raw/fda_inspections/sha256/b47ab3cb75d1e4d97ef5b26081de461e873e4c323bef698f9c7ff02fa715c73d/inspections.htm",
+        "retrieved_at": "2026-10-17T05:55:46.921522+00:00",
+        "sha256": "b47ab3cb75d1e4d97ef5b26081de461e873e4c323bef698f9c7ff02fa715c73d",
+        "size_bytes": 27649,
+        "source_url": "https://datadashboard.fda.gov/oii/cd/inspections.htm",
+        "source_version": null
+      },
+      {
+        "artifact_id": "fda_api_documentation",
+        "path": "data/raw/fda_inspections/sha256/91b62cbff3b236e5a2253030fb2d9ea5957d4ba99ffafe190a1f423f8e58a97d/api-index.htm",
+        "retrieved_at": "2026-10-17T05:55:47.159603+00:00",
+        "sha256": "91b62cbff3b236e5a2253030fb2d9ea5957d4ba99ffafe190a1f423f8e58a97d",
+        "size_bytes": 58406,
+        "source_url": "https://datadashboard.fda.gov/oii/api/index.htm",
+        "source_version": null
+      },
+      {
+        "artifact_id": "fda_license",
+        "path": "data/raw/fda_inspections/sha256/63fe227e41e9843bd7855c25c9a7a26a50f0d5a51a7da23aab868d75361b605d/website-policies.html",
+        "retrieved_at": "2026-10-17T05:57:23.596251+00:00",
+        "sha256": "63fe227e41e9843bd7855c25c9a7a26a50f0d5a51a7da23aab868d75361b605d",
+        "size_bytes": 45587,
+        "source_url": "https://www.fda.gov/about-fda/about-website/website-policies",
+        "source_version": null
+      }
+    ],
+    "fsis_raw_poultry": [
+      {
+        "artifact_id": "fsis_catalog_page",
+        "path": "data/raw/fsis/sha256/ce9ab489a207ae0faa1aaaf80a6a31318c4f118d81af4a2c8839f2223c4a4ce3/catalog.html",
+        "retrieved_at": "2026-10-17T05:39:59.722602+00:00",
+        "sha256": "ce9ab489a207ae0faa1aaaf80a6a31318c4f118d81af4a2c8839f2223c4a4ce3",
+        "size_bytes": 123843,
+        "source_url": "https://catalog.data.gov/dataset/fsis-laboratory-sampling-data-raw-poultry-sampling",
+        "source_version": null
+      },
+      {
+        "artifact_id": "fsis_catalog_metadata",
+        "path": "data/raw/fsis/sha256/e8f3d9d7641f8109eab5405de93e833f573ed349e13266f1b03e71058338c3a0/catalog_metadata.json",
+        "retrieved_at": "2026-10-17T05:40:00.232526+00:00",
+        "sha256": "e8f3d9d7641f8109eab5405de93e833f573ed349e13266f1b03e71058338c3a0",
+        "size_bytes": 1581,
+        "source_url": "https://catalog.data.gov/harvest_record/8bd3606e-32f0-415c-ab74-38527ec5f9aa/raw",
+        "source_version": null
+      }
+    ],
+    "noaa_ghcn_daily": [
+      {
+        "artifact_id": "ghcn_stations",
+        "path": "data/raw/noaa/sha256/428eabc955883187935bce283766d5646e3ed7484b92eb0803874c0e8dd9b342/ghcnd-stations.txt",
+        "retrieved_at": "2026-10-17T05:55:51.729577+00:00",
+        "sha256": "428eabc955883187935bce283766d5646e3ed7484b92eb0803874c0e8dd9b342",
+        "size_bytes": 11441354,
+        "source_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt",
+        "source_version": null
+      },
+      {
+        "artifact_id": "ghcn_readme",
+        "path": "data/raw/noaa/sha256/0e4e6f0e6947cf1add884c328a01760f31c56ef5fb86b85ed57dd5dc4c4aeaa6/readme.txt",
+        "retrieved_at": "2026-10-17T05:55:48.222051+00:00",
+        "sha256": "0e4e6f0e6947cf1add884c328a01760f31c56ef5fb86b85ed57dd5dc4c4aeaa6",
+        "size_bytes": 29587,
+        "source_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/readme.txt",
+        "source_version": null
+      },
+      {
+        "artifact_id": "ghcn_version",
+        "path": "data/raw/noaa/sha256/af43ea47247547b0905b10a88cf70d7d99a04120dd29cd0e8f4487457a608cef/ghcnd-version.txt",
+        "retrieved_at": "2026-10-17T05:55:47.997985+00:00",
+        "sha256": "af43ea47247547b0905b10a88cf70d7d99a04120dd29cd0e8f4487457a608cef",
+        "size_bytes": 270,
+        "source_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-version.txt",
+        "source_version": null
+      },
+      {
+        "artifact_id": "ghcn_catalog",
+        "path": "data/raw/noaa/sha256/48c36b6d4d9ebe2ad523cb20c634372c25a14c89fc1608743d6038638c61d5a0/C00861.html",
+        "retrieved_at": "2026-10-17T05:55:48.719235+00:00",
+        "sha256": "48c36b6d4d9ebe2ad523cb20c634372c25a14c89fc1608743d6038638c61d5a0",
+        "size_bytes": 53716,
+        "source_url": "https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00861",
+        "source_version": null
+      },
+      {
+        "artifact_id": "noaa_policy",
+        "path": "data/raw/noaa/sha256/472f577c9f53d5f54782f71a9e6a110b694b9e8b4fd33fcb26a4bc4e6417e999/privacy.html",
+        "retrieved_at": "2026-10-17T05:55:49.230594+00:00",
+        "sha256": "472f577c9f53d5f54782f71a9e6a110b694b9e8b4fd33fcb26a4bc4e6417e999",
+        "size_bytes": 19821,
+        "source_url": "https://data.ngdc.noaa.gov/ngdcinfo/privacy.html",
+        "source_version": null
+      },
+      {
+        "artifact_id": "ghcn_station_data",
+        "path": "data/raw/noaa/sha256/66f1bdd365da92a90f5fe4f74347f9988c09bc09eeadeff8090f031f8f75ee24/MYM00048647.dly",
+        "retrieved_at": "2026-10-17T05:56:38.000203+00:00",
+        "sha256": "66f1bdd365da92a90f5fe4f74347f9988c09bc09eeadeff8090f031f8f75ee24",
+        "size_bytes": 715770,
+        "source_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/all/MYM00048647.dly",
+        "source_version": null
+      }
+    ],
+    "opendosm_crops_district_area": [
+      {
+        "artifact_id": "crops_district_area",
+        "path": "data/raw/opendosm/sha256/10e71cb5da3471b92ecf20d7ac0d74c3be3e403b226086307fefa808b4b7e672/crops_district_area.csv",
+        "retrieved_at": "2026-10-17T05:55:52.943510+00:00",
+        "sha256": "10e71cb5da3471b92ecf20d7ac0d74c3be3e403b226086307fefa808b4b7e672",
+        "size_bytes": 542038,
+        "source_url": "https://storage.data.gov.my/agriculture/crops_district_area.csv",
+        "source_version": null
+      },
+      {
+        "artifact_id": "crops_district_area_catalog",
+        "path": "data/raw/opendosm/sha256/2b93292c7c60d6712557c4976087f0f4b84ede81adc45dd06fb32ccab36b9ecf/crops_district_area.html",
+        "retrieved_at": "2026-10-17T05:55:53.003432+00:00",
+        "sha256": "2b93292c7c60d6712557c4976087f0f4b84ede81adc45dd06fb32ccab36b9ecf",
+        "size_bytes": 115303,
+        "source_url": "https://open.dosm.gov.my/data-catalogue/crops_district_area",
+        "source_version": null
+      }
+    ],
+    "opendosm_crops_district_production": [
+      {
+        "artifact_id": "crops_district_production",
+        "path": "data/raw/opendosm/sha256/d3bdf3a710f4635214f3191deb6970849e9f8b623bae43b3de823bfe802449cd/crops_district_production.csv",
+        "retrieved_at": "2026-10-17T05:55:52.598252+00:00",
+        "sha256": "d3bdf3a710f4635214f3191deb6970849e9f8b623bae43b3de823bfe802449cd",
+        "size_bytes": 567921,
+        "source_url": "https://storage.data.gov.my/agriculture/crops_district_production.csv",
+        "source_version": null
+      },
+      {
+        "artifact_id": "crops_district_production_catalog",
+        "path": "data/raw/opendosm/sha256/90f565daeeec929a06eb4e178441d0675fdd0fbebbda944b52b658764f297fee/crops_district_production.html",
+        "retrieved_at": "2026-10-17T05:55:52.732970+00:00",
+        "sha256": "90f565daeeec929a06eb4e178441d0675fdd0fbebbda944b52b658764f297fee",
+        "size_bytes": 115273,
+        "source_url": "https://open.dosm.gov.my/data-catalogue/crops_district_production",
+        "source_version": null
+      }
+    ],
+    "opendosm_crops_state": [
+      {
+        "artifact_id": "crops_state",
+        "path": "data/raw/opendosm/sha256/b977d8ff61c536909f8131374de484bd1d0cb2d37935c875018b1b89577a849b/crops_state.csv",
+        "retrieved_at": "2026-10-17T05:55:52.137738+00:00",
+        "sha256": "b977d8ff61c536909f8131374de484bd1d0cb2d37935c875018b1b89577a849b",
+        "size_bytes": 68546,
+        "source_url": "https://storage.data.gov.my/agriculture/crops_state.csv",
+        "source_version": null
+      },
+      {
+        "artifact_id": "crops_state_catalog",
+        "path": "data/raw/opendosm/sha256/f5d90d4b1404fb01abbf3d4d775bc62e682d9e699df4e8120da09fab7a217d5c/crops_state.html",
+        "retrieved_at": "2026-10-17T05:55:52.313171+00:00",
+        "sha256": "f5d90d4b1404fb01abbf3d4d775bc62e682d9e699df4e8120da09fab7a217d5c",
+        "size_bytes": 106748,
+        "source_url": "https://open.dosm.gov.my/data-catalogue/crops_state",
+        "source_version": null
+      }
+    ],
+    "openfda_enforcement": [
+      {
+        "artifact_id": "openfda_local_json",
+        "path": "data/external/openfda/sha256/02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d/food-enforcement-0001-of-0001.json",
+        "retrieved_at": null,
+        "sha256": "02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d",
+        "size_bytes": 39906111,
+        "source_url": null,
+        "source_version": "embedded 2026-10-14; original retrieval unknown"
+      },
+      {
+        "artifact_id": "openfda_local_zip",
+        "path": "data/external/openfda/sha256/7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6/food-enforcement-0001-of-0001.json.zip",
+        "retrieved_at": null,
+        "sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+        "size_bytes": 5858570,
+        "source_url": null,
+        "source_version": null
+      },
+      {
+        "artifact_id": "openfda_download_index",
+        "path": "data/external/openfda/sha256/e9c8536852ecd25fdc15b79a5f7c41cb3803f31dbc7c52b86a6feddc3ac220a1/download_index.json",
+        "retrieved_at": "2026-10-17T05:40:03.609682+00:00",
+        "sha256": "e9c8536852ecd25fdc15b79a5f7c41cb3803f31dbc7c52b86a6feddc3ac220a1",
+        "size_bytes": 593799,
+        "source_url": "https://api.fda.gov/download.json",
+        "source_version": null
+      },
+      {
+        "artifact_id": "openfda_license",
+        "path": "data/external/openfda/sha256/7fda0041a24f8d7139a1781d4462ae39643a2ee6f3b0f079946c989a8e1982d2/license.html",
+        "retrieved_at": "2026-10-17T05:40:05.044709+00:00",
+        "sha256": "7fda0041a24f8d7139a1781d4462ae39643a2ee6f3b0f079946c989a8e1982d2",
+        "size_bytes": 123019,
+        "source_url": "https://open.fda.gov/license/",
+        "source_version": null
+      },
+      {
+        "artifact_id": "openfda_dictionary",
+        "path": "data/external/openfda/sha256/9c92fc04f447e70936c8646d9ac0f7a50af2118f01fd3b26d039e19860418baa/foodenforcement_reference.pdf",
+        "retrieved_at": "2026-10-17T05:40:05.830130+00:00",
+        "sha256": "9c92fc04f447e70936c8646d9ac0f7a50af2118f01fd3b26d039e19860418baa",
+        "size_bytes": 55827,
+        "source_url": "https://open.fda.gov/fields/foodenforcement_reference.pdf",
+        "source_version": null
+      },
+      {
+        "artifact_id": "openfda_upstream_zip",
+        "path": "data/external/openfda/sha256/7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6/food-enforcement-0001-of-0001.json.zip",
+        "retrieved_at": "2026-10-17T05:40:08.830596+00:00",
+        "sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+        "size_bytes": 5858570,
+        "source_url": "https://download.open.fda.gov/food/enforcement/food-enforcement-0001-of-0001.json.zip",
+        "source_version": null
+      }
+    ],
+    "usda_pdp": [
+      {
+        "artifact_id": "pdp_2024",
+        "path": "data/raw/usda_pdp/sha256/de916ba119f8d6dd5a4d5596c69b00c476fceeb31a96b1389dd005031c9c4d79/2024PDPDatabase.zip",
+        "retrieved_at": "2026-10-17T05:55:45.335571+00:00",
+        "sha256": "de916ba119f8d6dd5a4d5596c69b00c476fceeb31a96b1389dd005031c9c4d79",
+        "size_bytes": 10600875,
+        "source_url": "https://www.ams.usda.gov/sites/default/files/media/2024PDPDatabase.zip",
+        "source_version": null
+      },
+      {
+        "artifact_id": "pdp_catalog",
+        "path": "data/raw/usda_pdp/sha256/2ed2e7b9eb9111d0bd5ca722cf28a3101e49bc5c7d9615f33025e5509bcbf338/pdpdata.html",
+        "retrieved_at": "2026-10-17T05:55:44.364242+00:00",
+        "sha256": "2ed2e7b9eb9111d0bd5ca722cf28a3101e49bc5c7d9615f33025e5509bcbf338",
+        "size_bytes": 49219,
+        "source_url": "https://www.ams.usda.gov/datasets/pdp/pdpdata",
+        "source_version": null
+      },
+      {
+        "artifact_id": "pdp_instructions",
+        "path": "data/raw/usda_pdp/sha256/e1e1bbe759d73074a9915373097b5433f05aeb4c8ef7d70c5a904949ae4bb1fe/PDPDatabaseInstructions.pdf",
+        "retrieved_at": "2026-10-17T05:55:44.645478+00:00",
+        "sha256": "e1e1bbe759d73074a9915373097b5433f05aeb4c8ef7d70c5a904949ae4bb1fe",
+        "size_bytes": 80736,
+        "source_url": "https://www.ams.usda.gov/sites/default/files/media/PDPDatabaseInstructions.pdf",
+        "source_version": null
+      },
+      {
+        "artifact_id": "pdp_search_dictionary",
+        "path": "data/raw/usda_pdp/sha256/da5a0b019cafd956b707aef30059d1e089fa9893e721c78967fd3c3942e176e1/PDPSearchAppDataDictionary.pdf",
+        "retrieved_at": "2026-10-17T05:55:43.768886+00:00",
+        "sha256": "da5a0b019cafd956b707aef30059d1e089fa9893e721c78967fd3c3942e176e1",
+        "size_bytes": 250124,
+        "source_url": "https://www.ams.usda.gov/sites/default/files/media/PDPSearchAppDataDictionary.pdf",
+        "source_version": null
+      }
+    ]
+  },
+  "raw_immutability": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 28,
+    "failures": [],
+    "integrity_ok": true
+  },
+  "stage_fingerprints": {
+    "configs/m6_join_proposals.json": "396c9f23a68a32fa9c05e1888ec34fec529fd1db28fb344b72e90d3ad0af4852",
+    "configs/m7_chemical_detection_v1.json": "3f83182269e23b09122534042030e7086390af8815f442c224dc48d196b66dca",
+    "configs/source_contracts.json": "d7fce7156f82a1dbded326f672c9fd678a95f2c37b918d423c73bed714de29a1",
+    "reports/m1_source_manifest.json": "ea1b9446b2f2e47013217b1abe1729b77e0ae67d50f56d9987e65e37b5743581",
+    "reports/m2_cleaning_summary.json": "b99300603ddc2cb23cccf4a26a6f15faa5c6e717ee5d1655ad3a25a4114c9afb",
+    "reports/m5_validation.json": "9aebaa735ec8c0d36e9d16a62bdb2e7ca89f5909f4ddd465bb5feeadc79495e0",
+    "reports/m6_validation.json": "70a7b06d473f479517d061ef2b3a3c6744bb9e23ec92a23d7d2e3bbbf976e57b",
+    "reports/m7_validation.json": "4056852c6926e2f93a4fcb8b26c37737983836f2b2f5cef621bed29f13037a3b",
+    "src/tracefront_data/enrichment.py": "ff057d0c268df44be98ff170e352d404e28d2c34a58c3a4e15708052d62cd6d6",
+    "src/tracefront_data/modeling_handoff.py": "d4e2db6636057be6f583ae32ba6d281011b6c65edf28224654228cecdd004192"
+  },
+  "training_source": "USDA AMS PDP 2024 only; other source artifacts are acquisition context, not inputs to predictors or target.",
+  "versions": {
+    "M1": "frozen 20261017T060123145416Z-29c44de9 receipt",
+    "canonical_schema": "configs/source_contracts.json (source-specific M4 mappings)",
+    "cleaning": "m2_v1",
+    "dataset": "1.0",
+    "enrichment": "m6_v1 J01 only",
+    "features": "m5_v1",
+    "leakage_audit": "m7_v1"
+  }
+}

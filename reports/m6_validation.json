@@ -1,0 +1,35 @@
+{
+  "checks": {
+    "formal_proposals_complete": true,
+    "m5_inputs_unchanged": true,
+    "no_cross_source_join": true,
+    "no_history_features": true,
+    "no_row_expansion": true,
+    "only_approved_join_executed": true,
+    "raw_immutable": true,
+    "typed_roundtrip": true
+  },
+  "code_sha256": {
+    "src/tracefront_data/enrichment.py": "ff057d0c268df44be98ff170e352d404e28d2c34a58c3a4e15708052d62cd6d6"
+  },
+  "inputs": {
+    "configs/m6_join_proposals.json": "396c9f23a68a32fa9c05e1888ec34fec529fd1db28fb344b72e90d3ad0af4852",
+    "configs/m7_chemical_detection_v1.json": "3f83182269e23b09122534042030e7086390af8815f442c224dc48d196b66dca",
+    "data/interim/m2_v1/usda_pdp/results.csv": "42dddfe4df43cc63e8ed3295ed8a783aebb13b3a95dbc3ded3b58d9ccbc1b92e",
+    "data/interim/m2_v1/usda_pdp/results.schema.json": "1931aefd789db2ef867933288496da36d7489a8591a37f8002f9a15954dae28a",
+    "data/interim/m2_v1/usda_pdp/samples.csv": "0d3d5bca6390f4cec5aed0fb35c953a10f996e56546ad2fe36dc1a6c138b979c",
+    "data/interim/m2_v1/usda_pdp/samples.schema.json": "d376bda04bcea5dc4c6e9e2fdbc419d6c5e295d7172d151e42f7b2f6d6ca08f3",
+    "data/interim/m5_v1/pdp_sample_context_features.csv": "23e7e6db133baf2a9097ff839044c7bcf6df73814749a784ec423800d942b51a",
+    "data/interim/m5_v1/pdp_sample_context_features.schema.json": "7b9d06e67f829e1eeef7cee62ed58e814029baca837492f5ad4018395631493a",
+    "reports/m2_m5_checkpoint.json": "bb588b5cf52d12c422e6c61eb6b364c64b67afa6eb54f914cd89ccd2574be9ba",
+    "reports/m5_validation.json": "9aebaa735ec8c0d36e9d16a62bdb2e7ca89f5909f4ddd465bb5feeadc79495e0"
+  },
+  "milestone": "M6",
+  "outputs": {
+    "data/interim/enriched/m6_v1/pdp_imidacloprid_context.csv": "8b3a287530963e1d5b9109e56d9fdd5fc7c6ed3de5b559dafc2d76c2b5de6105",
+    "data/interim/enriched/m6_v1/pdp_imidacloprid_context.schema.json": "f7b5ddb131de0e00dce1a4a3a44f4fc681b6eb6e04009a33d812007d79c47154",
+    "reports/m6_enrichment_summary.json": "5d017fc97506256a6e7bbfac62e585bd0cce57ca7b86071612989656392a7810",
+    "reports/m6_join_audit.md": "327945c3fbcd50f9b8aace93c2a9f3ef5322c363d3ad65fb850cc653d2eece80"
+  },
+  "status": "COMPLETE"
+}

@@ -1,0 +1,57 @@
+{
+  "architecture": "x86_64",
+  "final_readiness_reader": {
+    "features": 9,
+    "rows": 9871,
+    "unique_samples": 9871
+  },
+  "format_nondeterminism": "None observed: CSV and schema bytes identical across independent rebuilds.",
+  "independent_raw_to_final_rounds": [
+    {
+      "dataset_sha256": "686885fa458a9f098df9133058b0e007482d92307ba495eb996436c9c664afde",
+      "exclusions": {
+        "excluded_mean_R": 1
+      },
+      "final_csv_schema_byte_identical": true,
+      "m2_files_matched": 30,
+      "m5_csv_schema_byte_identical": true,
+      "m6_csv_schema_byte_identical": true,
+      "m7_candidate_byte_identical": true,
+      "round": 1,
+      "rows": 9871
+    },
+    {
+      "dataset_sha256": "686885fa458a9f098df9133058b0e007482d92307ba495eb996436c9c664afde",
+      "exclusions": {
+        "excluded_mean_R": 1
+      },
+      "final_csv_schema_byte_identical": true,
+      "m2_files_matched": 30,
+      "m5_csv_schema_byte_identical": true,
+      "m6_csv_schema_byte_identical": true,
+      "m7_candidate_byte_identical": true,
+      "round": 2,
+      "rows": 9871
+    }
+  ],
+  "m5_inputs_unchanged": true,
+  "python": "3.14.7",
+  "raw_immutability_after": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 28,
+    "failures": [],
+    "integrity_ok": true
+  },
+  "raw_immutability_before": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 28,
+    "failures": [],
+    "integrity_ok": true
+  },
+  "s390x_executed": false,
+  "source_code_sha256": {
+    "src/tracefront_data/reproduce_handoff.py": "4629b96ba156ac4e6a57790acb49bee292ae4ea1ba0bfbf6fff1eb355e35db1d"
+  },
+  "status": "PASS",
+  "training_performed": false
+}

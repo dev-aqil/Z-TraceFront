@@ -1,0 +1,56 @@
+{
+  "checks": {
+    "approved_predictors": 0,
+    "data_tables_written": 0,
+    "labels_created": 0,
+    "leakage_class_counts": {
+      "LABEL": 12,
+      "LEAKAGE": 8,
+      "QUESTIONABLE": 65,
+      "SAFE": 21
+    },
+    "mapped_fields": 106,
+    "pending_unit_fields": [
+      "opendosm_crops_district_production.crops_district_production.production",
+      "opendosm_crops_state.crops_state.production"
+    ],
+    "source_tables": 7
+  },
+  "contract_sha256": "d7fce7156f82a1dbded326f672c9fd678a95f2c37b918d423c73bed714de29a1",
+  "data_status": "NOT MODEL-READY",
+  "input_sha256": {
+    "data/interim/m2_v1/noaa/daily_observations.schema.json": "2eef99ce4be46139394f1f5e1be8ab501b5b66e068a3142149e749dd4d8f4128",
+    "data/interim/m2_v1/opendosm_crops_district_area/crops_district_area.schema.json": "02dacccf05aa94ef32a63a504ec7a931168e2d2c5973550ce7ecd8e5852afd43",
+    "data/interim/m2_v1/opendosm_crops_district_production/crops_district_production.schema.json": "80fbc983a985148a6b82c564763615d475e6bc5ad235e67a31531ed06b869ee7",
+    "data/interim/m2_v1/opendosm_crops_state/crops_state.schema.json": "8fa9c2eb042b823d34ca77c65ed1399ed4171e2251e66c7901cdc56bca8c4753",
+    "data/interim/m2_v1/openfda/recalls.schema.json": "58c11318be3d9b017ec9b0ebf0bc6d8102da1bc8c5a49456f8069eea6b10bbb0",
+    "data/interim/m2_v1/usda_pdp/results.schema.json": "1931aefd789db2ef867933288496da36d7489a8591a37f8002f9a15954dae28a",
+    "data/interim/m2_v1/usda_pdp/samples.schema.json": "d376bda04bcea5dc4c6e9e2fdbc419d6c5e295d7172d151e42f7b2f6d6ca08f3",
+    "reports/m2_cleaning_report.md": "13533a82b440e5f01acee2ade2926a43db3193356d1445572bda46ce99e9b1cf",
+    "reports/m2_cleaning_summary.json": "b99300603ddc2cb23cccf4a26a6f15faa5c6e717ee5d1655ad3a25a4114c9afb",
+    "reports/m2_revalidation.json": "bdd0b79430b50c66b743d3b8369937b7a5eedc19d9c71578f7102cfe0893ed32",
+    "reports/m3_eda_report.md": "ac7780090e861964f211296b5c01c8ba5d7ac50981de289f4634a52b938e7fed",
+    "reports/m3_eda_summary.json": "d2eb5aa9df39f97f01ca38a37a68627ce8a3eeefb8f3c829916e62435cd53ae0",
+    "reports/m3_eda_visuals.html": "30cdeb2b096853d40b9a4a5d5444812bb23cd869d63d4eb88456b9616f736bca",
+    "reports/m3_quality_findings.md": "2f9fe2df9d3bcdd10976484a69bc3a3140716253ea5de052ebb51c38f4feab7a",
+    "reports/m3_validation.json": "816a89f9ca2c5f72a0137a86ea1e57fc3a4ea801f0a3d56f44092ff794a03875"
+  },
+  "m2_output_files_checked": 30,
+  "milestone": "M4",
+  "outputs": {
+    "m4_data_dictionary.csv": "ab05809319b87ed17f93c60e82e46c4022fc8e0677f2ffb979f28086636761d2",
+    "m4_data_dictionary.md": "b408a53f7f49ee7624aa5d868f031140a4b900ddc65c9344766f4d5211ca879e"
+  },
+  "raw_verification": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 28,
+    "failures": [],
+    "integrity_ok": true
+  },
+  "runtime_dependencies_added": [],
+  "s390x_executed": false,
+  "scope": "Source-specific contract design and metadata validation only",
+  "status": "COMPLETE",
+  "typed_readback_evidence": "Reused matching M3 full typed census; no new row transformations or full EDA scan",
+  "validator_sha256": "de74c11a6d25d0a36f1e25785c0dd70b04499ad6e50c5c6023480911aecf57dd"
+}

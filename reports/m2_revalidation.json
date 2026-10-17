@@ -1,0 +1,107 @@
+{
+  "baseline_commit": "30746b39b90e78ae68b2f97d7fe84077725a2c0d",
+  "checks": {
+    "eligible_sources_exactly_match_outputs": true,
+    "m1_receipt_sha256_matches": true,
+    "previous_reproduction_summary_sha256_matches": true,
+    "producer_code_sha256_matches": true,
+    "source_manifest_sha256_matches": true,
+    "working_tree_clean_before_audit_record": true
+  },
+  "data_status": "NOT MODEL-READY",
+  "eligible_cohort_status": "COMPLETE",
+  "eligible_sources": [
+    "noaa_ghcn_daily",
+    "opendosm_crops_district_area",
+    "opendosm_crops_district_production",
+    "opendosm_crops_state",
+    "openfda_enforcement",
+    "usda_pdp"
+  ],
+  "implementation_changes_required": false,
+  "milestone": "M2",
+  "pending_sources": {
+    "fda_inspections": "Pending; excluded from M2",
+    "fsis_raw_poultry": "official source confirmed, raw file not yet acquired"
+  },
+  "portability": {
+    "new_dependencies": [],
+    "runtime": "Python standard library, including sqlite3",
+    "s390x_executed": false,
+    "verification_architecture": "x86_64"
+  },
+  "raw_verification": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 28,
+    "failures": [],
+    "integrity_ok": true,
+    "unique_raw_paths": 27
+  },
+  "reused_reproduction_evidence": {
+    "fresh_full_rebuild_performed_this_revalidation": false,
+    "path": "reports/m2_validation.json",
+    "reason": "Source manifest, producer code, cleaning summary and all output hashes match prior full cross-version rebuild evidence.",
+    "reproduction": {
+      "files_compared": 30,
+      "first_python": "3.14.7",
+      "method": "Fresh full raw-to-output rebuild under Python 3.11 into temporary staging; all generated files compared to existing Python 3.14 outputs before reuse",
+      "output_sha256_maps_identical": true,
+      "readback_applies_to_final_identical_bytes": true,
+      "rebuild_python": "3.11.17",
+      "total_output_bytes": 248687007
+    },
+    "sha256": "018bd9b523724210e771f5a205e493c7148b46957b1b75b6bc702c4caca91de3"
+  },
+  "summary": {
+    "path": "reports/m2_cleaning_summary.json",
+    "sha256": "b99300603ddc2cb23cccf4a26a6f15faa5c6e717ee5d1655ad3a25a4114c9afb"
+  },
+  "tests": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q tests",
+      "exit_code": 0,
+      "passed": 56,
+      "python_version": "3.11.17",
+      "status": "PASS"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests -q",
+      "exit_code": 0,
+      "passed": 56,
+      "python_version": "3.14.7",
+      "status": "PASS"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q food-risk-ml/tests --ignore=food-risk-ml/tests/test_inference.py --ignore=food-risk-ml/tests/test_api.py",
+      "exit_code": 4,
+      "reason": "conftest imports src.models.train; matplotlib is absent. No model training executed.",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=backend .venv/bin/python -m pytest -q backend/app/test_risk.py",
+      "exit_code": 2,
+      "reason": "Collection requires absent sqlalchemy; backend unchanged.",
+      "status": "UNAVAILABLE"
+    }
+  ],
+  "training_test_policy": "User previously instructed: Exclude training-dependent tests; report the limitation. No training fixtures executed.",
+  "typed_output_readback": {
+    "accepted_row_counts": {
+      "noaa_ghcn_daily/daily_observations": 80693,
+      "opendosm_crops_district_area/crops_district_area": 10010,
+      "opendosm_crops_district_production/crops_district_production": 10471,
+      "opendosm_crops_state/crops_state": 1584,
+      "openfda_enforcement/recalls": 29484,
+      "usda_pdp/results": 2872073,
+      "usda_pdp/samples": 9872
+    },
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m tracefront_data.clean --verify-only",
+    "exit_code": 0,
+    "integrity_ok": true,
+    "no_cross_source_joins": true,
+    "output_files_checked": 30,
+    "same_source_pdp_references_valid": true,
+    "typed_tables_read": 7
+  },
+  "verified_at_utc": "2026-10-17T06:48:04.159534+00:00"
+}

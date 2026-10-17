@@ -1,6 +1,10 @@
-# Data dictionary — M0 draft
+# Data dictionary — M4 index and historical design notes
 
-This document separates **observed source fields** from **proposed future features**. No source has been cleaned or mapped. No predictor is approved yet: the [draft contract](../configs/canonical_schema.json) has an empty predictor allowlist. M4 will freeze a supported subset after M1–M3.
+The current reviewed source-field dictionary is [M4 data dictionary](m4_data_dictionary.md), with a [filterable CSV](m4_data_dictionary.csv) and [machine-readable source contracts](../configs/source_contracts.json). It covers all 106 columns in the seven validated M2 tables. These are declaration-only mappings: no canonical table, feature or final label was materialized. All predictor allowlists remain empty and the data is **NOT MODEL-READY**.
+
+Units and timing holds are explicit. OpenDOSM production retains publisher-declared metric tonnes but has no approved canonical physical unit; crop-specific interpretation remains pending. Every source table has pending historical field availability. PDP `SOURCE_ID` is a sample-ID suffix, `LAB` is an analytical laboratory, and `QUANTITY` counts selected sample units; none supplies supplier/factory/batch identities.
+
+The sections below preserve M0–M2 design history. Statements about future source mappings, tentative types or proposed features are **historical design notes**, superseded for the acquired cohort by the M4 registry. In particular, M4 uses exact decimals rather than coercing source measurements to the historical draft's float64 types. The [future batch schema](../configs/canonical_schema.json) remains a separate design and does not describe emitted records. See the [M4 decisions](m4_schema_report.md) and [M3 scientific holds](m3_quality_findings.md).
 
 ## FSIS source dictionary status — M1
 

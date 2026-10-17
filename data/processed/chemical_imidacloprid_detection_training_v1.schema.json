@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "status": "MODEL_READY_RETROSPECTIVE",
+  "row_granularity": "One unambiguous original imidacloprid analytical result for one PDP 2024 sample; at most one row per sample.",
+  "columns": {
+    "observation_id": {
+      "datatype": "string",
+      "classification": "IDENTIFIER_ONLY"
+    },
+    "pdp_sample_id": {
+      "datatype": "string",
+      "classification": "IDENTIFIER_ONLY"
+    },
+    "pdp_source_row_number": {
+      "datatype": "integer",
+      "classification": "IDENTIFIER_ONLY"
+    },
+    "pdp_result_source_row_number": {
+      "datatype": "integer",
+      "classification": "IDENTIFIER_ONLY"
+    },
+    "collection_date": {
+      "datatype": "date",
+      "classification": "METADATA_ONLY"
+    },
+    "observation_time": {
+      "datatype": "date",
+      "classification": "METADATA_ONLY"
+    },
+    "source_release": {
+      "datatype": "string",
+      "classification": "METADATA_ONLY"
+    },
+    "analyte_code": {
+      "datatype": "string",
+      "classification": "METADATA_ONLY"
+    },
+    "pdp_commodity_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "commod",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP commodity code",
+      "canonical_source_field": "pdp_commodity_code",
+      "classification": "SAFE_FEATURE"
+    },
+    "pdp_commodity_type_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "commtype",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP commodity-form code",
+      "canonical_source_field": "pdp_commodity_type_code",
+      "classification": "SAFE_FEATURE"
+    },
+    "pdp_origin_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "origin",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP origin code",
+      "canonical_source_field": "pdp_origin_code",
+      "classification": "SAFE_FEATURE"
+    },
+    "pdp_import_origin_country_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "country",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP import-origin country code; null is not imputed",
+      "canonical_source_field": "pdp_import_origin_country_code",
+      "classification": "SAFE_FEATURE"
+    },
+    "pdp_product_claim_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "claim",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP label-claim code",
+      "canonical_source_field": "pdp_product_claim_code",
+      "classification": "SAFE_FEATURE"
+    },
+    "pdp_sample_unit_count": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "quantity",
+      "family": "pdp_product_context",
+      "unit": "count_individual_sample_units",
+      "derivation": "verbatim nonnegative integer sample-unit count; null is not zero",
+      "canonical_source_field": "pdp_sample_unit_count",
+      "classification": "SAFE_FEATURE"
+    },
+    "pdp_collection_dow_iso": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "collection_date",
+      "family": "pdp_collection_calendar",
+      "unit": "iso_weekday_1_monday_7_sunday",
+      "derivation": "ISO weekday (1=Monday..7=Sunday) of the validated collection date",
+      "classification": "SAFE_FEATURE"
+    },
+    "pdp_collection_doy": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "collection_date",
+      "family": "pdp_collection_calendar",
+      "unit": "day_of_year_1_366",
+      "derivation": "day of year (1..366) of the validated collection date",
+      "classification": "SAFE_FEATURE"
+    },
+    "pdp_collection_isoweek": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "collection_date",
+      "family": "pdp_collection_calendar",
+      "unit": "iso_week_number_1_53",
+      "derivation": "ISO week number (1..53) of the validated collection date",
+      "classification": "SAFE_FEATURE"
+    },
+    "imidacloprid_detected": {
+      "datatype": "integer",
+      "classification": "TARGET",
+      "domain": [
+        0,
+        1
+      ]
+    }
+  },
+  "null_encoding": {
+    "null": "\\N",
+    "escape": "Prefix one extra backslash to non-null values starting with backslash",
+    "empty_string": "non-null empty string"
+  }
+}
