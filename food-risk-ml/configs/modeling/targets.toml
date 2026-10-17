@@ -43,6 +43,30 @@ primary_metric = "pr_auc"
 threshold_policy = "max_f1"
 target_recall = 0.80
 
+# READY 2026-10-17, reviewed by Adam Amzar (decision record: reports/modeling_target_contracts.md, section B).
+# Person A's handoff chemical_imidacloprid_detection_training_v1 (M8). One parent analyte, PDP 2024 only.
+[targets.imidacloprid_detected]
+domain = "CHEMICAL"
+task_type = "binary"
+unit = "none (0/1 per PDP 2024 sample, analyte 967 imidacloprid)"
+positive_meaning = "publisher original-extraction detection (MEAN O) of imidacloprid; 0 = validated well-recovered nondetect (ND). Not exceedance, not unsafe food."
+scope = "RETROSPECTIVE_RELEASE_COHORT_ONLY"
+requires_analyte = true
+status = "READY"
+forbidden_feature_patterns = [
+  "imidacloprid_detected", "result", "concen", "lod", "loq", "mean", "annotate", "quantitate", "confmethod",
+  "extract", "determin", "testclass", "detection", "exceedance", "tolerance", "contaminated", "unsafe", "recall",
+  "previous_positive", "history", "future", "supplier", "variety",
+]
+# Excluded before any training: the temporal split puts validation (day 254-310) and test (day 311-358) entirely
+# outside the training range (day 2-253), so these features can only extrapolate. Day-of-week covers all splits.
+excluded_features = ["pdp_collection_doy", "pdp_collection_isoweek"]
+split = "temporal"
+group_column = "pdp_sample_id"
+primary_metric = "pr_auc"
+threshold_policy = "min_recall"
+target_recall = 0.80
+
 [targets.residue_concentration]
 domain = "CHEMICAL"
 task_type = "regression"

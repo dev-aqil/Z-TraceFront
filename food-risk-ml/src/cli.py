@@ -48,6 +48,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("manifest", type=Path)
     p.add_argument("--out", type=Path, default=Path("artifacts/experiments"))
     p.add_argument("--no-xgboost", action="store_true")
+    p = sub.add_parser("train-chemical", help="train/register a chemical model from a Person A readiness bundle")
+    p.add_argument("--key", default="imidacloprid", help="[chemical.<key>] section of the config")
+    p.add_argument("--readiness", type=Path, help="override the configured readiness.json")
     args = ap.parse_args(argv)
 
     setup_logging()
@@ -107,13 +110,21 @@ def main(argv: list[str] | None = None) -> int:
                                args.label, args.models.split(",") if args.models else None)
             print(json.dumps(rep["summary"], indent=2))
         elif args.cmd == "check-handoff":
+            from src.models.chemical import load_pdp_readiness
             from src.models.contracts import load_handoff
-            h = load_handoff(args.manifest)
+            is_readiness = args.manifest.exists() and "dataset_path" in json.loads(args.manifest.read_text())
+            h = load_pdp_readiness(args.manifest)[0] if is_readiness else load_handoff(args.manifest)
             print(f"OK: {h.manifest['target']} handoff, {len(h.table)} labelled rows, {len(h.features())} features")
         elif args.cmd == "experiment":
             from src.models.experiment import run_experiment
             rep = run_experiment(args.manifest, resolve(args.out), cfg["seed"], use_xgboost=not args.no_xgboost)
             print(json.dumps({r["model_type"]: r["metrics"]["test"] for r in rep["runs"]}, indent=2, default=str))
+        elif args.cmd == "train-chemical":
+            from src.models.chemical import run_chemical
+            rep = run_chemical(cfg, args.key, args.readiness)
+            print(json.dumps({k: rep[k] for k in ("model_version", "selected_model", "tied_models", "test",
+                                                   "test_pr_auc_ci", "vs_commodity_rate_pr_auc",
+                                                   "ablation_with_calendar_position")}, indent=2, default=str))
     except (MappingIncompleteError, SchemaError, FileNotFoundError, NotModelReadyError, ContractError) as e:
         print(f"BLOCKED: {e}", file=sys.stderr)
         return 2

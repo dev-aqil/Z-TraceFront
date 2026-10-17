@@ -87,9 +87,11 @@ def test_refuses_table_changed_after_handoff(tmp_path):
         load_handoff(path, ready_targets())
 
 
-def test_every_real_target_is_currently_blocked(tmp_path):
+def test_only_reviewed_targets_are_ready(tmp_path):
     targets = load_targets()
-    assert all(c["status"] != "READY" for c in targets["targets"].values())
+    # imidacloprid_detected: reviewed 2026-10-17 (reports/modeling_target_contracts.md); everything else blocked
+    assert [n for n, c in targets["targets"].items() if c["status"] == "READY"] == ["imidacloprid_detected"]
+    assert targets["targets"]["imidacloprid_detected"]["scope"] == "RETROSPECTIVE_RELEASE_COHORT_ONLY"
     with pytest.raises(NotModelReadyError, match="contract status"):
         load_handoff(write_handoff(tmp_path, synthetic_table()), targets)
 

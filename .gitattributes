@@ -1,0 +1,5 @@
+# Person A's model-ready handoff is pinned by the SHA-256 of each file's exact bytes
+# (data/processed/*.readiness.json). Line-ending conversion on checkout (core.autocrlf) would break every pin.
+data/processed/** -text
+reports/m7_validation.json -text
+reports/modeling_handoff.json -text

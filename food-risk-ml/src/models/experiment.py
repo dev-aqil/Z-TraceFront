@@ -52,7 +52,7 @@ def split_handoff(h: Handoff, seed: int, overrides: dict | None = None) -> tuple
     return parts, split_def
 
 
-def _matrix(h: Handoff, df: pd.DataFrame) -> pd.DataFrame:
+def feature_matrix(h: Handoff, df: pd.DataFrame) -> pd.DataFrame:
     X = pd.DataFrame(index=df.index)
     for f in h.manifest["features"]:
         col = df[f["name"]]
@@ -65,7 +65,7 @@ def run_experiment(manifest_path: str | Path, out_dir: str | Path, seed: int = 4
     h = load_handoff(manifest_path, targets)  # refuses anything not model-ready
     c, task = h.contract, h.contract["task_type"]
     parts, split_def = split_handoff(h, seed, split_overrides)
-    X = {k: _matrix(h, v) for k, v in parts.items()}
+    X = {k: feature_matrix(h, v) for k, v in parts.items()}
     y = {k: v[h.target].to_numpy() for k, v in parts.items()}
     cat = [f["name"] for f in h.manifest["features"] if f["dtype"] != "numeric"]
     num = [f["name"] for f in h.manifest["features"] if f["dtype"] == "numeric"]

@@ -1,0 +1,8 @@
+source_feature,mean_abs_shap
+pdp_commodity_code,0.2395507871869234
+pdp_sample_unit_count,0.10358634698505112
+pdp_import_origin_country_code,0.06913413705653568
+pdp_product_claim_code,0.027558817412440064
+pdp_commodity_type_code,0.02317411574946572
+pdp_origin_code,0.013370514931889293
+pdp_collection_dow_iso,0.010924482071909871

@@ -1,0 +1,152 @@
+{
+  "model_version": "chemical-imidacloprid-random_forest-20261017T133020Z",
+  "selected_model": "random_forest",
+  "tied_models": [
+    "random_forest"
+  ],
+  "selection": "max validation PR-AUC among learned models; within 0.005 tied, preference ['xgboost', 'logistic_regression', 'random_forest']",
+  "calibration": {
+    "raw_brier": 0.14888662399199074,
+    "platt_oof_brier": 0.03174692593786766,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "threshold": 0.024121259643263407,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "val": {
+    "n": 1540,
+    "prevalence": 0.03441558441558441,
+    "threshold": 0.024121259643263407,
+    "precision": 0.0649171270718232,
+    "recall": 0.8867924528301887,
+    "f1": 0.12097812097812098,
+    "specificity": 0.5447209145931405,
+    "false_negative_rate": 0.11320754716981132,
+    "pr_auc": 0.14759800974042192,
+    "roc_auc": 0.7712692390656126,
+    "brier": 0.03171703300918238,
+    "tn": 810,
+    "fp": 677,
+    "fn": 6,
+    "tp": 47
+  },
+  "test": {
+    "n": 1418,
+    "prevalence": 0.03244005641748942,
+    "threshold": 0.024121259643263407,
+    "precision": 0.06330935251798561,
+    "recall": 0.9565217391304348,
+    "f1": 0.11875843454790824,
+    "specificity": 0.5255102040816326,
+    "false_negative_rate": 0.043478260869565216,
+    "pr_auc": 0.1611418566703831,
+    "roc_auc": 0.8591393078970719,
+    "brier": 0.029161631993768904,
+    "tn": 721,
+    "fp": 651,
+    "fn": 2,
+    "tp": 44
+  },
+  "test_pr_auc_ci": [
+    0.10321925288187753,
+    0.24942394268474316
+  ],
+  "test_recall_at_budget": {
+    "10pct": {
+      "budget": 0.1,
+      "recall": 0.5169082125603864,
+      "precision": 0.1674491392801252,
+      "lift": 5.169082125603864
+    },
+    "20pct": {
+      "budget": 0.2,
+      "recall": 0.7608695652173914,
+      "precision": 0.12323943661971831,
+      "lift": 3.8043478260869565
+    },
+    "30pct": {
+      "budget": 0.3,
+      "recall": 0.8695652173913043,
+      "precision": 0.09411764705882353,
+      "lift": 2.898550724637681
+    }
+  },
+  "vs_commodity_rate_pr_auc": {
+    "val": {
+      "diff": 0.046767174588257854,
+      "ci": [
+        -0.02438625708748268,
+        0.1265776045699766
+      ],
+      "share_a_better": 0.916,
+      "resamples": 2000
+    },
+    "test": {
+      "diff": 0.05736198806259703,
+      "ci": [
+        0.02333707632084586,
+        0.12424643290362616
+      ],
+      "share_a_better": 1.0,
+      "resamples": 2000
+    }
+  },
+  "ablation_with_calendar_position": {
+    "added_features": [
+      "pdp_collection_doy",
+      "pdp_collection_isoweek"
+    ],
+    "model": "random_forest",
+    "val": {
+      "pr_auc": 0.14259817825863755,
+      "pr_auc_ci": [
+        0.08313359730237446,
+        0.23932934982013096
+      ]
+    },
+    "test": {
+      "pr_auc": 0.1515085334659223,
+      "pr_auc_ci": [
+        0.09505153712308327,
+        0.24305574019659548
+      ]
+    }
+  },
+  "sizes": {
+    "train": 6913,
+    "val": 1540,
+    "test": 1418
+  },
+  "synthetic": false,
+  "top_features": [
+    {
+      "source_feature": "pdp_commodity_code",
+      "mean_abs_shap": 0.2395507871869234
+    },
+    {
+      "source_feature": "pdp_sample_unit_count",
+      "mean_abs_shap": 0.10358634698505112
+    },
+    {
+      "source_feature": "pdp_import_origin_country_code",
+      "mean_abs_shap": 0.06913413705653568
+    },
+    {
+      "source_feature": "pdp_product_claim_code",
+      "mean_abs_shap": 0.027558817412440064
+    },
+    {
+      "source_feature": "pdp_commodity_type_code",
+      "mean_abs_shap": 0.02317411574946572
+    },
+    {
+      "source_feature": "pdp_origin_code",
+      "mean_abs_shap": 0.013370514931889293
+    },
+    {
+      "source_feature": "pdp_collection_dow_iso",
+      "mean_abs_shap": 0.010924482071909871
+    }
+  ],
+  "model_dir": "D:\\Documents\\Portfolio\\hackathon\\Z-TraceFront\\food-risk-ml\\artifacts\\registry_chemical_imidacloprid\\chemical-imidacloprid-random_forest-20261017T133020Z"
+}

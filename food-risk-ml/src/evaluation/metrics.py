@@ -43,6 +43,22 @@ def bootstrap_ci(metric, y: np.ndarray, p: np.ndarray, n: int = 200, seed: int =
     return float(np.quantile(vals, a)), float(np.quantile(vals, 1 - a))
 
 
+def paired_bootstrap_diff(metric, y: np.ndarray, p_a: np.ndarray, p_b: np.ndarray, n: int = 2000, seed: int = 0,
+                          level: float = 0.95) -> dict:
+    """metric(a) - metric(b) on the same resampled rows each time, so shared noise cancels. `share_a_better` is
+    the fraction of resamples where a beats b; an interval excluding 0 is evidence a is better on this data."""
+    rng = np.random.default_rng(seed)
+    y, p_a, p_b = np.asarray(y), np.asarray(p_a), np.asarray(p_b)
+    diffs = []
+    for _ in range(n):
+        idx = rng.integers(0, len(y), len(y))
+        if len(np.unique(y[idx])) == 2:
+            diffs.append(metric(y[idx], p_a[idx]) - metric(y[idx], p_b[idx]))
+    diffs, a = np.asarray(diffs), (1 - level) / 2
+    return {"diff": float(metric(y, p_a) - metric(y, p_b)), "ci": [float(np.quantile(diffs, a)),
+            float(np.quantile(diffs, 1 - a))], "share_a_better": float((diffs > 0).mean()), "resamples": len(diffs)}
+
+
 def regression_metrics(y: np.ndarray, pred: np.ndarray) -> dict:
     """MAE/RMSE in target units, R^2, and a residual summary (bias and spread) for residual analysis."""
     y, pred = np.asarray(y, dtype=float), np.asarray(pred, dtype=float)

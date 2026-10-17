@@ -70,7 +70,13 @@ def load_handoff(manifest_path: str | Path, targets: dict[str, Any] | None = Non
     m = json.loads(manifest_path.read_text(encoding="utf-8"))
     if m.get("model_ready") is not True:  # a JSON boolean, not "true" or 1
         raise NotModelReadyError(f"{manifest_path}: model_ready is {m.get('model_ready')!r}, not true")
+    return gate(m, manifest_path.parent, targets)
 
+
+def gate(m: dict[str, Any], base_dir: Path, targets: dict[str, Any] | None = None) -> Handoff:
+    """The checks every handoff passes, whatever format it arrived in (see src/models/chemical.py)."""
+    if m.get("model_ready") is not True:
+        raise NotModelReadyError(f"model_ready is {m.get('model_ready')!r}, not true")
     targets = targets or load_targets()
     name = m.get("target")
     if name not in targets["targets"]:
@@ -83,7 +89,7 @@ def load_handoff(manifest_path: str | Path, targets: dict[str, Any] | None = Non
         raise ContractError(f"target {name!r} needs an analyte (one model per pathogen or pesticide)")
 
     table_meta = m["table"]
-    table_path = (manifest_path.parent / table_meta["path"]).resolve()
+    table_path = (Path(base_dir) / table_meta["path"]).resolve()
     actual = sha256_file(table_path)
     if actual != table_meta["sha256"]:
         raise NotModelReadyError(f"{table_path.name}: sha256 {actual} does not match manifest {table_meta['sha256']}")

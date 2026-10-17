@@ -1,6 +1,6 @@
 # Modeling target contracts — Person B
 
-Status date: 2026-10-17. Owner: Person B. Machine-readable version used by code: [food-risk-ml/configs/modeling/targets.toml](../food-risk-ml/configs/modeling/targets.toml). The experiment runner refuses any target whose status is not `READY`. **Every target is currently blocked.**
+Status date: 2026-10-17. Owner: Person B. Machine-readable version used by code: [food-risk-ml/configs/modeling/targets.toml](../food-risk-ml/configs/modeling/targets.toml). The experiment runner refuses any target whose status is not `READY`. **One target is READY: `imidacloprid_detected` (retrospective scope, 2026-10-17). All others are blocked.**
 
 Each problem type below is separate. Outputs from different targets are never combined into one probability, and rows from different targets are never concatenated into one training table.
 
@@ -10,6 +10,7 @@ Each problem type below is separate. Outputs from different targets are never co
 |---|---|---|---|---|
 | `pathogen_positive` | Biological | binary | `BLOCKED_PENDING_PERSON_A_FSIS_HANDOFF` | Person A FSIS intake + model-ready handoff |
 | `pesticide_detected` | Chemical | binary | `BLOCKED_PENDING_PDP_CODE_SEMANTICS` | Person A documents the MEAN/ANNOTATE/re-extraction rules that define detection |
+| `imidacloprid_detected` | Chemical | binary | **`READY`** (retrospective 2024 cohort only) | Person A M8 handoff `chemical_imidacloprid_detection_training_v1`; reviewed 2026-10-17 |
 | `residue_concentration` | Chemical | regression (censored) | `BLOCKED_PENDING_CENSORING_POLICY` | Agreed handling of nondetects below LOD |
 | `chemical_exceedance` | Chemical | binary | `BLOCKED_NO_AUTHORITATIVE_LIMITS` | Tolerance table with effective dates, residue definitions, commodity mapping |
 | `microbial_count` | Cold chain | regression | `BLOCKED_PENDING_SOURCE` | Milk/paneer/beef source acquired and cleaned |
@@ -64,6 +65,33 @@ The PDP 2024 tables are cleaned (M2) but not model-ready. **A PDP detection is n
 | Expected inputs | Commodity, commodity type, claim, origin/country, sampling state, distribution type, month |
 | Major leakage risks | CONCEN/LOD/MEAN/ANNOTATE/QUANTITATE/CONFMETHOD of the same sample × pesticide. Other pesticides' results on the same sample (multi-residue co-occurrence) are same-sample lab results, so they are excluded by default. Lab and test-class fields affect detection limits (see the feature requirements). |
 | Readiness | `BLOCKED_PENDING_PDP_CODE_SEMANTICS` |
+
+### `imidacloprid_detected` (READY, retrospective)
+
+This is a narrow instance of `pesticide_detected`: one pesticide, one release. Person A has documented the code semantics for it.
+
+| Field | Contract |
+|---|---|
+| Scientific meaning | For one PDP 2024 sample, the original-extraction analytical result for imidacloprid (analyte 967, parent compound only) is a detection |
+| Positive class | Publisher MEAN `O` (original-extraction detection) |
+| Negative class | MEAN `ND`, a validated well-recovered nondetect. Nondetect is assay-relative, so it does not mean zero residue or safe food. |
+| Excluded | `NP` (marginal-performing nondetect), `R` (re-extraction, 1 row), and any ambiguous repeated sample/analyte group. All other analytes. |
+| Inputs | Person A's whitelist: commodity, commodity type, origin, import-origin country, label claim, sample unit count, collection day-of-week. **Excluded by this contract:** day-of-year and ISO week (see below). |
+| Split | Person A's audited temporal split on whole collection days: train 2024-01-02..09-09 (6,913 rows, 291 positive), validation 09-10..11-05 (1,540, 53), test 11-06..12-23 (1,418, 46) |
+| Scope | `RETROSPECTIVE_RELEASE_COHORT_ONLY`. All labels were released together after the cohort, so this measures association within 2024, not a model that could have run during 2024. No regulatory exceedance, no unsafe-food claim, no facility or new-farm transfer claim. |
+| Readiness | **`READY`** |
+
+**Decision record (2026-10-17).**
+- Reviewer: Adam Amzar (Person B).
+- Evidence:
+  - Person A's readiness file has `model_ready: true` and `leakage_audit_passed: true`, with SHA-256 pins for the dataset, feature manifest, leakage audit, schema and provenance (`data/processed/chemical_imidacloprid_detection_training_v1.readiness.json`).
+  - M7 leakage audit: `reports/m7_validation.json`.
+  - Person B review of the label counts, split counts and feature ranges.
+- Feature decision, made before any model was fitted:
+  - `pdp_collection_doy` and `pdp_collection_isoweek` are excluded, because the temporal split leaves no overlap. Training covers day 2–253, validation 254–310 and test 311–358, so these features can only extrapolate.
+  - Day-of-week (1–7 in every split) is kept.
+  - A run with the two features restored is reported as an ablation only.
+- Success criterion, fixed before training: the learned model is compared with a **commodity-rate baseline** (each commodity's smoothed training detection rate) by a paired bootstrap on test. Value beyond commodity is claimed only if that interval excludes zero.
 
 ### `residue_concentration`
 

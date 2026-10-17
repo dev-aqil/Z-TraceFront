@@ -19,6 +19,14 @@ processed = "data/processed/canonical_campylobacter.csv"
 reports = "reports/campylobacter"
 registry = "artifacts/registry_campylobacter"
 
+# Chemical models, trained only from a Person A model-ready handoff (src/models/chemical.py). Separate from the
+# pathogen models in every way: target, registry, reports, API output. Never combined into one probability.
+[chemical.imidacloprid]
+readiness = "../data/processed/chemical_imidacloprid_detection_training_v1.readiness.json"
+reports = "reports/chemical_imidacloprid"
+registry = "artifacts/registry_chemical_imidacloprid"
+bootstrap = 2000
+
 [split]
 # Chronological split by sample_date on fixed calendar dates shared by every pathogen:
 # train < val_start <= val < backtest.sealed_test_start <= test. The dates are those of the first real (Salmonella)
