@@ -6,7 +6,7 @@ SAMPLE_ID = "sample_id"
 SAMPLE_DATE = "sample_date"
 ESTABLISHMENT_ID = "establishment_id"
 PRODUCT_CATEGORY = "product_category"
-TARGET = "salmonella_positive"
+TARGET = "pathogen_positive"  # which pathogen is in config/metadata, never the column name
 
 IS_SYNTHETIC = "is_synthetic"
 
@@ -26,7 +26,7 @@ ALIASES = {
     "food_type": META_CAT_PREFIX + "food_type", "state": META_CAT_PREFIX + "state",
 }
 PATHOGEN_COLUMNS = ("pathogen", "analyte")  # Person A uses analyte
-GENERIC_TARGET, LABEL_STATUS = "pathogen_positive", "label_status"
+LABEL_STATUS = "label_status"
 # Person A lineage/label metadata: kept in their store, not model inputs, so dropped on load.
 LINEAGE_COLUMNS = (
     "observation_id", "dataset_id", "dataset_version", "source_record_id", "prediction_time",
@@ -81,9 +81,9 @@ def validate_canonical(df: pd.DataFrame, require_labels: bool = True) -> pd.Data
     bad = df[TARGET].dropna()
     bad = bad[~bad.isin([0, 1])]
     if len(bad):
-        problems.append(f"salmonella_positive must be 0, 1 or missing; found {sorted(map(str, bad.unique()))[:10]}")
+        problems.append(f"{TARGET} must be 0, 1 or missing; found {sorted(map(str, bad.unique()))[:10]}")
     if require_labels and df[TARGET].notna().sum() == 0:
-        problems.append("no labelled rows (salmonella_positive is entirely missing)")
+        problems.append(f"no labelled rows ({TARGET} is entirely missing)")
 
     if IS_SYNTHETIC in df and not pd.api.types.is_bool_dtype(df[IS_SYNTHETIC]):
         problems.append("is_synthetic must be boolean")

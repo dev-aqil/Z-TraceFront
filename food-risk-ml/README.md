@@ -21,7 +21,7 @@ cd food-risk-ml
 python -m venv .venv
 .venv\Scripts\activate          # Windows;  source .venv/bin/activate on Linux/macOS
 pip install -e ".[dev,boost,explain]"   # boost = xgboost, explain = shap; both optional (no s390x wheels)
-pytest                          # 84 tests on synthetic fixtures
+pytest                          # 93 tests on synthetic fixtures
 ruff check src tests
 ```
 

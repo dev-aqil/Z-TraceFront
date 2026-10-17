@@ -1,7 +1,8 @@
 """FastAPI inference service.
 
 Run:  uvicorn src.api.app:app --port 8100
-Model: $FOOD_RISK_MODEL_DIR if set, else the LATEST entry in artifacts/registry.
+Model: $FOOD_RISK_MODEL_DIR if set, else the LATEST entry in the registry of $FOOD_RISK_PATHOGEN
+(a config pathogen key such as salmonella or campylobacter; default: the config's default_pathogen).
 """
 
 import logging
@@ -56,12 +57,13 @@ class Health(BaseModel):
 
 
 def create_app(model_dir: Path | None = None) -> FastAPI:
-    app = FastAPI(title="Food contamination risk: Salmonella sample positivity", version="0.1.0")
+    app = FastAPI(title="Food contamination risk: pathogen sample positivity", version="0.1.0")
     state: dict = {"predictor": None, "error": None}
     try:
         if model_dir is None:
+            cfg = load_config(pathogen=os.environ.get("FOOD_RISK_PATHOGEN"))
             model_dir = Path(os.environ["FOOD_RISK_MODEL_DIR"]) if "FOOD_RISK_MODEL_DIR" in os.environ \
-                else latest_model_dir(resolve(load_config()["paths"]["registry"]))
+                else latest_model_dir(resolve(cfg["paths"]["registry"]))
         state["predictor"] = Predictor(model_dir)
     except Exception as e:  # missing file, missing library (e.g. xgboost on s390x), version-incompatible pickle
         state["error"] = f"{type(e).__name__}: {e}"

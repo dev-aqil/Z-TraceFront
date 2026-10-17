@@ -9,7 +9,7 @@ from tests.test_loading import MAPPING, RAW
 
 
 @pytest.mark.parametrize("name", ["Salmonella_Result", "serotype", "Campylobacter", "recall_status",
-                                  "AMR_profile", "pfge_pattern", "salmonella_positive", "not_analyzed",
+                                  "AMR_profile", "pfge_pattern", "pathogen_positive", "not_analyzed",
                                   "campylobacter_analysis_30ml_canceled", "aerobic_plate_count_mpn_ml",
                                   "enterobacteriaceae_mpn_ml", "allele_code"])
 def test_denylist_blocks_target_derived_names(name):
@@ -29,7 +29,7 @@ def test_mapping_rejects_leaky_extra_feature():
 
 def test_features_exclude_target_and_identifiers(synthetic_df, cfg):
     X = make_features(synthetic_df, build_daily_history(synthetic_df), cfg, prior_rate=0.1)
-    assert not {"salmonella_positive", "sample_id", "establishment_id", "sample_date"} & set(X.columns)
+    assert not {"pathogen_positive", "sample_id", "establishment_id", "sample_date"} & set(X.columns)
 
 
 def _brute_force(df, lag):
@@ -38,7 +38,7 @@ def _brute_force(df, lag):
         prior = df[(df["establishment_id"] == r["establishment_id"])
                    & (df["sample_date"] + pd.Timedelta(days=lag) < r["sample_date"])]
         n.append(len(prior))
-        pos.append(int(prior["salmonella_positive"].sum()))
+        pos.append(int(prior["pathogen_positive"].sum()))
     return np.array(n), np.array(pos)
 
 
@@ -57,7 +57,7 @@ def test_own_and_same_day_labels_do_not_change_features(synthetic_df):
     i = 200
     flipped = df.copy()
     same_day = (flipped["sample_date"] >= df["sample_date"].iloc[i])  # this sample, same-day and later ones
-    flipped.loc[same_day, "salmonella_positive"] = 1 - flipped.loc[same_day, "salmonella_positive"]
+    flipped.loc[same_day, "pathogen_positive"] = 1 - flipped.loc[same_day, "pathogen_positive"]
     after = add_history_features(flipped, build_daily_history(flipped), 0, 0.1, 20)
     rows = df.index[df["sample_date"] == df["sample_date"].iloc[i]]
     pd.testing.assert_frame_equal(base.loc[rows, list(HISTORY_FEATURES)], after.loc[rows, list(HISTORY_FEATURES)])

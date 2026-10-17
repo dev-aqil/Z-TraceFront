@@ -17,7 +17,7 @@ HINTS = {
     "sample_date": ("date", "collect"),
     "establishment_id": ("establishment", "est", "plant"),
     "product_category": ("product", "project", "category", "class", "type"),
-    "salmonella_result": ("salmonella", "salm"),
+    "pathogen_result": ("salmonella", "campylobacter", "listeria", "stec", "analysis"),
 }
 DATE_FORMATS = ("ISO8601", "%m/%d/%Y", "%d/%m/%Y", "%Y%m%d")
 

@@ -74,6 +74,14 @@ def _pr_plot(y: np.ndarray, probs: dict[str, np.ndarray], path: Path) -> None:
     plt.close(fig)
 
 
+def select_model(val_pr_auc: dict[str, float], tie_tolerance: float, preference: list[str]) -> tuple[str, list[str]]:
+    """Best validation PR-AUC; models within tie_tolerance of it are tied and the tie goes to `preference` order."""
+    top = max(val_pr_auc.values())
+    tied = [m for m, v in val_pr_auc.items() if v >= top - tie_tolerance]
+    rank = {m: i for i, m in enumerate(preference)}
+    return min(tied, key=lambda m: (rank.get(m, len(rank)), -val_pr_auc[m])), tied
+
+
 def run_training(df: pd.DataFrame, cfg: dict, reports_dir: Path, registry_dir: Path, provenance: dict) -> dict:
     seed = cfg["seed"]
     np.random.seed(seed)
@@ -122,7 +130,10 @@ def run_training(df: pd.DataFrame, cfg: dict, reports_dir: Path, registry_dir: P
 
     # Model selection uses validation PR-AUC only; the test split is reported, never used to choose.
     cand = metrics[(metrics["split"] == "val") & (metrics["model"] != "dummy_prior")]
-    best = str(cand.sort_values("pr_auc", ascending=False).iloc[0]["model"])
+    sel = cfg["selection"]
+    best, tied = select_model(dict(zip(cand["model"], cand["pr_auc"], strict=True)), sel["tie_tolerance"],
+                              sel["preference"])
+    log.info("selected %s (tied within %.3f validation PR-AUC: %s)", best, sel["tie_tolerance"], tied)
     pipe = fitted[best]
     cal = assess_calibration(y["val"], p_val[best], seed)
     final = PlattCalibrated(pipe).fit(p_val[best], y["val"]) if cal["apply"] else pipe
@@ -141,13 +152,16 @@ def run_training(df: pd.DataFrame, cfg: dict, reports_dir: Path, registry_dir: P
 
     version = f"{cfg['pathogen'].lower()}-{best}-{datetime.now(UTC):%Y%m%dT%H%M%SZ}"
     final_report = {
-        "model_version": version, "selected_model": best, "selection": "max validation PR-AUC (dummy excluded)",
+        "model_version": version, "selected_model": best,
+        "selection": f"max validation PR-AUC (dummy excluded); models within {sel['tie_tolerance']} tied, "
+                     f"tie goes to preference order {sel['preference']}",
+        "tied_models": tied,
         "calibration": cal, "threshold": thr, "threshold_rule": how,
         "val": binary_metrics(y["val"], fv, thr), "test": binary_metrics(y["test"], ft, thr),
     }
     metadata = {
         "model_version": version, "task": TASK, "pathogen": cfg["pathogen"],
-        "target": f"{TARGET}: laboratory sample tested positive (not batch safety)",
+        "target": f"{TARGET}: laboratory sample tested positive for {cfg['pathogen']} (not batch safety)",
         "created_at": datetime.now(UTC).isoformat(), "provenance": provenance,
         "split": {"method": split.method, "notes": split.notes,
                   "sizes": {k: len(v) for k, v in parts.items()}},

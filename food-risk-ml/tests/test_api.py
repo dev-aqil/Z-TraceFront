@@ -29,7 +29,7 @@ def test_predict_response_schema(client):
 @pytest.mark.parametrize("payload", [
     {"product_category": "x"},                                           # missing sample_date
     {"sample_date": "not-a-date"},
-    {"sample_date": "2024-01-15", "salmonella_positive": 1},             # unknown top-level field
+    {"sample_date": "2024-01-15", "pathogen_positive": 1},             # unknown top-level field
     {"sample_date": "2024-01-15", "metadata": {"meta_cat_recall_flag": "Y"}},  # feature the model lacks
 ])
 def test_predict_rejects_invalid_input(client, payload):

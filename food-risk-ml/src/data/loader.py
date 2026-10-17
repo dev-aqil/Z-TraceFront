@@ -14,7 +14,6 @@ import pandas as pd
 from src.data.contract import (
     ALIASES,
     ESTABLISHMENT_ID,
-    GENERIC_TARGET,
     IS_SYNTHETIC,
     LABEL_STATUS,
     LINEAGE_COLUMNS,
@@ -92,7 +91,7 @@ def load_mapping(path: str | Path) -> dict[str, Any]:
 
 def mapping_problems(m: dict[str, Any]) -> list[str]:
     cols, labels = m.get("columns", {}), m.get("labels", {})
-    problems = [f"columns.{k} is empty" for k in ("sample_date", "salmonella_result") if not cols.get(k)]
+    problems = [f"columns.{k} is empty" for k in ("sample_date", "pathogen_result") if not cols.get(k)]
     if not labels.get("positive_values"):
         problems.append("labels.positive_values is empty")
     if not labels.get("negative_values"):
@@ -144,7 +143,7 @@ def apply_mapping(raw: pd.DataFrame, m: dict[str, Any]) -> pd.DataFrame:
     out[PRODUCT_CATEGORY] = (text(cols["product_category"]).fillna(UNKNOWN_CATEGORY)
                              if cols.get("product_category") else UNKNOWN_CATEGORY)
 
-    result = text(cols["salmonella_result"]).str.casefold()
+    result = text(cols["pathogen_result"]).str.casefold()
     pos = {str(v).strip().casefold() for v in m["labels"]["positive_values"]}
     neg = {str(v).strip().casefold() for v in m["labels"]["negative_values"]}
     out[TARGET] = pd.Series(pd.NA, index=raw.index, dtype="Int8")
@@ -205,13 +204,11 @@ def resolve_aliases(df: pd.DataFrame, pathogen: str = "Salmonella") -> pd.DataFr
     if clashes:
         raise SchemaError([f"both {a!r} and {ALIASES[a]!r} present; deliver one" for a in clashes])
     df = df.rename(columns={a: c for a, c in ALIASES.items() if a in df})
-    if GENERIC_TARGET in df:
-        pcol = next((c for c in PATHOGEN_COLUMNS if c in df), None)
-        if TARGET in df or pcol is None:
-            raise SchemaError([f"{GENERIC_TARGET} needs one of {PATHOGEN_COLUMNS} and no {TARGET!r} column"])
+    pcol = next((c for c in PATHOGEN_COLUMNS if c in df), None)
+    if pcol:  # multi-pathogen file: keep only this model's pathogen; others are separate targets
         keep = df[pcol].astype(str).str.strip().str.casefold() == pathogen.casefold()
         log.info("keeping %d/%d rows where %s == %s", keep.sum(), len(df), pcol, pathogen)
-        df = df[keep].drop(columns=pcol).rename(columns={GENERIC_TARGET: TARGET})
+        df = df[keep].drop(columns=pcol)
     if LABEL_STATUS in df:
         if TARGET in df:
             df.loc[df[LABEL_STATUS].astype(str).str.strip().str.casefold() != "observed", TARGET] = pd.NA

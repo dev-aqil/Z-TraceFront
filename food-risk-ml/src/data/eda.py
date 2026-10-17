@@ -39,7 +39,7 @@ def run_eda(df: pd.DataFrame, out_dir: str | Path) -> dict:
         fig, ax = plt.subplots(figsize=(10, 4))
         monthly["positive_rate"].plot(ax=ax, marker=".")
         ax.set_ylabel("sample positive rate")
-        ax.set_title("Salmonella sample positive rate by collection month")
+        ax.set_title("Sample positive rate by collection month")
         fig.tight_layout()
         fig.savefig(out / "positive_rate_by_month.png", dpi=120)
         plt.close(fig)

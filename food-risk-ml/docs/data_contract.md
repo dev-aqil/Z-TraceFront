@@ -1,6 +1,6 @@
 # Data contract: Person A → Person B
 
-This document defines the **canonical internal table** that Person B's Salmonella model consumes. The names here are internal. **They are not the official FSIS field names.** The mapping from real FSIS columns is set in `configs/source_mapping.toml`, and only after someone has inspected the downloaded files and the official FSIS metadata. At the time of writing that has not happened, because the FSIS site was unreachable from the build machine. See the README.
+This document defines the **canonical internal table** that Person B's pathogen models consume (one table and one model per pathogen: Salmonella, Campylobacter). The names here are internal. **They are not the official FSIS field names.** The mapping from real FSIS columns is set in `configs/source_mapping.toml`, and only after someone has inspected the downloaded files and the official FSIS metadata. At the time of writing that has not happened, because the FSIS site was unreachable from the build machine. See the README.
 
 Validate any delivered file with:
 
@@ -14,7 +14,7 @@ The project has three ML problem types. Each one has its own training table, lab
 
 | Problem | Source(s) | Label | Status |
 |---|---|---|---|
-| **Biological contamination** (this contract) | USDA FSIS Laboratory Sampling Data, raw poultry | `salmonella_positive` | MVP; implemented, training blocked on data |
+| **Biological contamination** (this contract) | USDA FSIS Laboratory Sampling Data, raw poultry | `pathogen_positive`, one model per pathogen (`--pathogen salmonella` / `campylobacter`) | implemented |
 | Chemical residue | USDA Pesticide Data Program | `pesticide_exceedance` | future, separate model |
 | Cold-chain / spoilage | milk tank, paneer, beef, fruit storage datasets | `microbial_count` / `spoilage_class` | future, separate model (§8) |
 
@@ -30,7 +30,7 @@ The other microbiological datasets (milk, paneer, beef) measure different organi
 | `product_category` | string | yes | Product/sampling category known before testing (e.g. the FSIS project or product class, once verified). | `__unknown__`. Never empty. |
 | `meta_cat_<name>` | string | no | Extra **pre-sampling** categorical metadata (§4). | `__unknown__` |
 | `meta_num_<name>` | number | no | Extra **pre-sampling** numeric metadata (§4). | Empty (median-imputed, with a missing indicator). |
-| `salmonella_positive` | 0/1 | yes (column) | `1`: the laboratory result for **this sample** reports Salmonella detected. `0`: the sample was tested and Salmonella was not detected. | Empty = not tested, not analysed, inconclusive, or a code not yet interpreted. Such rows are **excluded** from training and evaluation. Labels are never imputed. |
+| `pathogen_positive` | 0/1 | yes (column) | `1`: the laboratory result for **this sample** reports the model's pathogen detected (Salmonella: `salmonella_sp_analysis`; Campylobacter: enrichment result `campylobacter_analysis_30ml` only). `0`: tested and not detected. | Empty = not tested, not analysed, inconclusive, or a code not yet interpreted. Such rows are **excluded** from training and evaluation. Labels are never imputed. |
 
 Any other column is rejected by validation.
 
@@ -49,10 +49,10 @@ Any other column is rejected by validation.
 
 These must never appear as `meta_*` features, whatever they are called. `src/features/leakage.py` also rejects names containing denylist terms:
 
-- Any laboratory result for the **same sample**: Salmonella, and also **Campylobacter, Listeria and STEC/E. coli** (FSIS tests one sample for several pathogens), serotype/serovar, PFGE/WGS, isolate IDs, AMR/resistance, MPN/CFU counts.
+- Any laboratory result for the **same sample**: Salmonella, **Campylobacter (either method), Listeria and STEC/E. coli** (FSIS tests one sample for several pathogens), serotype/serovar, PFGE/WGS, isolate IDs, AMR/resistance, MPN/CFU counts.
 - Anything recorded after collection: result or report dates, outcome, finding, status, follow-up actions.
 - Recall, enforcement or regulatory actions linked to the sample or to its outcome.
-- Any column derived from `salmonella_positive`.
+- Any column derived from `pathogen_positive`.
 
 ## 4. Optional pre-sampling metadata
 
@@ -67,7 +67,7 @@ Person B computes establishment history from labels inside the pipeline (`src/fe
 - `est_prior_samples`, `est_prior_positives`, `est_prior_rate_smoothed`, `est_days_since_prior`
 - A labelled sample collected on date *d* counts toward a sample on date *t* only if `d + label_lag_days < t`. Same-day and later samples never count, and neither does the sample itself.
 - **Result availability is assumed, not observed.** The FSIS data dictionary has no result or report date, only `collection_date`. The 7-day lag is a documented assumption (agreed 2026-10-17). Person A's leakage audit forbids treating collection time as availability time; this adds a lag instead, but it is still an assumption.
-- History is **pooled per establishment across all sampling programmes** for Salmonella. Per-programme history is a possible refinement.
+- History is **pooled per establishment across all sampling programmes**, from the model's own pathogen only. Per-programme history is a possible refinement.
 - **No-history convention:** the count is 0 and the rate is **smoothed** toward the training-period positive rate using 20 pseudo-samples, rather than left null as in Person A's dictionary. `est_prior_samples = 0` still identifies rows with no history.
 - **Online policy:** validation and test rows may use earlier results from the validation and test periods, subject to the same lag, as a deployed model would. Model fitting itself only ever sees training rows.
 - Tests check this by brute force (`tests/test_leakage.py`).
@@ -98,7 +98,7 @@ Person A stores data in several tables (`observations`, `labels`, `history_event
 | `factory_id` | `establishment_id` | FSIS `establishment_id`. Keep the same namespacing in API requests. |
 | `sampling_program` | `product_category` | FSIS `project_code`, e.g. `HC_CH_CARC01` |
 | `food_category`, `commodity`, `food_type`, `state` | `meta_cat_<name>` | Extra pre-sampling categorical features |
-| `pathogen_positive` + `analyte` (or `pathogen`) | `salmonella_positive` | `true`/`false` or `1`/`0`. Only rows where analyte is "Salmonella" are kept; other pathogens are separate targets. |
+| `pathogen_positive` + `analyte` (or `pathogen`) | `pathogen_positive` | `true`/`false` or `1`/`0`. Only rows whose analyte matches the model's pathogen are kept; other pathogens are separate targets. |
 | `label_status` | — | Any status other than `observed` (untested, indeterminate, missing) gives no label. The column is then dropped. |
 | `is_synthetic` | `is_synthetic` | Optional boolean. If any row is true, the run's outputs are flagged synthetic. |
 | `observation_id`, `dataset_id`, `dataset_version`, `source_record_id`, `prediction_time`, `prediction_time_precision`, `label_id`, `target_name`, `label_source_record_id`, `label_definition_version`, `assay_method`, `result_available_at` | dropped | Lineage stays in Person A's store and is not a model input |

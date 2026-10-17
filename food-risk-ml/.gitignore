@@ -13,6 +13,7 @@ data/processed/*
 
 # Trained model binaries: never committed by default. metadata.json is small and may be committed deliberately.
 artifacts/registry/*
+artifacts/registry_*/
 !artifacts/README.md
 
 # Generated plots and per-run outputs (regenerate with the CLI)

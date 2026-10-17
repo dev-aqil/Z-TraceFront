@@ -1,0 +1,50 @@
+# Source -> canonical mapping for the CAMPYLOBACTER model on the FSIS Raw Poultry Sampling data product (FY2014-FY2026).
+# Same files and columns as the Salmonella mapping (configs/source_mapping.toml); only the result column differs.
+#
+# Evidence: the data_dictionary embedded in each downloaded JSON file (metadata.creation_date "October 09, 2026"),
+# plus a scan of all 13 files on 2026-10-17: identical primary-table columns in every year; salmonella_sp_analysis
+# values are "Positive", "Negative", "NULL", or a cancellation reason; form_id unique except 2 forms whose
+# duplicate rows agree. Files: data/raw/fsis_raw_poultry/ (hashes in DOWNLOAD_PROVENANCE.json).
+#
+# To re-check: python -m src.cli inspect data/raw/fsis_raw_poultry/zips/*.zip
+
+verified_by = "Claude Code draft from the embedded FSIS data dictionary; pending team review"
+verified_against = "FSIS Raw Poultry Product Sampling FY2014-FY2026 JSON, embedded metadata.data_dictionary (creation_date October 09, 2026), downloaded 2026-10-17"
+
+[columns]
+# data_dictionary: "The form number used to uniquely identify a specific sample." (sample_number = one test on it)
+sample_id = "form_id"
+# data_dictionary: "The date the FSIS inspector collected the sample at the FSIS-regulated establishment."
+sample_date = "collection_date"
+# data_dictionary: "A unique numeric identifier that is used to identify an establishment across data datasets"
+establishment_id = "establishment_id"
+# FSIS sampling project (e.g. HC_CH_CARC01 = HACCP verification, young chicken carcasses). Known at collection.
+# CAVEAT: F_* codes are "Follow-up sampling", triggered by an earlier result at the establishment. That is
+# information available before this sample (not same-sample leakage) but encodes FSIS targeting; see model card.
+product_category = "project_code"
+# data_dictionary: "The result of the analysis for Campylobacter species in the sample that was tested using the
+# enrichment method. Negative indicates Campylobacter was not found in the sample. Positive indicates ... found".
+# Enrichment (30 ml) only: ~191k labelled samples, one consistent method. The direct-plate method
+# (campylobacter_analysis_1ml, ~80k samples, ~4% positive) has a different sensitivity; mixing the two would turn a
+# method change into fake drift. Rows tested only by direct plate get no label. Scan of all 13 files on 2026-10-17:
+# values Positive 32,627 / Negative 158,505 / NEGATIVE 1 (matched case-insensitively) / NULL 133,990.
+pathogen_result = "campylobacter_analysis_30ml"
+
+[dates]
+format = "%Y-%m-%d"
+
+[missing]
+# metadata.notes_limitations: "NULL values indicate that the specific variable is not available for that record."
+values = ["NULL"]
+
+[labels]
+positive_values = ["Positive"]
+negative_values = ["Negative"]
+# Everything else (NULL, cancellation reasons such as "26 Lab closed") becomes a missing label and is excluded.
+
+[features]
+# Pre-sampling attributes from the primary table. Excluded on purpose: establishment_name/number (identifiers;
+# establishment_id covers them), project_name (duplicates project_code), not_analyzed*, every *_canceled field,
+# every other microbiology result (Salmonella, Campylobacter direct plate, MPN, CFU, plate counts) and the whole
+# secondary table.
+extra = { "sample_source_name" = "categorical", "product_type" = "categorical", "establishment_state" = "categorical" }

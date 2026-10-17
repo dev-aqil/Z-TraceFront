@@ -7,9 +7,18 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "configs" / "config.toml"
 
 
-def load_config(path: Path = DEFAULT_CONFIG) -> dict[str, Any]:
+def load_config(path: Path = DEFAULT_CONFIG, pathogen: str | None = None) -> dict[str, Any]:
+    """Load the config and resolve one pathogen section into cfg["pathogen"] (display name),
+    cfg["pathogen_key"] and cfg["paths"] (mapping, processed, reports, registry)."""
     with open(path, "rb") as f:
-        return tomllib.load(f)
+        cfg = tomllib.load(f)
+    key = (pathogen or cfg["default_pathogen"]).lower()
+    if key not in cfg["pathogens"]:
+        raise KeyError(f"unknown pathogen {key!r}; configured: {sorted(cfg['pathogens'])}")
+    section = cfg["pathogens"][key]
+    cfg["pathogen"], cfg["pathogen_key"] = section["name"], key
+    cfg["paths"] = {k: section[k] for k in ("mapping", "processed", "reports", "registry")}
+    return cfg
 
 
 def resolve(path: str | Path) -> Path:

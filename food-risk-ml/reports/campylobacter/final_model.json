@@ -1,0 +1,91 @@
+{
+  "model_version": "campylobacter-xgboost-20261017T130600Z",
+  "selected_model": "xgboost",
+  "selection": "max validation PR-AUC (dummy excluded); models within 0.005 tied, tie goes to preference order ['xgboost', 'logistic_regression', 'random_forest']",
+  "tied_models": [
+    "random_forest",
+    "xgboost"
+  ],
+  "calibration": {
+    "raw_brier": 0.20304758846759796,
+    "platt_oof_brier": 0.133749154558249,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "threshold": 0.17308476567268372,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "val": {
+    "n": 32490,
+    "prevalence": 0.19421360418590336,
+    "threshold": 0.17308476567268372,
+    "precision": 0.31156647327490433,
+    "recall": 0.8,
+    "f1": 0.4484719260838663,
+    "specificity": 0.5739495798319327,
+    "false_negative_rate": 0.2,
+    "pr_auc": 0.435403258548066,
+    "roc_auc": 0.7611434431141711,
+    "brier": 0.13373634219169617,
+    "tn": 15026,
+    "fp": 11154,
+    "fn": 1262,
+    "tp": 5048
+  },
+  "test": {
+    "n": 25799,
+    "prevalence": 0.1981084538160394,
+    "threshold": 0.17308476567268372,
+    "precision": 0.31370826010544817,
+    "recall": 0.7683427900606535,
+    "f1": 0.44551591128254575,
+    "specificity": 0.5847351121423047,
+    "false_negative_rate": 0.23165720993934652,
+    "pr_auc": 0.43443090983832755,
+    "roc_auc": 0.752067812656474,
+    "brier": 0.13706618547439575,
+    "tn": 12097,
+    "fp": 8591,
+    "fn": 1184,
+    "tp": 3927
+  },
+  "model_dir": "D:\\Documents\\Portfolio\\hackathon\\Z-TraceFront\\food-risk-ml\\artifacts\\registry_campylobacter\\campylobacter-xgboost-20261017T130600Z",
+  "synthetic": false,
+  "top_features": [
+    {
+      "source_feature": "est_prior_rate_smoothed",
+      "mean_abs_shap": 0.7836337685585022
+    },
+    {
+      "source_feature": "product_category",
+      "mean_abs_shap": 0.26304736733436584
+    },
+    {
+      "source_feature": "meta_cat_product_type",
+      "mean_abs_shap": 0.25753507018089294
+    },
+    {
+      "source_feature": "meta_cat_sample_source_name",
+      "mean_abs_shap": 0.21960268914699554
+    },
+    {
+      "source_feature": "meta_cat_establishment_state",
+      "mean_abs_shap": 0.1361919343471527
+    },
+    {
+      "source_feature": "est_prior_samples",
+      "mean_abs_shap": 0.11444918066263199
+    },
+    {
+      "source_feature": "sample_month",
+      "mean_abs_shap": 0.09735537320375443
+    },
+    {
+      "source_feature": "est_days_since_prior",
+      "mean_abs_shap": 0.06869225203990936
+    },
+    {
+      "source_feature": "est_prior_positives",
+      "mean_abs_shap": 0.05792258679866791
+    }
+  ]
+}

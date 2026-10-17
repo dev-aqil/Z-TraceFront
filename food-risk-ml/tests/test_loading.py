@@ -24,7 +24,7 @@ RAW = pd.DataFrame({
 MAPPING = {
     "verified_by": "test", "verified_against": "synthetic fixture",
     "columns": {"sample_id": "fake_id", "sample_date": "fake_collected", "establishment_id": "fake_est",
-                "product_category": "fake_product", "salmonella_result": "fake_salm"},
+                "product_category": "fake_product", "pathogen_result": "fake_salm"},
     "dates": {"format": "%Y-%m-%d"},
     "labels": {"positive_values": ["pos"], "negative_values": ["NEG"]},
     "features": {"extra": {}},
@@ -62,7 +62,7 @@ def test_read_table_fsis_product_reads_primary_only(tmp_path):
 def test_missing_tokens_become_missing():
     raw = RAW.assign(fake_product=["NULL", "parts", "", "x"], fake_salm=["NULL", "POS", "NEG", "NEG"])
     out = apply_mapping(raw, {**MAPPING, "missing": {"values": ["NULL"]}})
-    assert out["product_category"].iloc[0] == "__unknown__" and pd.isna(out["salmonella_positive"].iloc[0])
+    assert out["product_category"].iloc[0] == "__unknown__" and pd.isna(out["pathogen_positive"].iloc[0])
 
 
 def test_read_table_rejects_ambiguous_json(tmp_path):
@@ -73,8 +73,8 @@ def test_read_table_rejects_ambiguous_json(tmp_path):
 
 def test_apply_mapping_labels_dates_and_unknowns():
     out = apply_mapping(RAW, MAPPING)
-    assert out["salmonella_positive"].tolist()[:2] == [1, 0]
-    assert pd.isna(out["salmonella_positive"].iloc[2])  # "Not Tested" is in neither list -> missing label
+    assert out["pathogen_positive"].tolist()[:2] == [1, 0]
+    assert pd.isna(out["pathogen_positive"].iloc[2])  # "Not Tested" is in neither list -> missing label
     assert pd.isna(out["sample_date"].iloc[2])
     assert out["product_category"].iloc[2] == "__unknown__"
     assert pd.isna(out["establishment_id"].iloc[3])
@@ -102,7 +102,7 @@ def test_read_tables_stacks_same_layout_and_rejects_different(tmp_path):
 
 
 def test_deduplicate_drops_conflicting_ids():
-    df = pd.DataFrame({"sample_id": ["a", "a", "b", "b"], "salmonella_positive": [1, 0, 1, 1]})
+    df = pd.DataFrame({"sample_id": ["a", "a", "b", "b"], "pathogen_positive": [1, 0, 1, 1]})
     assert deduplicate(df)["sample_id"].tolist() == ["b"]
 
 
@@ -121,7 +121,34 @@ def test_load_canonical_accepts_person_a_flat_export(tmp_path):
     }).to_csv(p, index=False)
     df = load_canonical(p)
     assert df["sample_id"].tolist() == ["1", "3", "4"]  # Campylobacter row is a different target, dropped
-    assert df["salmonella_positive"].tolist()[:2] == [1, 0] and pd.isna(df["salmonella_positive"].iloc[2])
+    assert df["pathogen_positive"].tolist()[:2] == [1, 0] and pd.isna(df["pathogen_positive"].iloc[2])
     assert df["product_category"].tolist() == ["HC_CH_CARC01", "F_CH_COM01", "X"]  # project code, not commodity
     assert df["meta_cat_food_category"].tolist() == ["chicken", "__unknown__", "turkey"]
     assert "observation_id" not in df and not df["is_synthetic"].any()
+
+
+def test_config_selects_pathogen_sections_with_separate_outputs():
+    from src.config import load_config
+    s, c = load_config(), load_config(pathogen="campylobacter")
+    assert (s["pathogen"], c["pathogen"]) == ("Salmonella", "Campylobacter")
+    for k in ("mapping", "processed", "reports", "registry"):
+        assert s["paths"][k] != c["paths"][k]  # models can never overwrite each other
+    with pytest.raises(KeyError, match="unknown pathogen"):
+        load_config(pathogen="norovirus")
+
+
+def test_campylobacter_mapping_reads_enrichment_result_only():
+    from src.config import load_config, resolve
+    from src.data.loader import load_mapping
+    m = load_mapping(resolve(load_config(pathogen="campylobacter")["paths"]["mapping"]))
+    raw = pd.DataFrame({  # invented values, FSIS column names
+        "form_id": ["1", "2", "3"], "collection_date": ["2024-01-01"] * 3, "establishment_id": ["9"] * 3,
+        "project_code": ["HC_CH_CARC01"] * 3, "sample_source_name": ["x"] * 3, "product_type": ["NULL"] * 3,
+        "establishment_state": ["GA"] * 3, "salmonella_sp_analysis": ["Positive", "Positive", "Negative"],
+        "campylobacter_analysis_30ml": ["NEGATIVE", "Positive", "NULL"],
+        "campylobacter_analysis_1ml": ["Positive", "NULL", "Positive"],
+    })
+    out = apply_mapping(raw, m)
+    assert out["pathogen_positive"].tolist()[:2] == [0, 1]  # case-insensitive NEGATIVE; enrichment only
+    assert pd.isna(out["pathogen_positive"].iloc[2])          # direct-plate-only row: no label
+    assert not any("salmonella" in c or "campylobacter" in c for c in out.columns)

@@ -26,5 +26,5 @@ def make_synthetic_canonical(n: int = 2400, seed: int = 0) -> pd.DataFrame:
         "establishment_id": [f"SYNTH-EST-{e:03d}" for e in est],
         "product_category": cats[cat_idx],
         "meta_num_synthetic_score": rng.normal(size=n),
-        "salmonella_positive": pd.array(rng.binomial(1, p), dtype="Int8"),
+        "pathogen_positive": pd.array(rng.binomial(1, p), dtype="Int8"),
     })

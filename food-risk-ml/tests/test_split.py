@@ -13,6 +13,8 @@ def test_temporal_split_is_ordered_disjoint_and_date_aligned(synthetic_df, cfg):
     assert not (dates[0] & dates[1]) and not (dates[1] & dates[2])  # no day straddles splits
     assert sum(len(p) for p in s.parts().values()) == len(synthetic_df)
     assert 0.6 < len(s.train) / len(synthetic_df) < 0.8
+    assert s.test["sample_date"].min() >= pd.Timestamp(cfg["backtest"]["sealed_test_start"])  # test == sealed period
+    assert s.train["sample_date"].max() < pd.Timestamp(cfg["split"]["val_start"])
 
 
 def test_split_is_reproducible(synthetic_df, cfg):

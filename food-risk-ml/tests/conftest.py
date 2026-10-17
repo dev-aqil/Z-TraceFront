@@ -13,6 +13,8 @@ def cfg():
     c["models"]["random_forest"]["n_estimators"] = 30
     c["models"]["xgboost"]["n_estimators"] = 30
     c["explain"]["shap_sample"] = 100
+    c["split"]["val_start"] = "2023-02-01"  # synthetic data spans 2021-2023: ~70/15/15
+    c["backtest"]["sealed_test_start"] = "2023-07-15"
     return c
 
 

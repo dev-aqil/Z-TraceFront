@@ -1,16 +1,30 @@
 # Training configuration. All paths are relative to the food-risk-ml/ directory.
 
 seed = 42
-pathogen = "Salmonella"
+default_pathogen = "salmonella"   # CLI: --pathogen <key>
 
-[paths]
+# One FSIS pathogen model per section. Each has its own mapping, canonical table, reports and model registry, so
+# models never overwrite each other. Salmonella keeps the original paths.
+[pathogens.salmonella]
+name = "Salmonella"
 mapping = "configs/source_mapping.toml"
 processed = "data/processed/canonical.csv"
-registry = "artifacts/registry"
 reports = "reports"
+registry = "artifacts/registry"
+
+[pathogens.campylobacter]
+name = "Campylobacter"
+mapping = "configs/source_mapping_campylobacter.toml"
+processed = "data/processed/canonical_campylobacter.csv"
+reports = "reports/campylobacter"
+registry = "artifacts/registry_campylobacter"
 
 [split]
-# Chronological split by sample_date. Cuts fall on date boundaries so one day's samples never straddle splits.
+# Chronological split by sample_date on fixed calendar dates shared by every pathogen:
+# train < val_start <= val < backtest.sealed_test_start <= test. The dates are those of the first real (Salmonella)
+# run, which used 70/15/15 by rows; fixing them stops the test window moving with each pathogen's row counts.
+val_start = "2023-02-22"
+# train_frac / val_frac are used only by the grouped fallback below.
 train_frac = 0.70
 val_frac = 0.15
 # If more than this fraction of rows lack a valid sample_date, dates are treated as unreliable and the
@@ -47,6 +61,14 @@ max_depth = 4
 learning_rate = 0.05
 subsample = 0.8
 colsample_bytree = 0.8
+
+[selection]
+# The model with the best validation PR-AUC wins, except that every model within tie_tolerance of the best counts
+# as tied, and a tie goes to the earliest name in `preference` (cheapest to explain per request and to ship to
+# LinuxONE). 0.005 is about 10x the gap that made a 400-tree forest beat XGBoost on Campylobacter validation
+# (0.4359 vs 0.4354), while the backtest ranked them the other way (0.4024 vs 0.4025).
+tie_tolerance = 0.005
+preference = ["xgboost", "logistic_regression", "random_forest"]
 
 [threshold]
 # "min_recall": highest-precision threshold whose validation recall >= target_recall (falls back to max_f1).

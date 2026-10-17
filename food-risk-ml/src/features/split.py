@@ -24,9 +24,13 @@ class Split:
         return {"train": self.train, "val": self.val, "test": self.test}
 
 
-def temporal_split(df: pd.DataFrame, train_frac: float, val_frac: float) -> Split:
-    """Assign whole collection dates to splits in time order so no date straddles two splits."""
-    parts = generic.temporal_split(df, SAMPLE_DATE, train_frac, val_frac)
+def temporal_split(df: pd.DataFrame, val_start: str, test_start: str) -> Split:
+    """Fixed calendar cuts, identical for every pathogen, so 'test' is always the sealed period
+    (backtest.sealed_test_start) whatever the row counts. Cutting on dates keeps each day in one split."""
+    dated = df.dropna(subset=[SAMPLE_DATE])
+    d, v, t = dated[SAMPLE_DATE], pd.Timestamp(val_start), pd.Timestamp(test_start)
+    parts = {k: p.reset_index(drop=True) for k, p in
+             {"train": dated[d < v], "val": dated[(d >= v) & (d < t)], "test": dated[d >= t]}.items()}
     dropped = len(df) - sum(len(v) for v in parts.values())
     notes = (f"chronological split on {SAMPLE_DATE}; {dropped} rows without a date excluded; "
              + "; ".join(f"{k}: {v[SAMPLE_DATE].min().date()}..{v[SAMPLE_DATE].max().date()}"
@@ -48,7 +52,7 @@ def make_split(df: pd.DataFrame, cfg: dict, seed: int) -> Split:
     labelled = df[df[TARGET].notna()]
     missing = labelled[SAMPLE_DATE].isna().mean()
     if missing <= s["max_missing_date_frac"]:
-        split = temporal_split(labelled, s["train_frac"], s["val_frac"])
+        split = temporal_split(labelled, s["val_start"], cfg["backtest"]["sealed_test_start"])
     else:
         log.warning("%.1f%% of labelled rows lack sample_date: using grouped fallback split", 100 * missing)
         split = group_split(labelled, s["train_frac"], s["val_frac"], seed)

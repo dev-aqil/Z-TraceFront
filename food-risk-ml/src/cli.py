@@ -23,6 +23,7 @@ def _sha256(path: Path) -> str:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="food-risk", description=__doc__)
     ap.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    ap.add_argument("--pathogen", help="pathogen section of the config, e.g. salmonella or campylobacter")
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("inspect", help="profile raw FSIS file(s) to fill configs/source_mapping.toml")
     p.add_argument("raw", type=Path, nargs="+")
@@ -50,12 +51,12 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     setup_logging()
-    cfg = load_config(args.config)
+    cfg = load_config(args.config, args.pathogen)
     paths = cfg["paths"]
     canonical = getattr(args, "canonical", None) or resolve(paths["processed"])
 
     # Imports are local so `inspect` works before the heavier ML stack is needed.
-    from src.data.contract import SchemaError
+    from src.data.contract import TARGET, SchemaError
     from src.data.loader import MappingIncompleteError, load_canonical, load_fsis
     from src.models.contracts import ContractError, NotModelReadyError
 
@@ -77,7 +78,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"wrote {len(df)} canonical rows -> {out}")
         elif args.cmd == "validate":
             df = load_canonical(args.canonical, cfg["pathogen"])
-            print(f"OK: {len(df)} rows, {int(df['salmonella_positive'].notna().sum())} labelled")
+            print(f"OK: {len(df)} rows, {int(df[TARGET].notna().sum())} labelled")
         elif args.cmd == "eda":
             from src.data.eda import run_eda
             print(json.dumps(run_eda(load_canonical(canonical, cfg["pathogen"]),

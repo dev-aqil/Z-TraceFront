@@ -22,7 +22,7 @@ establishment_id = "establishment_id"
 # information available before this sample (not same-sample leakage) but encodes FSIS targeting; see model card.
 product_category = "project_code"
 # data_dictionary: "The result of the analysis for Salmonella in the sample. Negative ... Positive ..."
-salmonella_result = "salmonella_sp_analysis"
+pathogen_result = "salmonella_sp_analysis"
 
 [dates]
 format = "%Y-%m-%d"

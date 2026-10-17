@@ -1,6 +1,7 @@
 import json
 
 import pandas as pd
+import pytest
 
 from src.models.baselines import xgboost_available
 from src.models.predict import Predictor
@@ -29,9 +30,20 @@ def test_predictor_outputs_valid_deterministic_scores(trained):
     reqs = [{"sample_date": "2024-02-01", "product_category": "synthetic_ground", "establishment_id": "SYNTH-EST-001"},
             {"sample_date": "2024-02-01", "product_category": "never_seen_category"}]
     a, b = p.predict(reqs), p.predict(reqs)
-    assert [r["probability_positive"] for r in a] == [r["probability_positive"] for r in b]
+    # multithreaded float summation can differ in the last ulp between calls; anything larger is a real bug
+    assert [r["probability_positive"] for r in a] == pytest.approx([r["probability_positive"] for r in b], abs=1e-12)
     for r in a:
         assert 0.0 <= r["probability_positive"] <= 1.0
         assert r["risk_band"] == p.risk_band(r["probability_positive"])
         assert (r["risk_band"] == "high") == (r["probability_positive"] >= r["threshold"])
         assert r["trained_on_synthetic_data"] is True
+
+
+def test_select_model_breaks_near_ties_by_preference():
+    from src.models.train import select_model
+    pref = ["xgboost", "logistic_regression", "random_forest"]
+    # Campylobacter validation case: a 0.0005 forest lead is a tie, so XGBoost is kept
+    assert select_model({"random_forest": 0.4359, "xgboost": 0.4354, "logistic_regression": 0.4292}, 0.005, pref) \
+        == ("xgboost", ["random_forest", "xgboost"])
+    assert select_model({"random_forest": 0.45, "xgboost": 0.43}, 0.005, pref)[0] == "random_forest"  # real gap wins
+    assert select_model({"random_forest": 0.45, "xgboost": 0.43}, 0.0, pref)[0] == "random_forest"
