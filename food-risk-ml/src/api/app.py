@@ -3,31 +3,25 @@
 Run:  uvicorn src.api.app:app --port 8100
 Model: $FOOD_RISK_MODEL_DIR if set, else the LATEST entry in the registry of $FOOD_RISK_PATHOGEN
 (a config pathogen key such as salmonella or campylobacter; default: the config's default_pathogen).
+The /models routes (src/api/spin.py) serve every pathogen model at once for the frontend's spin demo.
 """
 
 import logging
 import os
-from datetime import date
 from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, ConfigDict, Field
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
+from src.api.schemas import PredictRequest
+from src.api.spin import default_catalog, spin_router
 from src.config import load_config, resolve
 from src.models.predict import Predictor, UnsupportedFeatureError
 from src.models.registry import latest_model_dir
 
 log = logging.getLogger(__name__)
-
-
-class PredictRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    sample_date: date = Field(description="Planned/actual sample collection date")
-    product_category: str | None = Field(None, description="Product category as in the training data")
-    establishment_id: str | None = Field(None, description="Establishment identifier; enables history features")
-    metadata: dict[str, str | float | None] = Field(
-        default_factory=dict, description="Extra pre-sampling features declared at training (meta_cat_/meta_num_)")
 
 
 class Contribution(BaseModel):
@@ -56,8 +50,11 @@ class Health(BaseModel):
     detail: str | None = None
 
 
-def create_app(model_dir: Path | None = None) -> FastAPI:
+def create_app(model_dir: Path | None = None, spin_catalog=default_catalog) -> FastAPI:
     app = FastAPI(title="Food contamination risk: pathogen sample positivity", version="0.1.0")
+    app.add_middleware(CORSMiddleware, allow_origins=os.environ.get("FOOD_RISK_CORS", "http://localhost:3000").split(","),
+                       allow_methods=["*"], allow_headers=["*"])
+    app.include_router(spin_router(spin_catalog))
     state: dict = {"predictor": None, "error": None}
     try:
         if model_dir is None:
