@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.graph import build_batch_graph
-from app.models import (Batch, BatchLot, BatchRelationship, ContainmentDecision, LabResult, Organization, Shipment,
-                        ShipmentManifest, SyntheticBatch)
+from app.models import (Analysis, Batch, BatchLot, BatchRelationship, ContainmentDecision, DecisionSource, LabResult,
+                        Organization, Shipment, ShipmentManifest, SyntheticBatch)
 from app.schemas import DecisionCreate, OrganizationCreate, OrganizationOut, RelationshipCreate, ShipmentCreate
 
 router = APIRouter(prefix="/api")
@@ -147,10 +147,17 @@ def containment(selected, downstream, included, shipment_rows, ranking, batches)
             "note": "Simulated action: an approval is recorded, but no hold is sent to any site."}
 
 
-def decision_document(d: ContainmentDecision) -> dict:
+def decision_document(db: Session, d: ContainmentDecision) -> dict:
     at = d.decided_at if d.decided_at.tzinfo else d.decided_at.replace(tzinfo=timezone.utc)  # SQLite drops the zone
+    source = db.get(DecisionSource, d.decision_id)
     return {"decision_id": d.decision_id, "scope": d.scope, "decision": d.decision, "batch_ids": d.batch_ids,
-            "shipment_ids": d.shipment_ids, "officer": d.officer, "reason": d.reason, "decided_at": at.isoformat()}
+            "shipment_ids": d.shipment_ids, "officer": d.officer, "reason": d.reason, "decided_at": at.isoformat(),
+            "analysis_id": source.analysis_id if source else None}
+
+
+def lab_document(lab: LabResult) -> dict:
+    return {"lab_result_id": lab.lab_result_id, "batch_id": lab.batch_id, "tested_at": lab.tested_at,
+            "contaminant": lab.contaminant, "result": lab.result}
 
 
 def trace_document(db: Session, batch_ids: list[int]) -> dict:
@@ -176,14 +183,18 @@ def trace_document(db: Session, batch_ids: list[int]) -> dict:
     shipment_rows = db.query(Shipment).filter(Shipment.batch_id.in_(included)).order_by(Shipment.shipment_id).all()
     labs = db.query(LabResult).filter(LabResult.batch_id.in_(included)).order_by(LabResult.tested_at, LabResult.lab_result_id)
     decisions = db.query(ContainmentDecision).filter_by(selection=selection_key(selected)).order_by(ContainmentDecision.decision_id.desc())
+    # Positives this selection does not reach: the prompt to widen the investigation.
+    elsewhere = (db.query(LabResult).filter(LabResult.result == "positive", LabResult.batch_id.notin_(included))
+                 .order_by(LabResult.tested_at.desc(), LabResult.lab_result_id).limit(10))
     return {"selected_batch_ids": sorted(selected), "upstream": sorted(upstream), "downstream": sorted(downstream),
             "related": sorted(related), "batches": batches,
             "edges": [[a, b] for a, b in sorted(graph.edges) if a in included and b in included],
             "shipments": [shipment_document(db, ship) for ship in shipment_rows], "source_ranking": ranking,
-            "lab_results": [{"lab_result_id": lab.lab_result_id, "batch_id": lab.batch_id, "tested_at": lab.tested_at,
-                             "contaminant": lab.contaminant, "result": lab.result} for lab in labs],
+            "lab_results": [lab_document(lab) for lab in labs],
+            "positive_elsewhere": [{**lab_document(lab), "batch": batch_document(db, db.get(Batch, lab.batch_id))}
+                                   for lab in elsewhere],
             "containment": containment(selected, downstream, included, shipment_rows, ranking, batches),
-            "decisions": [decision_document(d) for d in decisions],
+            "decisions": [decision_document(db, d) for d in decisions],
             "interpretation": "Shared ingredients are investigation leads, not proven causes. Related stock needs review, not an automatic recall."}
 
 
@@ -196,13 +207,17 @@ def investigate(batch_ids: list[int] = Query(min_length=1, max_length=20), db: S
 def decide(data: DecisionCreate, db: Session = Depends(get_db)):
     # The hold list is recomputed from stored records, never taken from the client.
     held = trace_document(db, data.batch_ids)["containment"]["options"][data.scope]
+    if data.analysis_id:
+        require(db, Analysis, data.analysis_id, "analysis")
     row = ContainmentDecision(selection=selection_key(data.batch_ids), scope=data.scope, decision=data.decision,
                               officer=data.officer.strip(), reason=data.reason.strip(),
                               decided_at=datetime.now(timezone.utc), **held)
     db.add(row)
+    db.flush()
+    if data.analysis_id:
+        db.add(DecisionSource(decision_id=row.decision_id, analysis_id=data.analysis_id))
     commit(db)
-    db.refresh(row)
-    return decision_document(row)
+    return decision_document(db, row)
 
 
 @router.post("/demo/seed")

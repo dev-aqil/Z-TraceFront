@@ -23,7 +23,8 @@ export type TraceDocument = {
   selected_batch_ids: number[]; upstream: number[]; downstream: number[]; related: number[];
   batches: TraceBatch[]; edges: [number, number][]; shipments: TraceShipment[];
   source_ranking: { batch_id: number; matched_batch_ids: number[]; flagged_product_count: number; total_distance: number }[];
-  lab_results: { lab_result_id: number; batch_id: number; tested_at: string; contaminant: string | null; result: string }[];
+  lab_results: LabResult[];
+  positive_elsewhere: (LabResult & { batch: TraceBatch })[]; // positives this selection does not reach
   interpretation: string;
   containment: {
     recommended: HoldScope; basis: string; note: string;
@@ -31,10 +32,11 @@ export type TraceDocument = {
   };
   decisions: Decision[]; // newest first
 };
+export type LabResult = { lab_result_id: number; batch_id: number; tested_at: string; contaminant: string | null; result: string };
 export type HoldScope = "targeted" | "extended";
 export type Decision = {
   decision_id: number; scope: HoldScope; decision: "approved" | "rejected"; batch_ids: number[];
-  shipment_ids: number[]; officer: string; reason: string; decided_at: string;
+  shipment_ids: number[]; officer: string; reason: string; decided_at: string; analysis_id: string | null;
 };
 export type Check = { check: string; label: string; fields: string[]; shipments_checked: number; shipments_total: number };
 
@@ -119,7 +121,7 @@ const json = { method: "POST", headers: { "Content-Type": "application/json" } }
 export const getTraceBatches = () => request<TraceBatch[]>(`${API_URL}/api/trace/batches`);
 export const traceLots = (ids: number[]) => request<TraceDocument>(`${API_URL}/api/trace?${ids.map((id) => `batch_ids=${id}`).join("&")}`);
 export const seedTraceDemo = () => request<{ selected_batch_ids: number[]; synthetic: boolean }>(`${API_URL}/api/demo/seed`, { ...json, body: "{}" });
-export const recordDecision = (body: { batch_ids: number[]; scope: HoldScope; decision: Decision["decision"]; officer: string; reason: string }) =>
+export const recordDecision = (body: { batch_ids: number[]; scope: HoldScope; decision: Decision["decision"]; officer: string; reason: string; analysis_id: string | null }) =>
   request<Decision>(`${API_URL}/api/decisions`, { ...json, body: JSON.stringify(body) });
 // Display form of a sample field. The models need the raw value (the beef models lower-case their text), so this is
 // for showing only: states in capitals, text fields capitalised, the "__unknown__" placeholder as "not recorded".

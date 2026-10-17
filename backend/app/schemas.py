@@ -89,3 +89,4 @@ class DecisionCreate(BaseModel):
     decision: Literal["approved", "rejected"]
     officer: str = Field(min_length=1, max_length=100, pattern=r"\S")
     reason: str = Field(min_length=1, max_length=500, pattern=r"\S")
+    analysis_id: str | None = Field(default=None, max_length=100)  # the upload that led to this decision, if any

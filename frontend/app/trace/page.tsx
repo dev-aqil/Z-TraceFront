@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getTraceBatches, recordDecision, seedTraceDemo, traceLots } from "@/lib/api";
+import { getFindings, getTraceBatches, recordDecision, seedTraceDemo, traceLots, withAnalysis } from "@/lib/api";
 import type { Decision, HoldScope, TraceBatch, TraceDocument } from "@/lib/api";
+import type { DemoFinding } from "../analysis-results/demo-findings";
 
 const code = (batch: TraceBatch) => batch.lot_code ?? `Batch ${batch.batch_id}`;
 const SCOPES: Record<HoldScope, [title: string, description: string]> = {
@@ -15,8 +16,11 @@ const SCOPES: Record<HoldScope, [title: string, description: string]> = {
 // Shipments covered by the latest decision for this selection, if it approved a hold.
 const heldBy = (trace: TraceDocument) => new Set(trace.decisions[0]?.decision === "approved" ? trace.decisions[0].shipment_ids : []);
 
-function DecisionPanel({ trace, label, onRecorded }: { trace: TraceDocument; label: (id: number) => string; onRecorded: (d: Decision) => void }) {
+function DecisionPanel({ trace, label, analysisId, onRecorded }: { trace: TraceDocument; label: (id: number) => string; analysisId: string | null; onRecorded: (d: Decision) => void }) {
   const { recommended, basis, note, options } = trace.containment;
+  // With no upstream lots both options hold the same stock; offer one choice rather than two identical ones.
+  const same = options.targeted.shipment_ids.join() === options.extended.shipment_ids.join() && options.targeted.batch_ids.join() === options.extended.batch_ids.join();
+  const scopes: HoldScope[] = same ? ["targeted"] : ["targeted", "extended"];
   const [scope, setScope] = useState<HoldScope>(recommended);
   const [officer, setOfficer] = useState("");
   const [reason, setReason] = useState("");
@@ -28,7 +32,7 @@ function DecisionPanel({ trace, label, onRecorded }: { trace: TraceDocument; lab
     if (!officer.trim() || !reason.trim()) return setError("Enter the officer name and a reason before recording a decision.");
     setSaving(true); setError("");
     try {
-      onRecorded(await recordDecision({ batch_ids: trace.selected_batch_ids, scope, decision, officer: officer.trim(), reason: reason.trim() }));
+      onRecorded(await recordDecision({ batch_ids: trace.selected_batch_ids, scope, decision, officer: officer.trim(), reason: reason.trim(), analysis_id: analysisId }));
       setReason("");
     } catch (e) { setError((e as Error).message); }
     finally { setSaving(false); }
@@ -38,8 +42,8 @@ function DecisionPanel({ trace, label, onRecorded }: { trace: TraceDocument; lab
     <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 id="decision-heading" className="text-lg font-semibold">Containment decision</h2><p className="text-xs font-semibold text-amber-800">{note}</p></div>
     <p className="mt-2 text-sm leading-6 text-slate-700"><strong>Recommended: {SCOPES[recommended][0].toLowerCase()}.</strong> {basis}</p>
     <form onSubmit={(e) => { e.preventDefault(); decide(((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value === "rejected" ? "rejected" : "approved"); }}>
-      <fieldset className="mt-4 grid gap-3 sm:grid-cols-2"><legend className="sr-only">Hold scope</legend>
-        {(Object.keys(SCOPES) as HoldScope[]).map((key) => {
+      <fieldset className={`mt-4 grid gap-3 ${same ? "" : "sm:grid-cols-2"}`}><legend className="sr-only">Hold scope</legend>
+        {scopes.map((key) => {
           const ships = trace.shipments.filter((s) => options[key].shipment_ids.includes(s.shipment_id));
           const moving = ships.filter((s) => s.status === "pending" || s.status === "in_transit").length;
           return <label key={key} className={`cursor-pointer rounded-xl border p-4 ${scope === key ? "border-rose-500 bg-rose-50" : "border-slate-200 hover:border-slate-400"}`}>
@@ -50,6 +54,7 @@ function DecisionPanel({ trace, label, onRecorded }: { trace: TraceDocument; lab
             <span className="mt-2 block text-[11px] text-slate-500">{options[key].batch_ids.map(label).join(", ")}</span>
           </label>;
         })}
+        {same && <p className="text-[11px] text-slate-500">No upstream ingredient is recorded for this selection, so an extended hold would cover the same stock.</p>}
       </fieldset>
       <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <label className="text-xs font-semibold">Officer<input value={officer} onChange={(e) => setOfficer(e.target.value)} required maxLength={100} autoComplete="name" className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal" /></label>
@@ -66,6 +71,7 @@ function DecisionPanel({ trace, label, onRecorded }: { trace: TraceDocument; lab
       <p><strong className={d.decision === "approved" ? "text-rose-700" : "text-slate-700"}>{d.decision === "approved" ? "Approved" : "Rejected"} {SCOPES[d.scope][0].toLowerCase()}</strong> · {d.officer} · {new Date(d.decided_at).toLocaleString()}</p>
       <p className="mt-1 text-slate-600">{d.reason}</p>
       <p className="mt-1 text-[11px] text-slate-500">{d.shipment_ids.length} shipments: {d.shipment_ids.map(codeOf).join(", ") || "none recorded"}</p>
+      {d.analysis_id && <Link href={`${withAnalysis("/analysis-results", d.analysis_id)}#findings`} className="mt-1 inline-block text-[11px] font-semibold text-slate-700 underline decoration-slate-300 underline-offset-2 hover:text-rose-700">Started from upload {d.analysis_id}</Link>}
     </li>)}</ol>}
   </section>;
 }
@@ -123,24 +129,31 @@ export default function TracePage() {
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
   const [back, setBack] = useState("/");
+  const [analysisId, setAnalysisId] = useState<string | null>(null);
+  const [origin, setOrigin] = useState<DemoFinding | null>(null); // the upload finding that opened this investigation
 
   useEffect(() => {
     let live = true;
     const query = new URLSearchParams(window.location.search);
     const analysis = query.get("analysis");
-    if (analysis) setBack(`/distribution?analysis=${encodeURIComponent(analysis)}`);
+    const lot = query.get("lot");
+    if (analysis) {
+      setAnalysisId(analysis);
+      setBack(`/distribution?analysis=${encodeURIComponent(analysis)}`);
+      // The banner is context only; if the findings cannot load, the trace still works without it.
+      getFindings(analysis).then((findings) => { if (live) setOrigin(findings.find((f) => f.batchId === lot) ?? findings[0] ?? null); }, () => {});
+    }
     getTraceBatches().then((rows) => {
       if (!live) return;
       setBatches(rows);
       const ids = query.getAll("batch").map(Number).filter((id) => rows.some((b) => b.batch_id === id));
-      const lot = query.get("lot");
       const matches = lot ? rows.filter((b) => b.lot_code === lot) : [];
       if (ids.length) setSelected(ids);
       else if (matches.length === 1) {
         setSelected([matches[0].batch_id]);
-        if (analysis && matches[0].synthetic) setNotice("This lot code matches a synthetic demo batch. The uploaded file does not establish these ingredient links.");
+        if (analysis && matches[0].synthetic) setNotice(`Lot ${lot} from your upload matches a stored lot. Its ingredient links, later movements and lab results come from the simulated scenario.`);
       }
-      else if (lot) setNotice(matches.length ? `Lot ${lot} belongs to more than one producer. Select the producer below.` : `Lot ${lot} has no stored ingredient links yet. Select a known batch or load the separate synthetic scenario.`);
+      else if (lot) setNotice(matches.length ? `Lot ${lot} belongs to more than one producer. Select the producer below.` : `Lot ${lot} has no stored ingredient links yet. Load the synthetic scenario to connect it, or select a known batch.`);
       setLoading(false);
     }, (e: Error) => { if (live) { setError(e.message); setLoading(false); } });
     return () => { live = false; };
@@ -163,9 +176,13 @@ export default function TracePage() {
     setSeeding(true); setError("");
     try {
       const result = await seedTraceDemo();
-      setBatches(await getTraceBatches());
-      setNotice("Synthetic scenario: lot links, movements and the lab result are simulated. Existing records were preserved.");
-      setSelected(result.selected_batch_ids);
+      const rows = await getTraceBatches();
+      setBatches(rows);
+      setNotice("Synthetic scenario loaded: lot links, movements and lab results are simulated. Existing records were preserved.");
+      // Arriving from an upload, stay on its lot instead of jumping to the scenario's default selection.
+      const lot = new URLSearchParams(window.location.search).get("lot");
+      const matches = lot ? rows.filter((b) => b.lot_code === lot) : [];
+      setSelected(matches.length === 1 ? [matches[0].batch_id] : result.selected_batch_ids);
     } catch (e) { setError((e as Error).message); }
     finally { setSeeding(false); }
   }
@@ -181,6 +198,7 @@ export default function TracePage() {
   }
   const byId = new Map(batches.map((batch) => [batch.batch_id, batch]));
   const label = (id: number) => byId.has(id) ? code(byId.get(id)!) : String(id);
+  const positives = trace ? [...new Set([...trace.lab_results, ...trace.positive_elsewhere].filter((lab) => lab.result === "positive").map((lab) => lab.batch_id))].sort((a, b) => a - b) : [];
 
   return <main className="min-h-dvh bg-[#f7f9fb] text-[#0d293b]">
     <header className="border-b border-slate-200 bg-white"><div className="mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-5 sm:px-8">
@@ -192,6 +210,11 @@ export default function TracePage() {
         <div><p className="text-[10px] font-bold uppercase tracking-[0.22em] text-rose-700">TraceFront / Investigation</p><h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Follow the lot. Find the connections.</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Select products under investigation to trace their ingredients and find related stock across factories and receiving sites.</p></div>
         <button onClick={loadDemo} disabled={seeding || loading} className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50">{seeding ? "Loading scenario…" : "Load synthetic scenario"}</button>
       </div>
+      {origin && <div className="mt-5 rounded-xl border border-rose-200 bg-white px-4 py-3 text-sm leading-6">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-rose-700">Started from upload finding {origin.id}</p>
+        <p className="mt-1"><strong>{origin.title}</strong> · lot <span className="font-mono">{origin.batchId}</span> · <span className="font-mono">{origin.shipmentId}</span></p>
+        <p className="text-slate-600">{origin.reason}</p>
+      </div>}
       {notice && <p role="status" className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">{notice}</p>}
       {error && <p role="alert" className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</p>}
       <section aria-labelledby="select-heading" className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
@@ -207,6 +230,12 @@ export default function TracePage() {
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           {[[trace.upstream.length, "upstream ingredient lots"], [trace.related.length, "other connected products"], [new Set(trace.shipments.map((s) => s.to_org_id)).size, "receiving locations in this trace"]].map(([number, text]) => <div key={text} className="rounded-2xl border border-slate-200 bg-white px-5 py-4"><strong className="text-3xl font-light tabular-nums">{number}</strong><p className="mt-1 text-xs text-slate-500">{text}</p></div>)}
         </div>
+        {!!trace.positive_elsewhere.length && <section aria-labelledby="elsewhere-heading" className="mt-5 rounded-2xl border border-amber-300 bg-amber-50 p-5">
+          <h2 id="elsewhere-heading" className="text-sm font-semibold text-amber-950">Positive results this selection does not explain</h2>
+          <ul className="mt-2 space-y-1 text-xs text-amber-950">{trace.positive_elsewhere.map((lab) => <li key={lab.lab_result_id}><strong>{code(lab.batch)}</strong> · {lab.batch.product_name} · {lab.batch.organization_name} · {lab.contaminant ?? "Unspecified test"} {lab.result} · {lab.tested_at.replace("T", " ")}</li>)}</ul>
+          <p className="mt-2 text-xs leading-5 text-amber-900">No stored lot link connects these to the current selection. Investigating every positive product together shows whether they share an ingredient.</p>
+          <button onClick={() => setSelected(positives)} className="mt-3 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700">Investigate all {positives.length} positive products together</button>
+        </section>}
         <section aria-label="Stored ingredient and shipment network" className="mt-5 rounded-2xl border border-slate-200 bg-white p-4"><LotNetwork trace={trace} /><p className="mt-3 text-xs leading-5 text-slate-500">Amber: upstream ingredient · Rose: selected product · White: connected product · Blue: recorded shipment destination. Lines reflect stored lot links and movements.</p></section>
         <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(300px,0.8fr)_minmax(0,1.2fr)]">
           <section className="rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-lg font-semibold">Ingredients to investigate</h2><p className="mt-1 text-xs leading-5 text-slate-500">Ranked by how many selected products share the ingredient, then closeness in the lot chain.</p>
@@ -220,7 +249,7 @@ export default function TracePage() {
           </section>
         </div>
         {!!trace.lab_results.length && <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-semibold">Recorded laboratory evidence</h2><ul className="mt-3 space-y-2 text-xs">{trace.lab_results.map((lab) => <li key={lab.lab_result_id}><strong>{label(lab.batch_id)}</strong> · {lab.contaminant ?? "Unspecified test"} · <span className={lab.result === "positive" ? "font-semibold text-rose-700" : "text-slate-600"}>{lab.result}</span> · {lab.tested_at.replace("T", " ")}</li>)}</ul></section>}
-        <DecisionPanel key={trace.selected_batch_ids.join(",")} trace={trace} label={label} onRecorded={(d) => setTrace((t) => t && { ...t, decisions: [d, ...t.decisions] })} />
+        <DecisionPanel key={trace.selected_batch_ids.join(",")} trace={trace} label={label} analysisId={analysisId} onRecorded={(d) => setTrace((t) => t && { ...t, decisions: [d, ...t.decisions] })} />
       </>}
     </div>
   </main>;

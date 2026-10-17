@@ -116,3 +116,11 @@ class ContainmentDecision(Base):
     officer = Column(String, nullable=False)
     reason = Column(String, nullable=False)
     decided_at = Column(DateTime(timezone=True), nullable=False)
+
+
+class DecisionSource(Base):
+    """The upload analysis a decision started from. A separate table so existing decision tables are never altered."""
+    __tablename__ = "decision_sources"
+
+    decision_id = Column(Integer, ForeignKey("containment_decisions.decision_id"), primary_key=True)
+    analysis_id = Column(String, ForeignKey("analyses.analysis_id"), nullable=False)

@@ -1,5 +1,6 @@
 """HTTP integration checks against an isolated, foreign-key-enforced SQLite database."""
 
+from datetime import datetime
 import json
 import os
 from pathlib import Path
@@ -71,6 +72,12 @@ class SystemTests(unittest.TestCase):
         except HTTPError as error:
             return error.code, json.load(error)
 
+    def upload(self, csv_text):
+        boundary = "tracefront-test-boundary"
+        raw = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"sensor.csv\"\r\n"
+               f"Content-Type: text/csv\r\n\r\n{csv_text}\r\n--{boundary}--\r\n").encode()
+        return self.call("/api/analyses", raw=raw, content_type=f"multipart/form-data; boundary={boundary}")
+
     def test_seed_and_cross_factory_trace(self):
         self.assertEqual(self.call("/api/demo/seed", {})[0], 200)
         self.assertEqual(self.call("/api/demo/seed", {})[0], 200)
@@ -85,6 +92,12 @@ class SystemTests(unittest.TestCase):
         self.assertEqual(both["source_ranking"][0]["matched_batch_ids"], [910042, 910091])
         self.assertEqual(self.call("/api/lots/resolve?lot_code=RM-402")[1]["batch_id"], 910402)
         self.assertEqual(self.call("/api/batches/910042/trace")[1]["upstream"], [910102, 910402])
+        _, chicken = self.call("/api/trace?batch_ids=910402")
+        self.assertEqual([b["product_name"] for b in chicken["batches"] if b["batch_id"] == 910402], ["Marinated chicken"])
+        self.assertIn("SHIP-017", [s["shipment_code"] for s in chicken["shipments"]])
+        self.assertEqual([lab["batch_id"] for lab in chicken["lab_results"]], [910042])
+        self.assertEqual([lab["batch_id"] for lab in chicken["positive_elsewhere"]], [910091])  # salad: no chicken
+        self.assertEqual(both["positive_elsewhere"], [])
         self.assertEqual(self.call("/api/trace?batch_ids=99999999")[0], 404)
         self.assertEqual(self.call("/api/trace")[0], 422)
 
@@ -95,12 +108,15 @@ class SystemTests(unittest.TestCase):
         options = both["containment"]["options"]
         self.assertEqual(both["containment"]["recommended"], "extended")
         self.assertEqual(len(options["targeted"]["shipment_ids"]), 5)  # CW-42 and CS-91 movements only
-        self.assertEqual(len(options["extended"]["shipment_ids"]), 8)  # plus lettuce, chicken and veggie-wrap movements
+        self.assertEqual(len(options["extended"]["shipment_ids"]), 9)  # plus lettuce, SHIP-017 and veggie-wrap movements
+        _, analysis = self.upload("shipment_id,batch_id\nSHIP-017,RM-402\n")
         body = {"batch_ids": [910091, 910042], "scope": "extended", "decision": "approved",
-                "officer": "Test Officer", "reason": "Shared lettuce lot"}
+                "officer": "Test Officer", "reason": "Shared lettuce lot", "analysis_id": analysis["analysis_id"]}
         code, made = self.call("/api/decisions", body)
         self.assertEqual(code, 201)
         self.assertEqual(made["shipment_ids"], options["extended"]["shipment_ids"])
+        self.assertEqual(made["analysis_id"], analysis["analysis_id"])
+        self.assertEqual(self.call("/api/decisions", {**body, "analysis_id": "analysis-missing"})[0], 404)
         self.assertEqual(self.call("/api/decisions", {**body, "officer": " "})[0], 422)
         self.assertEqual(self.call("/api/decisions", {**body, "scope": "everything"})[0], 422)
         self.assertEqual(self.call("/api/decisions", {**body, "batch_ids": [99999999]})[0], 404)
@@ -162,12 +178,31 @@ class SystemTests(unittest.TestCase):
         finally:
             engine.dispose()
 
+    def test_seed_upgrades_only_its_own_earlier_values(self):
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import Session
+        from app.database import Base
+        from app.models import Batch, Organization
+        from app.seed import seed_demo
+        engine = create_engine("sqlite:///" + str(Path(self.temp.name) / "legacy.db"))
+        try:
+            Base.metadata.create_all(engine)
+            with Session(engine) as db:  # rows exactly as the first seed version wrote them
+                db.add_all([Organization(organization_id=910002, name="Poultry Supplier", type="supplier"),
+                            Organization(organization_id=910003, name="FreshBite Factory KL", type="factory")])
+                db.flush()
+                db.add(Batch(batch_id=910402, product_name="Chilled chicken", organization_id=910002,
+                             produced_at=datetime(2026, 10, 17, 4), status="normal"))
+                db.commit()
+                seed_demo(db)
+                self.assertEqual(db.get(Organization, 910002).name, "Food Processing")
+                self.assertEqual(db.get(Organization, 910003).name, "Central Kitchen, QSR Group A")
+                self.assertEqual(db.get(Batch, 910402).product_name, "Marinated chicken")
+        finally:
+            engine.dispose()
+
     def test_upload_survives_process_restart(self):
-        boundary = "tracefront-test-boundary"
-        raw = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"sensor.csv\"\r\n"
-               "Content-Type: text/csv\r\n\r\nshipment_id,batch_id,temperature_c,reading_time\n"
-               f"S1,B1,12,2026-10-17T00:00:00Z\n\r\n--{boundary}--\r\n").encode()
-        code, result = self.call("/api/analyses", raw=raw, content_type=f"multipart/form-data; boundary={boundary}")
+        code, result = self.upload("shipment_id,batch_id,temperature_c,reading_time\nS1,B1,12,2026-10-17T00:00:00Z\n")
         self.assertEqual(code, 201)
         path = f"/api/analyses/{result['analysis_id']}"
         before = self.call(path + "/findings")[1]

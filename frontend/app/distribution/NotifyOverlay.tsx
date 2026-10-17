@@ -24,7 +24,7 @@ export type NotifyTarget = { shipmentId: string; batchId: string; reason: string
 export default function NotifyOverlay({ target }: { target: NotifyTarget }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [selectedId, setSelectedId] = useState<(typeof contacts)[number]["id"]>("dispatcher");
-  const [message, setMessage] = useState(`Please review shipment ${target.shipmentId} from batch ${target.batchId}. ${target.reason} Confirm the shipment record and product status before taking action.`);
+  const [message, setMessage] = useState(`Please review shipment ${target.shipmentId} from batch ${target.batchId}. ${target.reason} Please keep this stock aside while the hold decision is made.`);
   const [notice, setNotice] = useState<"idle" | "previewed">("idle");
   const [callPreview, setCallPreview] = useState(false);
   const selected = contacts.find((contact) => contact.id === selectedId) ?? contacts[0];
@@ -44,8 +44,8 @@ export default function NotifyOverlay({ target }: { target: NotifyTarget }) {
             <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7"><path d="M12 2a2 2 0 0 0-2 1.7A5.5 5.5 0 0 0 6.5 9v2.5c0 1.8-.6 3.5-1.8 4.8l-.6.7a1 1 0 0 0 .7 1.7h14.4a1 1 0 0 0 .7-1.7l-.6-.7c-1.2-1.3-1.8-3-1.8-4.8V9A5.5 5.5 0 0 0 14 3.7 2 2 0 0 0 12 2Zm-2 18a2 2 0 0 0 4 0h-4Z" /></svg>
             <span className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-rose-600" />
           </span>
-          <strong className="mt-3 text-2xl font-bold tracking-tight">Notify</strong>
-          <span className="mt-2 text-xs font-medium text-slate-600">Open contacts &amp; urgent call</span>
+          <strong className="mt-3 text-2xl font-bold tracking-tight">Early warning</strong>
+          <span className="mt-2 text-xs font-medium text-slate-600">Heads-up before the hold decision</span>
         </span>
       </button>
 
@@ -53,7 +53,7 @@ export default function NotifyOverlay({ target }: { target: NotifyTarget }) {
         <div className="p-5 sm:p-6 lg:p-5">
           <div className="flex items-start justify-between gap-5 border-b border-rose-200 pb-4 lg:pb-3">
             <div>
-              <h2 id="notify-title" className="text-2xl font-semibold tracking-tight">Notify contacts</h2>
+              <h2 id="notify-title" className="text-2xl font-semibold tracking-tight">Send an early warning</h2>
             </div>
             <button type="button" onClick={close} aria-label="Close notification overlay" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-rose-200 bg-white text-xl text-slate-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">×</button>
           </div>
