@@ -15,6 +15,7 @@ export default function UploadPage() {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const dialogActionRef = useRef<HTMLButtonElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const pickerTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [exampleSelected, setExampleSelected] = useState(false);
@@ -171,6 +172,19 @@ export default function UploadPage() {
         onClose={() => { clearPickerTimers(); setDialogStage("intro"); }}
         className={`upload-data-dialog w-[min(760px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl ${dialogStage === "picker" || dialogStage === "picker-confirming" || dialogStage === "picker-blank" ? "max-w-3xl" : "max-w-xl"}`}
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.json"
+          tabIndex={-1}
+          aria-hidden="true"
+          className="hidden"
+          onChange={(event) => {
+            clearPickerTimers();
+            chooseFile(event.target.files?.[0]);
+            event.target.value = ""; // choosing the same file again still fires change
+          }}
+        />
         {dialogStage === "picker-blank" ? (
           <div className="h-[520px] rounded-2xl bg-white"><h2 id="upload-dialog-title" className="sr-only">Opening files</h2></div>
         ) : dialogStage === "picker" || dialogStage === "picker-confirming" ? (
@@ -207,7 +221,9 @@ export default function UploadPage() {
                 <span className="w-20 font-medium text-slate-700">File name</span>
                 <input readOnly value={exampleFileName} aria-label="Selected file name" className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900" />
               </div>
-              <div className="mt-4 flex justify-end gap-3">
+              <div className="mt-4 flex flex-wrap justify-end gap-3">
+                {/* The picker above is a mock that offers the example file; this opens the device's real file chooser. */}
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="mr-auto min-h-10 rounded-lg px-2 py-2 text-sm font-medium text-blue-700 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-700">Choose a file from this device…</button>
                 <button type="button" onClick={() => { clearPickerTimers(); setDialogStage(file || exampleSelected ? "selected" : "intro"); }} className="min-h-10 rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-600">Cancel</button>
                 <button
                   ref={dialogActionRef}

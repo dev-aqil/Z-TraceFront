@@ -19,6 +19,7 @@ const PROGRESS_DISAPPEAR = DURATION - 5000;
 const PROGRESS_HIDE_START = PROGRESS_DISAPPEAR - 250;
 const PROGRESS_END = PROGRESS_HIDE_START - 250;
 const COMPLETE_HOLD = 250;
+const PLAYBACK_SPEED = 1.7; // the timeline above lasts 15.5 s; played at 1.7x it ends in about 9 s
 const NODE_COUNT = 96;
 const INITIAL_EDGE_COUNT = 156;
 const EDGE_COUNT = 312;
@@ -281,7 +282,7 @@ export default function MlProcess() {
 
     const tick = (now: number) => {
       if (previousTime !== null && !document.hidden) {
-        elapsedRef.current = Math.min(DURATION + COMPLETE_HOLD, elapsedRef.current + Math.min(now - previousTime, 100));
+        elapsedRef.current = Math.min(DURATION + COMPLETE_HOLD, elapsedRef.current + Math.min(now - previousTime, 100) * PLAYBACK_SPEED);
       }
       previousTime = now;
       draw(canvas, Math.min(elapsedRef.current, DURATION));

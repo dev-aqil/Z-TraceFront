@@ -31,6 +31,9 @@ RULES = load_rules()
 MODEL_VERSION = "cold-chain-rules-1"
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 DEFAULT_PROFILE = "tcs_food_us"  # FDA Food Code 5 °C; a `profile` column overrides it per shipment
+# Display names for the cold_chain_rules.toml profiles; a profile missing here shows its key.
+PROFILE_NAMES = {"poultry_chilled": "chilled poultry", "red_meat_chilled": "chilled red meat",
+                 "offal_chilled": "chilled offal", "tcs_food_us": "TCS food", "frozen": "frozen food"}
 # Review limits set by the operator, not regulatory limits: tune them per customer.
 DELAY_LIMIT_MIN = 30.0
 HUMIDITY_MAX_PCT = 75.0
@@ -147,7 +150,8 @@ def shipment_findings(ship: str, rows: pd.DataFrame, monitor: ColdChainMonitor) 
 
         peak = readings.loc[readings.temperature_c.idxmax()]
         if peak.temperature_c > limit or critical:
-            summary = f"Peak temperature {peak.temperature_c:.1f} °C; the {profile} limit is {limit:g} °C ({source})."
+            summary = (f"Peak temperature {peak.temperature_c:.1f} °C; the limit for {PROFILE_NAMES.get(profile, profile)} "
+                       f"is {limit:g} °C ({source}).")
             evidence = [ev(peak.record_id, "temperature_c", num(peak.temperature_c), limit, "C", peak.reading_time)]
             if critical:
                 summary += f" Danger zone: {critical[1]}."
@@ -156,8 +160,9 @@ def shipment_findings(ship: str, rows: pd.DataFrame, monitor: ColdChainMonitor) 
         if gaps:
             rec, t, minutes = max(gaps, key=lambda g: g[2])
             cap = RULES["max_gap_minutes"]
-            add("sensor_gap", "medium", f"No temperature reading for {minutes:.0f} min, over the {cap:g}-minute limit "
-                f"({len(gaps)} gap(s) in total). Temperature during a gap is unknown.",
+            more = f" ({len(gaps)} gaps in total)" if len(gaps) > 1 else ""
+            add("sensor_gap", "medium", f"No temperature reading for {minutes:.0f} min, over the {cap:g}-minute "
+                f"limit{more}. Temperature during a gap is unknown.",
                 ev(rec, "reading_gap_minutes", round(minutes), cap, "min", t))
 
     if "humidity_pct" in rows and rows.humidity_pct.notna().any():

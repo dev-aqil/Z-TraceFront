@@ -8,14 +8,14 @@ const contacts = [
     label: "Supplier dispatch",
     name: "Dispatch team",
     role: "Supplier logistics",
-    contactStatus: "Contact details not connected",
+    contactStatus: "Demo mode: nothing is sent",
   },
   {
     id: "kitchen",
     label: "Receiving kitchen",
     name: "Receiving team",
     role: "Kitchen operations",
-    contactStatus: "Contact details not connected",
+    contactStatus: "Demo mode: nothing is sent",
   },
 ] as const;
 
@@ -90,8 +90,9 @@ export default function NotifyOverlay({ target }: { target: NotifyTarget }) {
 
               <label htmlFor="notification-message" className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-600 lg:mt-3">Escalation draft</label>
               <textarea id="notification-message" rows={4} value={message} onChange={(event) => { setMessage(event.target.value); setNotice("idle"); }} className="mt-2 w-full resize-y rounded-xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-800 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 lg:mt-1 lg:min-h-[90px] lg:resize-none lg:p-2.5 lg:leading-5" />
-              <button type="button" onClick={() => setNotice("previewed")} disabled={!message.trim()} className="mt-3 w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 lg:py-2.5">Preview notification for {selected.label.toLowerCase()}</button>
-              {notice === "previewed" && <p role="status" className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50 p-2.5 text-sm font-medium text-emerald-900">Draft ready for {selected.name}.</p>}
+              {/* Results show on the buttons themselves: a status line below would grow the centred dialog and shift every button. */}
+              <button type="button" onClick={() => setNotice("previewed")} disabled={!message.trim()} className={`mt-3 w-full rounded-xl px-5 py-3 text-sm font-semibold text-white transition-colors active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 lg:py-2.5 ${notice === "previewed" ? "bg-emerald-700 hover:bg-emerald-800" : "bg-slate-900 hover:bg-slate-700"}`}>{notice === "previewed" ? `✓ Draft ready for ${selected.name}` : `Preview notification for ${selected.label.toLowerCase()}`}</button>
+              <p role="status" className="sr-only">{notice === "previewed" ? `Draft ready for ${selected.name}.` : ""}</p>
             </section>
 
             <section aria-labelledby="urgent-call-heading" className="flex flex-col justify-between rounded-2xl bg-gradient-to-br from-rose-600 via-rose-700 to-red-800 p-6 text-white shadow-xl lg:p-5">
@@ -107,8 +108,9 @@ export default function NotifyOverlay({ target }: { target: NotifyTarget }) {
                 </div>
               </div>
               <div className="mt-4">
-                <button type="button" onClick={() => setCallPreview(true)} className="w-full rounded-xl bg-white px-5 py-3.5 text-sm font-bold text-rose-800 shadow-sm transition-colors hover:bg-rose-50 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:py-3">Prepare call brief</button>
-                {callPreview && <div role="status" className="mt-2 rounded-xl border border-white/25 bg-black/20 p-2.5 text-sm leading-5">Call brief ready for {selected.name}. Add contact details to place a call.</div>}
+                <button type="button" onClick={() => setCallPreview(true)} className="w-full rounded-xl bg-white px-5 py-3.5 text-sm font-bold text-rose-800 shadow-sm transition-colors hover:bg-rose-50 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:py-3">{callPreview ? `✓ Call brief ready for ${selected.name}` : "Prepare call brief"}</button>
+                <p role="status" className="sr-only">{callPreview ? `Call brief ready for ${selected.name}.` : ""}</p>
+                <p className="mt-2 text-center text-xs text-rose-100">Demo mode: no call is placed.</p>
               </div>
             </section>
           </div>

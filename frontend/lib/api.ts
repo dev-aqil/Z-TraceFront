@@ -78,7 +78,15 @@ export type Tallies = { byModel: Record<string, Tally>; ids: string[] };
 export type StoredRun = { result: SampleRun; labels: Record<string, string>; tallies: Tallies };
 
 const json = { method: "POST", headers: { "Content-Type": "application/json" } };
-export const getCatalog = () => request<Catalog>(`${ML_URL}/models`);
+// Display form of a sample field. The models need the raw value (the beef models lower-case their text), so this is
+// for showing only: states in capitals, text fields capitalised, the "__unknown__" placeholder as "not recorded".
+export function displayValue(field: string, value: string) {
+  if (value === "__unknown__") return "not recorded";
+  if (field.endsWith("establishment_state")) return value.toUpperCase();
+  return field.startsWith("meta_cat_") ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+}
+
+export const getCatalog = () =>request<Catalog>(`${ML_URL}/models`);
 export const spinSample = () => request<SampleRun>(`${ML_URL}/models/spin`, { ...json, body: "{}" });
 export const predictSample = (family: string, sample: SampleRecord) =>
   request<SampleRun>(`${ML_URL}/models/predict?family=${encodeURIComponent(family)}`, { ...json, body: JSON.stringify(sample) });

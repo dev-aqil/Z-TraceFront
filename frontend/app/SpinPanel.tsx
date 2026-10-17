@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getCatalog, predictSample, spinSample, startSampleRun } from "@/lib/api";
+import { displayValue, getCatalog, predictSample, spinSample, startSampleRun } from "@/lib/api";
 import type { Catalog, FamilyInfo, SampleRecord, SampleRun } from "@/lib/api";
 
 type Values = Record<string, string | null>;
@@ -51,7 +51,8 @@ export default function SpinPanel({ onRun }: { onRun: () => void }) {
     if (!catalog) return;
     clearInterval(timerRef.current);
     const names = ["product", ...next.fields.map((field) => field.name)];
-    const finalText = (name: string) => (name === "product" ? next.name : final[name] ?? "(not recorded)");
+    const show = (name: string, value: string) => (name === "product" ? value : displayValue(name, value));
+    const finalText = (name: string) => (name === "product" ? next.name : final[name] == null ? "(not recorded)" : show(name, final[name]!));
     const optionsFor = (name: string) => (name === "product" ? catalog.families.map((f) => f.name) : next.fields.find((f) => f.name === name)!.options);
     setFamily(next);
     setValues(final);
@@ -70,7 +71,7 @@ export default function SpinPanel({ onRun }: { onRun: () => void }) {
       const frame: Record<string, Reel> = {};
       names.forEach((name, i) => {
         const stopped = elapsed >= FIRST_STOP_MS + i * STOP_GAP_MS;
-        frame[name] = { text: stopped ? finalText(name) : String(pick(optionsFor(name)) ?? ""), stopped };
+        frame[name] = { text: stopped ? finalText(name) : show(name, String(pick(optionsFor(name)) ?? "")), stopped };
       });
       setReels(frame);
       if (Object.values(frame).every((reel) => reel.stopped)) {
@@ -150,7 +151,7 @@ export default function SpinPanel({ onRun }: { onRun: () => void }) {
                 {landed ? (
                   <select id={id} value={values[field.name] ?? ""} onChange={(event) => { setValues({ ...values, [field.name]: event.target.value || null }); setEdited(true); }} className="mt-1 w-full truncate rounded border border-slate-300 bg-white px-1.5 py-1 font-mono text-xs text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-100">
                     <option value="">(not recorded)</option>
-                    {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
+                    {field.options.map((option) => <option key={option} value={option}>{displayValue(field.name, option)}</option>)}
                   </select>
                 ) : (
                   <p id={id} className={`mt-1 truncate font-mono text-xs ${reel?.stopped ? "text-slate-900" : "text-slate-400"}`}>{reel?.text ?? "—"}</p>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { readStoredRun } from "@/lib/api";
+import { displayValue, readStoredRun } from "@/lib/api";
 import type { Contribution, PathogenResult, StoredRun, Tally } from "@/lib/api";
 
 const REVEAL_DELAY_MS = 1400;
@@ -19,13 +19,17 @@ function shown(value: string | number | null | undefined) {
   return Number.isFinite(n) && !Number.isInteger(n) ? n.toFixed(3) : String(value);
 }
 
+function times(ratio: number) {
+  return ratio >= 10 ? ratio.toFixed(0) : ratio >= 0.1 ? ratio.toFixed(1) : "<0.1";
+}
+
 // A one-hot explanation can be about a category the sample is NOT in; say so instead of misstating its value.
 function reason(c: Contribution, labels: Record<string, string>) {
   const label = labels[c.source_feature] ?? c.source_feature;
   const category = c.feature.startsWith(`${c.source_feature}_`) ? c.feature.slice(c.source_feature.length + 1) : null;
   if (category === "infrequent_sklearn") return { label, value: "rare-category group" };
-  if (category !== null && category.toLowerCase() !== (c.input_value ?? "").toLowerCase()) return { label, value: `not “${category}”` };
-  return { label, value: shown(c.input_value) };
+  if (category !== null && category.toLowerCase() !== (c.input_value ?? "").toLowerCase()) return { label, value: `not “${displayValue(c.source_feature, category)}”` };
+  return { label, value: shown(c.input_value == null ? c.input_value : displayValue(c.source_feature, c.input_value)) };
 }
 
 function verdict(r: PathogenResult) {
@@ -55,6 +59,9 @@ function PathogenCard({ result, labels, tally, revealed }: { result: PathogenRes
         <span className="text-5xl font-light tabular-nums tracking-tight">{percent(probability)}</span>
         <span className={`mb-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${BAND_STYLE[p.risk_band]}`}>{p.risk_band} risk</span>
       </div>
+      {/* Pathogens differ in how often they test positive, so raw percentages don't compare across cards; the
+          distance to each model's own high-risk line does, and it always agrees with the badge. */}
+      <p className="mt-1 text-sm text-slate-700"><strong className="font-semibold">{times(probability / p.threshold)}×</strong> this model&apos;s high-risk line</p>
       <div className="relative mt-4 h-2.5 rounded-full bg-slate-200" aria-hidden="true">
         <div className="h-full rounded-full bg-rose-600" style={{ width: `${Math.min(100, (probability / scale) * 100)}%` }} />
         <div className="absolute -top-1.5 h-5 w-0.5 bg-slate-900" style={{ left: `${(p.threshold / scale) * 100}%` }} />
@@ -167,7 +174,7 @@ export default function PredictionResult() {
             {inputs.map(([name, value]) => (
               <div key={name} className="flex min-w-0 gap-3">
                 <dt className="w-36 shrink-0 text-slate-500">{labels[name] ?? name}</dt>
-                <dd className="min-w-0 break-words font-mono text-xs leading-5 text-slate-900">{shown(value)}</dd>
+                <dd className="min-w-0 break-words font-mono text-xs leading-5 text-slate-900">{shown(typeof value === "string" ? displayValue(name, value) : value)}</dd>
               </div>
             ))}
           </dl>
