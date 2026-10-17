@@ -1,6 +1,6 @@
 # Data lifecycle
 
-M1 captures immutable source bytes and receipts. No cleaned tables or training tables exist yet.
+M1 captures immutable source bytes and receipts. M2 produces independent cleaned interim tables for eligible sources. No model-ready training tables exist yet.
 
 | Directory | Contract |
 | --- | --- |
@@ -24,3 +24,15 @@ Each manifest records original/canonical source references, source/config versio
 `python -m tracefront_data.ingest verify MANIFEST` checks captured artifact bytes offline. `restore MANIFEST` restores missing bytes with expected hashes pinned and writes a separate restoration receipt; upstream drift fails. Do not edit files under `sha256/` or existing manifests. A successful integrity check does not imply that pending source acquisition or cohort review is complete.
 
 Planned processed paths: `biological/<version>/observations.parquet`, `chemical/<version>/observations.parquet`, and `spoilage/<dataset>/<version>/observations.parquet`. A universal `training_dataset.parquet` would conceal incompatible targets and row units. Features, labels, metadata and split manifests should be distinguishable at handoff.
+
+## M2 interim contract — NOT MODEL-READY
+
+`interim/m2_v1/` contains independent `usda_pdp/`, `openfda/`, `noaa/`, `opendosm_crops_state/`, `opendosm_crops_district_production/` and `opendosm_crops_district_area/` directories. M2 output bytes and scratch stores are Git-ignored; versioned reports pin their checksums. Reproduce with `PYTHONPATH=src python -m tracefront_data.clean` after restoring/verifying the M1 raw store.
+
+CSV sidecars define original source identity, native grain, datatypes, units, null/escape rules and missingness semantics. Accepted records retain source-row lineage; ledgers preserve original rejected values and warnings. The raw publisher archive plus source row/member identifies the original text for any accepted record, without repeating full raw rows in a multi-million-row CSV.
+
+NOAA is expanded from monthly element records into calendar-day element records, retaining missing days and flags; noncalendar padding has its own accounting. PDP sample and analytical tables are separate and references are checked without joining them. OpenDOSM conflicting keys are quarantined in full, and exact duplicate aggregate rows are removed with evidence. Analytical result duplicates are retained and marked because replicate/extraction identity is unresolved. No temporal/context joins or model datasets exist in this layer.
+
+Person B may inspect source schemas, accepted/rejected rows, quality codes and reproducibility evidence. Model fitting and predictor selection require later EDA, canonical contracts, feature/enrichment design and leakage audit. Existing Person B model code has not been pointed at these tables.
+
+Quality-report missingness dictionaries omit zero-count fields and use the stated input/accepted denominators. A lexical blank counted before cleaning can represent a documented default or no-annotation state; it is not necessarily an unknown measurement. Duplicate counts refer to extra key occurrences for identity/aggregate tables and exact raw-row repeats for analytical results; conflicting-version quarantine can reject more rows than the duplicate count.

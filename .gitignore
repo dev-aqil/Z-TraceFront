@@ -18,3 +18,8 @@ __pycache__/
 /data/raw/fda_inspections/sha256/
 /data/raw/noaa/sha256/
 /data/raw/opendosm/sha256/
+
+# Reproducible M2 outputs and scratch databases; reports retain checksums.
+/data/interim/m2_v1/
+/data/interim/m2_replay/
+/data/interim/.m2-stage-*/

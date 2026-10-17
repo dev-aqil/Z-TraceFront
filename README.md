@@ -40,7 +40,7 @@ Decision engine, ML risk model training, Cytoscape graph visualization (dependen
 
 The data work prepares reproducible source-specific observations for Person B's modeling: ingestion → cleaning → features → validation → training-table handoff. Biological contamination, chemical exceedance and spoilage/quality remain separate prediction tasks. Recalls and inspection classes are contextual signals, not laboratory labels. Raw inputs stay immutable; operational demos and synthetic data do not establish predictive accuracy.
 
-**Current milestone: M1 partial. FSIS: official source confirmed, raw file not yet acquired.** PDP 2024, the existing official-byte-verified openFDA snapshot, one NOAA Malaysian station history and three OpenDOSM crop tables are acquired. FDA inspection records remain pending after official export URLs returned 404; its API requires credentials. The [current inventory](reports/dataset_inventory.md), [machine-readable source manifest](reports/m1_source_manifest.json) and [expanded M1 report](reports/m1_public_ingestion_report.md) record actual counts, licenses, hashes and source-specific M2 eligibility. FSIS manual intake and [source-status evidence](reports/m1_fsis_source_status.json) remain unchanged. No cleaning, features, merges or training have occurred.
+**Current milestone: M2 COMPLETE for the six eligible source entries; outputs are NOT MODEL-READY.** M1 remains partial: FSIS is **official source confirmed, raw file not yet acquired**, and FDA inspection records remain pending. PDP 2024, openFDA, one NOAA station history and three OpenDOSM crop tables have independently cleaned interim tables and rejection/quality evidence. The [M2 report](reports/m2_cleaning_report.md), [summary](reports/m2_cleaning_summary.json) and [validation](reports/m2_validation.json) record actual results. The [M1 inventory](reports/dataset_inventory.md) and [source manifest](reports/m1_source_manifest.json) remain frozen acquisition evidence. No predictive features, enrichment joins, invented contamination labels or model training were performed.
 
 | Path | Purpose |
 | --- | --- |
@@ -107,6 +107,25 @@ Without uv, use `python -m venv .venv` and `.venv/bin/python -m pip install --re
 - [Preliminary leakage audit and future acceptance tests](reports/data_leakage_audit.md)
 - [LinuxONE/s390x portability](reports/linuxone_portability.md)
 
+### M2 — Source-specific cleaning
+
+The M2 cleaner processes only entries explicitly marked `m2_eligible=true` in the frozen [M1 source manifest](reports/m1_source_manifest.json). It verifies every M1 captured artifact before and after the run. It does not change raw bytes, pending FSIS/FDA inspection inputs, Person B's component or the final canonical schema.
+
+```bash
+PYTHONPATH=src python -m tracefront_data.clean
+PYTHONPATH=src .venv/bin/python -m pytest -q tests
+```
+
+Outputs go under `data/interim/m2_v1/`, independently for PDP samples/results, openFDA recalls, NOAA daily element observations and each OpenDOSM table. The [cleaning report](reports/m2_cleaning_report.md), [machine-readable summary](reports/m2_cleaning_summary.json) and [validation evidence](reports/m2_validation.json) record measured acceptance/rejection counts, missingness, code/raw fingerprints and output hashes.
+
+**NOT MODEL-READY.** CSV files have datatype/unit schemas (`*.schema.json`) and explicit null encoding: `\N` means null, an empty cell is a non-null empty string, and a literal leading backslash is escaped by an extra backslash. Disable dataframe default NA/type guessing when reading these files, or use `tracefront_data.cleaning.common.read_table`, which returns declared Python types without extra dependencies. IDs stay strings. `*.rejected.jsonl` preserves rejected source rows/reasons; `*.issues.jsonl` preserves warnings. `source_row_number` and duplicate references are lineage, not approved predictors.
+
+PDP preserves ND/NP censoring, original concentration tokens, units and result annotations without declaring regulatory exceedance. NOAA preserves missing sentinels and all flags alongside scaled measurements. openFDA remains historical context. OpenDOSM annual reference markers are not publication dates; conflicting aggregate-key versions are quarantined together, without choosing or summing values.
+
+Cleaning is deterministic and uses Python's standard library, including temporary SQLite storage for bounded-memory analytical duplicate checks. A repeat run reuses byte-identical generated outputs and refuses to overwrite changed ones. To compare a separate reproduction, use a new directory below `data/interim/` via `--output-dir`; no output directory under `data/raw/` is permitted. Raw-store backups remain necessary.
+
+`PYTHONPATH=src python -m tracefront_data.clean --verify-only` checks all output hashes and streams the seven typed tables to validate counts, nulls, source-specific keys, PDP references/censoring and NOAA scaling/flags without cleaning again. Full raw-to-output rebuilding on Python 3.11 matched all 30 output files from Python 3.14. The 56 portable tests pass on both versions. Training-dependent tests were excluded as instructed; separate ML/backend suites could not collect without their existing application dependencies (first missing modules: matplotlib and SQLAlchemy). No ML/native dependency was added to the data environment to run those unrelated suites.
+
 ### Continue or reproduce public-source ingestion (M1)
 
 Use the frozen receipt to verify local raw files or restore missing bytes. Restoration checks exact hashes and appends a receipt; a changed publisher file fails. Keep an offline copy of the raw store because publisher URLs can change or disappear. The full command details and pending-source routes are in the [expanded M1 report](reports/m1_public_ingestion_report.md).
@@ -119,6 +138,6 @@ PYTHONPATH=src python -m tracefront_data.public_sources inspect --manifest data/
 
 With the frozen raw store present, `PYTHONPATH=src python -m tracefront_data.public_sources acquire` revalidates captured artifacts and retries pending public downloads, preserving original retrieval clocks. `--source usda_pdp` restricts acquisition to that source. Changing source/version requires deliberate config and dictionary review; the PDP schema is pinned to the reviewed archive hash.
 
-M2 may subsequently handle only sources with all eligibility gates passed; FSIS and FDA inspection records remain excluded until acquired and reviewed. Then M3 analyzes distributions; M4 freezes verified mappings; M5 builds features; M6 enriches; M7 verifies leakage/quality; M8 produces separate Parquet training tables and a modeling handoff. Commands for M2–M8 do not exist yet.
+M2 now handles only the eligible acquired cohort; FSIS and FDA inspection records remain excluded until acquired and reviewed. M3 will analyze distributions; M4 freezes verified mappings; M5 builds features; M6 enriches; M7 verifies leakage/quality; M8 produces separate Parquet training tables and a modeling handoff. M3–M8 have not begun.
 
 No public dataset currently supplies a verified complete farm-to-retail batch trajectory. Keep unknowns explicit, avoid future/publication-time leakage, report sampling/domain limitations and avoid interpreting an uncalibrated score as the probability that a batch is safe or contaminated.

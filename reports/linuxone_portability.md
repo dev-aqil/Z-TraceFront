@@ -16,6 +16,14 @@ Run-time CLI needs only Python 3.11+ and normal HTTPS certificate support. No Pa
 
 ## Current evidence
 
+### M2 implementation
+
+M2 adds no third-party runtime dependency. CSV, JSON, `decimal.Decimal`, calendar/date validation, ZIP streaming and hashing are from Python 3.11+ standard libraries. Numeric output avoids binary floating-point conversion. Analytical duplicate detection uses the standard-library `sqlite3` module and a temporary disk-backed database so millions of result fingerprints need not fit in RAM. The target Python must include SQLite support (normally supplied by the Linux distribution's Python/SQLite packages); no PyPI native extension or x86 binary is introduced. Scratch databases are deleted after the run and never enter the interchange format.
+
+Accepted/rejected tables use portable UTF-8 CSV/JSONL plus JSON datatype/unit/null schemas. Parquet, pandas, NumPy, Arrow, ODBC and Microsoft Access remain unnecessary for Person A M2. The previously merged Person B ML dependencies remain separate; M2 does not install or add them to the data package. Existing ML test collection requires that independent stack, and training-dependent tests are excluded by user instruction.
+
+The [M2 validation record](m2_validation.json) records actual local Python test/reproduction versions and any excluded or unavailable suites. Local cross-version testing does not establish execution on IBM Z: actual LinuxONE/s390x execution is still pending.
+
 M0 code uses Python standard-library modules only and has no native extension, GPU library, architecture check, x86 instruction dependency or downloaded executable. It runs directly with `PYTHONPATH=src` on the local **x86_64** machine. Tests were run with Python 3.11.17 and 3.14.7. **No s390x execution or target dependency installation has been performed.** Source portability is not a claim of tested target compatibility.
 
 Local `uv` is a convenience for future dependency resolution, not a target runtime requirement. Use standard `python -m venv` / `python -m pip` on LinuxONE if a vetted uv distribution is unavailable. Do not install an x86_64 uv executable on s390x. Record the target distro, Python ABI, libc, architecture and package provenance before resolving native packages in M1.

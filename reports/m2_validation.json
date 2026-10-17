@@ -1,0 +1,85 @@
+{
+  "baseline": {
+    "commit": "f305135",
+    "person_a_tests_before_changes": {
+      "passed": 41
+    },
+    "raw_verification": {
+      "acquisition_status": "partial",
+      "checked_artifacts": 28,
+      "failures": [],
+      "integrity_ok": true
+    },
+    "working_tree_was_clean_before_m2": true
+  },
+  "checks": {
+    "all_final_code_fingerprints_match": true,
+    "all_table_counts_unchanged": true,
+    "fresh_rebuild_output_hashes_equal": true,
+    "git_diff_check_passed": true,
+    "no_application_code_changes": true,
+    "no_pending_source_outputs": true,
+    "no_person_b_code_changes": true,
+    "published_files_match_summary": true,
+    "raw_artifacts_read_only": true
+  },
+  "cleaning_summary_sha256": "b99300603ddc2cb23cccf4a26a6f15faa5c6e717ee5d1655ad3a25a4114c9afb",
+  "data_status": "NOT MODEL-READY",
+  "eligible_cohort_status": "COMPLETE",
+  "full_typed_readback": {
+    "accepted_row_counts": {
+      "noaa_ghcn_daily/daily_observations": 80693,
+      "opendosm_crops_district_area/crops_district_area": 10010,
+      "opendosm_crops_district_production/crops_district_production": 10471,
+      "opendosm_crops_state/crops_state": 1584,
+      "openfda_enforcement/recalls": 29484,
+      "usda_pdp/results": 2872073,
+      "usda_pdp/samples": 9872
+    },
+    "integrity_ok": true,
+    "no_cross_source_joins": true,
+    "output_files_checked": 30,
+    "raw_integrity": {
+      "acquisition_status": "partial",
+      "checked_artifacts": 28,
+      "failures": [],
+      "integrity_ok": true
+    },
+    "same_source_pdp_references_valid": true,
+    "typed_tables_read": 7
+  },
+  "milestone": "M2",
+  "producer_versions": {
+    "local_architecture": "x86_64",
+    "python_3_11_sqlite": "3.53.4",
+    "python_3_14_sqlite": "3.53.4",
+    "s390x_executed": false
+  },
+  "reproduction": {
+    "files_compared": 30,
+    "first_python": "3.14.7",
+    "method": "Fresh full raw-to-output rebuild under Python 3.11 into temporary staging; all generated files compared to existing Python 3.14 outputs before reuse",
+    "output_sha256_maps_identical": true,
+    "readback_applies_to_final_identical_bytes": true,
+    "rebuild_python": "3.11.17",
+    "total_output_bytes": 248687007
+  },
+  "test_scope_limitations": {
+    "backend_collection": "Unavailable: ModuleNotFoundError sqlalchemy; backend unchanged",
+    "new_runtime_dependencies_installed": [],
+    "person_b_collection": "Unavailable: conftest imports the absent modeling stack (first missing module: matplotlib). No training fixture executed; other ML tests could not be collected without that separate environment.",
+    "user_instruction": "Exclude training-dependent tests; report the limitation"
+  },
+  "tests": {
+    "new_m2_tests": 15,
+    "python_3_11_pytest": {
+      "passed": 56
+    },
+    "python_3_14_unittest": {
+      "passed": 56
+    }
+  },
+  "unrelated_worktree_changes_preserved": [
+    "PERSON_B_CLAUDE_PROMPT.md deletion appeared during M2 and was left untouched"
+  ]
+}

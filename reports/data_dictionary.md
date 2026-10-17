@@ -33,6 +33,15 @@ FSIS sample fields and FDA inspection export fields remain **pending actual file
 
 ## Existing openFDA source fields
 
+M2 source-specific output contracts are now declared in the generated `data/interim/m2_v1/**/*.schema.json` sidecars; output paths/checksums are in [the M2 summary](m2_cleaning_summary.json). These are cleaning contracts, not final M4 feature mappings. Native source columns are preserved or explicitly renamed with their temporal/measurement meaning. No batch ID, supplier/farm crosswalk or overall contamination label is invented.
+
+- PDP uses lower-case source field names, opaque string `sample_pk`/`site`/analyte codes, parsed `collection_date`, exact decimals and original `concen_raw`. `concen_missing_reason` distinguishes ND from NP censoring and unexpectedly absent detection measurements. `country_missing_reason` distinguishes domestic non-applicability from unknown origin/unprovided import code. SOURCE_ID's documented blank default and ANNOTATE's blank no-annotation state remain empty strings. `duplicate_of_source_row` is lineage only.
+- openFDA retains all inspected native fields; date columns are ISO calendar dates with corresponding unaltered `*_raw` tokens. Invalid optional dates become explicit nulls with issue evidence; missing recall identity/report dates are rejected. Nested empty objects survive as `{}`. No field is converted into a contamination outcome.
+- NOAA includes `station_id`, `observation_date`, `element`, exact `value`, `unit`, original integer `raw_value`, all three literal flag characters, `observation_status` and monthly/day source references. Status distinguishes publisher missing, quality-flagged and reported-unflagged measurements; this is measurement metadata, not a weather-risk feature or certification of validity.
+- OpenDOSM uses `reference_date` and integer `reference_year`, preserving original names/categories and nullable nonnegative quantities with hectares/metric-tonne units. No `publication_date` or event timestamp is inferred from annual 01-01 markers. State/national and district tables remain separate.
+
+All M2 outputs are **NOT MODEL-READY**. Null means the documented field-specific missing condition, not a negative result or an imputed zero. Source-row metadata, analytical endpoints/annotations and retrospective recall state are not approved predictors. Continue to use the existing proposed canonical dictionary below as a design until later milestone review.
+
 Original dataset for every row: local `food-enforcement-0001-of-0001.json`, top-level `results[]`. Each raw value is a string except `openfda` (object). Every column can be absent/null in a future release; currently observed missingness is in [audit JSON](openfda_snapshot_audit.json). No transformation has been applied. Availability is after public release **and field-version availability**, not automatically the initiation date. All are context-only; none establishes a contamination label.
 
 | Proposed contextual canonical name | Original column | Type / unit | Meaning, allowed/null and proposed transformation | Availability / leakage |
