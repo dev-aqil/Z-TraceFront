@@ -12,7 +12,7 @@ cp .env.example .env   # point DATABASE_URL at your Postgres instance
 uvicorn app.main:app --reload
 ```
 
-API docs at http://localhost:8000/docs. Tables are created automatically on startup from `app/models.py` (matches the ERD in section 14 of the project summary).
+API docs at http://localhost:8000/docs; [docs/schema-and-api.md](docs/schema-and-api.md) describes every table and every backend and ML-service route with real example responses. Tables are created automatically on startup from `app/models.py` (matches the ERD in section 14 of the project summary).
 
 Endpoints:
 - `GET /api/health`
