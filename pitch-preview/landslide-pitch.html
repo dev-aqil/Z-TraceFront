@@ -1,0 +1,98 @@
+<div id="landslide-pitch-viz">
+  <h2>Landslide risk, from rainfall to exposure</h2>
+  <div class="viz-controls">
+    <label class="form-label" for="pitch-rain">Rainfall scenario <span id="pitch-rain-value" class="tabular-nums">80 mm/day</span></label>
+    <input class="form-range" id="pitch-rain" type="range" min="0" max="200" step="10" value="80" aria-label="Rainfall scenario in millimeters per day">
+  </div>
+  <canvas id="pitch-terrain" role="img" aria-label="Illustrative three-dimensional voxel terrain with slope risk and a road below the hillside"></canvas>
+  <div class="viz-row" aria-live="polite"><span id="pitch-selected">Select a terrain cell to inspect its relative risk.</span></div>
+  <div class="viz-row text-small"><span>■ Relative risk: <span style="color:var(--viz-series-2)">low</span> · <span style="color:var(--viz-series-3)">medium</span> · <span style="color:var(--viz-series-4)">high</span></span><span>Illustrative synthetic terrain and rule-based scores. No trained ML or real cliff prediction.</span></div>
+</div>
+<style>
+  #landslide-pitch-viz { width:100%; }
+  #landslide-pitch-viz .viz-controls { margin: 8px 0; }
+  #landslide-pitch-viz .form-range { width: min(100%, 420px); }
+  #pitch-terrain { display:block; width:100%; height: min(62vw, 470px); min-height:280px; }
+  #landslide-pitch-viz .viz-row { margin-top:8px; }
+</style>
+<script>
+(() => {
+  const root = document.getElementById('landslide-pitch-viz');
+  const canvas = root.querySelector('#pitch-terrain');
+  const slider = root.querySelector('#pitch-rain');
+  const value = root.querySelector('#pitch-rain-value');
+  const selectedText = root.querySelector('#pitch-selected');
+  const ctx = canvas.getContext('2d');
+  const N = 22;
+  let hits = [];
+  let selection = null;
+  const cs = getComputedStyle(root);
+  function color(name) { return cs.getPropertyValue(name).trim(); }
+  function mix(a,b,t) {
+    return `color-mix(in srgb, ${a} ${Math.round((1-t)*100)}%, ${b})`;
+  }
+  function height(x,y) {
+    const ridge = 6.5*Math.exp(-Math.pow((x-7-0.28*y)/5.2,2));
+    const knoll = 3.5*Math.exp(-((x-15)**2+(y-8)**2)/25);
+    return Math.max(0.3, ridge + knoll + 0.6*Math.sin(x*0.9+y*0.7));
+  }
+  function slope(x,y) {
+    return Math.hypot(height(Math.min(N-1,x+1),y)-height(Math.max(0,x-1),y),height(x,Math.min(N-1,y+1))-height(x,Math.max(0,y-1)))/2;
+  }
+  function risk(x,y,rain) {
+    const s = slope(x,y);
+    return Math.max(0,Math.min(1,0.07 + rain/240 * (0.15 + s/1.6)));
+  }
+  function project(x,y,z,tw,th,originX,originY) {
+    return [originX+(x-y)*tw/2,originY+(x+y)*th/2-z*th*0.85];
+  }
+  function poly(pts,fill,stroke) {
+    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+    pts.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));ctx.closePath();
+    ctx.fillStyle=fill;ctx.fill();
+    if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=.5;ctx.stroke();}
+  }
+  function draw() {
+    const rect=canvas.getBoundingClientRect(), dpr=Math.min(devicePixelRatio||1,2);
+    canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const w=rect.width,h=rect.height;
+    const tw=Math.min(w/(N+2),h/(N*0.72+5))*1.5, th=tw*.47;
+    const ox=w/2,oy=Math.max(34,h*.09);
+    const rain=Number(slider.value);
+    value.textContent=`${rain} mm/day`;
+    hits=[];
+    const border=color('--border'), fg=color('--foreground'), low=color('--viz-series-2'), mid=color('--viz-series-3'), high=color('--viz-series-4');
+    const ground=mix(low,border,.55);
+    for(let sum=0;sum<=2*(N-1);sum++){
+      for(let x=0;x<N;x++){
+        const y=sum-x;if(y<0||y>=N)continue;
+        const z=height(x,y),r=risk(x,y,rain);
+        const tint=r>.62?high:r>.36?mid:low;
+        const top=mix(ground,tint,Math.min(.72,.12+r*.8));
+        const A=project(x,y,z,tw,th,ox,oy), B=project(x+1,y,z,tw,th,ox,oy), C=project(x+1,y+1,z,tw,th,ox,oy), D=project(x,y+1,z,tw,th,ox,oy);
+        const B0=project(x+1,y,0,tw,th,ox,oy), C0=project(x+1,y+1,0,tw,th,ox,oy), D0=project(x,y+1,0,tw,th,ox,oy);
+        poly([B,C,C0,B0],mix(top,fg,.17));
+        poly([D,C,C0,D0],mix(top,fg,.27));
+        poly([A,B,C,D],top,border);
+        if(selection&&selection.x===x&&selection.y===y){ctx.strokeStyle=fg;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(...A);[B,C,D].forEach(p=>ctx.lineTo(...p));ctx.closePath();ctx.stroke();}
+        hits.push({x,y,r,pts:[A,B,C,D]});
+      }
+    }
+    // Road and settlement symbols are schematic exposure, not predicted runout.
+    const roadY=N-1;
+    const start=project(1,roadY,0,tw,th,ox,oy),end=project(N-2,roadY,0,tw,th,ox,oy);
+    ctx.strokeStyle=fg;ctx.lineWidth=3;ctx.setLineDash([8,5]);ctx.beginPath();ctx.moveTo(...start);ctx.lineTo(...end);ctx.stroke();ctx.setLineDash([]);
+    const homes=[[5,roadY-1],[12,roadY-1],[18,roadY-1]];
+    ctx.fillStyle=fg;ctx.font='500 12px sans-serif';
+    homes.forEach(([x,y])=>{const p=project(x,y,1,tw,th,ox,oy);ctx.fillText('⌂',p[0]-5,p[1]-2);});
+    ctx.fillText('Road + homes: exposure overlay',Math.max(10,w*.5-95),Math.min(h-12,project(10,roadY,0,tw,th,ox,oy)[1]+22));
+    if(selection){const rr=risk(selection.x,selection.y,rain);const label=rr>.62?'high':rr>.36?'medium':'low';selectedText.textContent=`Cell ${selection.x+1}, ${selection.y+1}: ${label} relative risk · slope ${slope(selection.x,selection.y).toFixed(1)} · rainfall ${rain} mm/day`;}
+  }
+  function inside(px,py,pts){let sign=0;for(let i=0;i<pts.length;i++){const a=pts[i],b=pts[(i+1)%pts.length],v=(b[0]-a[0])*(py-a[1])-(b[1]-a[1])*(px-a[0]);if(v){const s=Math.sign(v);if(sign&&s!==sign)return false;sign=s;}}return true;}
+  canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;selection=[...hits].reverse().find(c=>inside(x,y,c.pts))||selection;draw();});
+  slider.addEventListener('input',draw);
+  new ResizeObserver(draw).observe(canvas);
+  draw();
+})();
+</script>

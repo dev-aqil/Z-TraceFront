@@ -1,0 +1,16 @@
+{
+  "retrieved_utc": "2026-10-16",
+  "source": "https://api.fda.gov/download.json",
+  "dataset": {
+    "export_date": "2026-10-14",
+    "partitions": [
+      {
+        "display_name": "/food/enforcement data",
+        "file": "https://download.open.fda.gov/food/enforcement/food-enforcement-0001-of-0001.json.zip",
+        "size_mb": "5.59",
+        "records": 29485
+      }
+    ],
+    "total_records": 29485
+  }
+}
