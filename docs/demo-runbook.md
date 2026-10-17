@@ -1,5 +1,7 @@
 # Tracefront demo runbook
 
+For the presenter's talk track (what to click, show and say), see [demo-script.md](demo-script.md).
+
 ## Deploy the prepared source
 
 From the repository root in PowerShell:
