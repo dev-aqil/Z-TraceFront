@@ -1,0 +1,55 @@
+{
+  "model_version": "campylobacter-xgboost-20261017T131153Z",
+  "selected_model": "xgboost",
+  "selection": "max validation PR-AUC (dummy excluded); models within 0.005 tied, tie goes to preference order ['xgboost', 'logistic_regression', 'random_forest']",
+  "tied_models": [
+    "logistic_regression",
+    "random_forest",
+    "xgboost"
+  ],
+  "calibration": {
+    "raw_brier": 0.20359069170661456,
+    "platt_oof_brier": 0.1339994537205993,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "threshold": 0.17264361274842438,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "val": {
+    "n": 32490,
+    "prevalence": 0.19421360418590336,
+    "threshold": 0.17264361274842438,
+    "precision": 0.31127828821606957,
+    "recall": 0.8,
+    "f1": 0.44817330314733433,
+    "specificity": 0.5733766233766234,
+    "false_negative_rate": 0.2,
+    "pr_auc": 0.4322487461294072,
+    "roc_auc": 0.7602123510404019,
+    "brier": 0.13398626299604258,
+    "tn": 15011,
+    "fp": 11169,
+    "fn": 1262,
+    "tp": 5048
+  },
+  "test": {
+    "n": 25799,
+    "prevalence": 0.1981084538160394,
+    "threshold": 0.17264361274842438,
+    "precision": 0.3117964166798795,
+    "recall": 0.7695167286245354,
+    "f1": 0.4437799717912553,
+    "specificity": 0.5803847641144625,
+    "false_negative_rate": 0.23048327137546468,
+    "pr_auc": 0.4328312359873398,
+    "roc_auc": 0.7518253605987298,
+    "brier": 0.13724556689056294,
+    "tn": 12007,
+    "fp": 8681,
+    "fn": 1178,
+    "tp": 3933
+  },
+  "model_dir": "/home/linux1/tracefront/food-risk-ml/artifacts/registry_campylobacter/campylobacter-xgboost-20261017T131153Z",
+  "synthetic": false,
+  "top_features": null
+}

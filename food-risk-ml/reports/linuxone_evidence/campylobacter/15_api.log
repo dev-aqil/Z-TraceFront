@@ -1,0 +1,16 @@
+utc: 2026-10-17T13:12:17Z  host: ibmdatatontest  arch: s390x  server: uvicorn on 127.0.0.1:8100 (pid 44689)  FOOD_RISK_PATHOGEN=campylobacter
+== GET /health
+{"status":"ok","model_version":"campylobacter-xgboost-20261017T131153Z","pathogen":"Campylobacter","detail":null}
+== POST /predict  (body: docs/examples/predict_request.json)
+{
+  "sample_date": "2026-07-15",
+  "product_category": "HC_CPT_LBW01",
+  "establishment_id": "581",
+  "metadata": {
+    "meta_cat_sample_source_name": "Product-Raw-Intact-Chicken",
+    "meta_cat_product_type": "Breast",
+    "meta_cat_establishment_state": "NC"
+  }
+}
+{"model_version":"campylobacter-xgboost-20261017T131153Z","pathogen":"Campylobacter","probability_positive":0.14982437867519038,"risk_band":"medium","threshold":0.17264361274842438,"explanation":null,"explanation_units":null,"trained_on_synthetic_data":false,"disclaimer":"Estimated probability that a laboratory sample with these characteristics tests positive for the named pathogen, learned from historical sampling records. It is a prioritisation signal for sampling and inspection, not a food-safety certification: a low score does not mean a product is safe. Explanations describe model behaviour, not causes of contamination."}
+== latency_seconds 0.098196

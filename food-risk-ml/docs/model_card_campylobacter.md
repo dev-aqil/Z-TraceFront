@@ -94,6 +94,14 @@ What this means:
 - **Cost:** 49% of test samples are flagged `high`, catching 77% of positives (validation target 80%), at 31% precision against a 19.8% base rate, a 1.6× lift.
 - **Top driver:** the establishment's own Campylobacter history (mean |SHAP| 0.78 log-odds), well ahead of project code (0.26), product type (0.26) and sample source (0.22). For Salmonella, project code dominates. These are associations with past positives, **not causes**.
 
+## LinuxONE (IBM Z)
+
+The model was retrained from the same commit on the LinuxONE VM (s390x, big-endian). Evidence is in `reports/linuxone_evidence/campylobacter/`.
+- 93 tests passed.
+- Training took 33 s at 0.9 GB peak RAM.
+- Test PR-AUC was 0.433 and ROC-AUC 0.752, against 0.434 and 0.752 on x86.
+- The API answered `/predict` in 0.098 s.
+
 ## Known limitations
 
 - **The test period has been looked at twice.** The first training run on 2026-10-17 used a row-fraction split, so its test window began on 2024-07-30 and overlapped validation and backtest data. Its test PR-AUC (0.437) was seen. That run was discarded because of the misaligned split, not because of its score, and the split was fixed to calendar dates. The final sealed scoring at the end of the project is the last use of this period.

@@ -1,0 +1,63 @@
+==================================================================
+step:      campylobacter/14_train
+utc:       2026-10-17T13:11:21Z
+host:      ibmdatatontest   kernel: Linux 6.8.0-147-generic   arch: s390x
+machine:   Manufacturer: IBM  Type: 9175
+os:        "Ubuntu 24.04.5 LTS"
+python:    3.12.3 big-endian
+command:   python -m src.cli --pathogen campylobacter train
+==================================================================
+2026-10-17 13:11:21,344 INFO numexpr.utils: NumExpr defaulting to 3 threads.
+2026-10-17 13:11:22,988 INFO src.features.split: chronological split on sample_date; 0 rows without a date excluded; train: 2014-08-18..2023-02-21; val: 2023-02-22..2024-10-10; test: 2024-10-11..2026-06-30 | sizes train=132842 val=32490 test=25799
+2026-10-17 13:11:23,463 INFO src.models.train: fitting dummy_prior
+2026-10-17 13:11:24,157 INFO src.models.train: fitting logistic_regression
+2026-10-17 13:11:28,637 INFO src.models.train: fitting random_forest
+2026-10-17 13:11:49,582 INFO src.models.train: fitting xgboost
+2026-10-17 13:11:53,603 INFO src.models.train: selected xgboost (tied within 0.005 validation PR-AUC: ['logistic_regression', 'random_forest', 'xgboost'])
+2026-10-17 13:11:54,210 INFO src.models.registry: registered /home/linux1/tracefront/food-risk-ml/artifacts/registry_campylobacter/campylobacter-xgboost-20261017T131153Z
+{
+  "model_version": "campylobacter-xgboost-20261017T131153Z",
+  "selected_model": "xgboost",
+  "threshold": 0.17264361274842438,
+  "test": {
+    "n": 25799,
+    "prevalence": 0.1981084538160394,
+    "threshold": 0.17264361274842438,
+    "precision": 0.3117964166798795,
+    "recall": 0.7695167286245354,
+    "f1": 0.4437799717912553,
+    "specificity": 0.5803847641144625,
+    "false_negative_rate": 0.23048327137546468,
+    "pr_auc": 0.4328312359873398,
+    "roc_auc": 0.7518253605987298,
+    "brier": 0.13724556689056294,
+    "tn": 12007,
+    "fp": 8681,
+    "fn": 1178,
+    "tp": 3933
+  }
+}
+	Command being timed: "python -m src.cli --pathogen campylobacter train"
+	User time (seconds): 73.63
+	System time (seconds): 0.61
+	Percent of CPU this job got: 223%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:33.14
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 923776
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 454278
+	Voluntary context switches: 12009
+	Involuntary context switches: 7399
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 8760
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+exit_code: 0
