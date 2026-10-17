@@ -2,7 +2,13 @@
 
 This is the ML component of Tracefront. It trains and serves a model that estimates the probability that a **USDA FSIS raw poultry laboratory sample tests positive for Salmonella**, using only information known before the test. It includes leakage-safe features, a chronological evaluation, threshold tuning on validation data only, a calibration check, SHAP explanations, a file-based model registry and a FastAPI endpoint.
 
-> **Current status: training is BLOCKED on data.** The FSIS website returned `HTTP 403 Access Denied` (Akamai) to every automated request from the build machine, including the PDFs, so the real files and metadata could not be inspected. The pipeline, tests and API run end to end on a **synthetic test fixture** (`tests/synthetic.py`, IDs prefixed `SYNTH-`). Synthetic runs are flagged in every output and are **not** evaluation results. `configs/source_mapping.toml` is intentionally unfilled, and `prepare` refuses to run until it is filled.
+> **Current status: trained on real FSIS data (FY2014–FY2026, 325,121 samples).**
+> - **Registered model:** `salmonella-xgboost-20261017T062839Z`
+> - **Test period (Oct 2024 – Jun 2026):** PR-AUC 0.299 against a 0.098 base rate, ROC-AUC 0.74, recall 0.83, precision 0.14
+> - Details and limitations are in [docs/model_card.md](docs/model_card.md).
+> - The source mapping is a **draft pending team review**.
+>
+> The unit tests run on a separate **synthetic fixture** (`tests/synthetic.py`, IDs prefixed `SYNTH-`). Anything trained on it is flagged as synthetic and is never an evaluation result.
 
 The project has three separate ML problem types: biological, chemical and cold-chain/spoilage. This package is the **biological** one. See [docs/data_contract.md](docs/data_contract.md) §1.
 
@@ -14,34 +20,27 @@ Requires Python 3.11 or later (tested on 3.13).
 cd food-risk-ml
 python -m venv .venv
 .venv\Scripts\activate          # Windows;  source .venv/bin/activate on Linux/macOS
-pip install -e ".[dev]"
-pytest                          # 46 tests on synthetic fixtures
+pip install -e ".[dev,boost,explain]"   # boost = xgboost, explain = shap; both optional (no s390x wheels)
+pytest                          # 84 tests on synthetic fixtures
 ruff check src tests
 ```
 
-## Getting the data (manual download)
+## Getting the data
 
-1. Open https://www.fsis.usda.gov/science-data/data-sets-visualizations/laboratory-sampling-data in a normal browser. Automated downloads were blocked.
-2. In the **Raw Poultry Sampling** section, download every data file offered, both current and archived. The data.gov catalogue entry says the dataset is split by fiscal year, with current data refreshed quarterly and the archive annually. The page reportedly offers a JSON view; this is unverified, so take whatever formats are actually listed. Also download the **metadata / data documentation** for the dataset. FSIS asks users to review it before analysis.
-3. Save everything with the original filenames in `data/raw/`. Write down the URL and the download date.
-4. Profile the files:
-   ```
-   python -m src.cli inspect data/raw/<file1> data/raw/<file2>
-   ```
-   Then read `reports/schema_inspection_<file>.md` **alongside the official metadata**.
-5. Fill `configs/source_mapping.toml`:
-   - sample id, **collection** date column and date format, establishment column, product category column
-   - the **Salmonella** result column, and the exact positive and negative codes
-   - `verified_by` and `verified_against`
+The FSIS site blocks scripted downloads (HTTP 403), so download the files in a normal browser:
 
-   Every row is tested for several pathogens (for example Campylobacter). Map only the Salmonella result. The other results are same-sample lab results, so they are forbidden as features.
-6. Build the canonical table:
+1. Open https://www.fsis.usda.gov/news-events/publications/raw-poultry-sampling.
+2. Download every `raw_poultry_sampling_data_fyNNNN.zip`, FY2014 to the current year, about 30 MB in total.
+3. Put the zips in `data/raw/fsis_raw_poultry/zips/`. Each zip holds one JSON file, and the metadata and data dictionary are embedded in that JSON.
+4. Build the canonical table:
    ```
-   python -m src.cli prepare data/raw/<file1> data/raw/<file2>
+   python -m src.cli inspect data/raw/fsis_raw_poultry/zips/raw_poultry_sampling_data_fy2026.zip   # optional profile
+   python -m src.cli prepare data/raw/fsis_raw_poultry/zips/*.zip
    ```
-   This writes `data/processed/canonical.csv` and its provenance file. Files are stacked only if their columns are identical.
 
-Supported formats: CSV, XLSX, JSON (a list of records, or an object with exactly one list of records), and a zip containing exactly one of these.
+`prepare` uses [configs/source_mapping.toml](configs/source_mapping.toml), which quotes the FSIS data dictionary for every choice. It reads only FSIS's **primary** test table. The secondary table (serotype, allele code, PFGE/WGS, AMR) exists only for positives, so it is outcome-derived and never loaded. The output, `data/processed/canonical.csv`, includes the source file hashes.
+
+Other supported inputs: CSV, XLSX, generic JSON (a list of records, or an object with exactly one list of records), and a zip containing exactly one of these.
 
 ## Commands
 
@@ -54,6 +53,8 @@ Supported formats: CSV, XLSX, JSON (a list of records, or an object with exactly
 | `python -m src.cli train [--canonical path]` | 4 baselines → `reports/metrics.csv`, then calibration, threshold, SHAP, registry |
 | `python -m src.cli predict docs/examples/predict_request.json` | Score a request with the latest registered model |
 | `uvicorn src.api.app:app --port 8100` | Serve `GET /health` and `POST /predict` |
+| `python -m src.cli check-handoff <handoff.json>` | Validate a Person A model-ready handoff against the target contracts (no training) |
+| `python -m src.cli experiment <handoff.json>` | Baseline sequence (dummy → linear → RF → HistGradientBoosting → XGBoost if installed) on a validated handoff |
 
 All settings (seed, split fractions, label lag, smoothing, imbalance strategy, model parameters, threshold policy) live in [configs/config.toml](configs/config.toml).
 
@@ -73,9 +74,25 @@ The response contains:
 - `trained_on_synthetic_data`
 - `disclaimer`
 
-The example request contains placeholders. Replace them with values that appear in the real training data.
+The example request uses real values from the training data (a chicken-parts sample at one establishment).
 
 Bands are prioritisation tiers, not safety verdicts. A low score does not mean safe. SHAP shows how the model's score responds to inputs, not causes of contamination.
+
+## Multi-target modeling framework
+
+Biological, chemical and cold-chain targets are separate contracts in [configs/modeling/targets.toml](configs/modeling/targets.toml). **All of them are currently blocked.** `experiment` refuses to run unless:
+- Person A's handoff manifest says `model_ready: true`
+- its table matches the recorded SHA-256
+- the target's status is `READY`
+- no feature is a label, an identifier, post-prediction, or matches the target's forbidden patterns
+
+The plans are in the repo-root `reports/`:
+- [target contracts](../reports/modeling_target_contracts.md)
+- [feature requirements](../reports/modeling_feature_requirements.md)
+- [split strategy](../reports/modeling_split_strategy.md)
+- [experiment plan](../reports/modeling_experiment_plan.md)
+- [LinuxONE compatibility](../reports/linuxone_modeling_compatibility.md)
+- [M8 handoff contract](../reports/modeling_m8_handoff_contract.md)
 
 ## Layout
 

@@ -2,6 +2,7 @@ import json
 
 import pandas as pd
 
+from src.models.baselines import xgboost_available
 from src.models.predict import Predictor
 from src.models.registry import latest_model_dir
 
@@ -13,7 +14,8 @@ def test_training_outputs_are_flagged_synthetic_and_complete(trained):
     root = trained["root"]
     metrics = pd.read_csv(root / "reports" / "metrics.csv")
     assert metrics["synthetic"].all()
-    assert set(metrics["model"]) == {"dummy_prior", "logistic_regression", "random_forest", "xgboost"}
+    expected = {"dummy_prior", "logistic_regression", "random_forest"} | ({"xgboost"} if xgboost_available() else set())
+    assert set(metrics["model"]) == expected
     assert REQUIRED_METRICS <= set(metrics.columns)
     meta = json.loads((latest_model_dir(root / "registry") / "metadata.json").read_text())
     assert meta["provenance"]["synthetic"] is True

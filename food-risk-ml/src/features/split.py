@@ -3,11 +3,10 @@
 import logging
 from dataclasses import dataclass
 
-import numpy as np
 import pandas as pd
-from sklearn.model_selection import GroupShuffleSplit
 
-from src.data.contract import ESTABLISHMENT_ID, SAMPLE_DATE, SAMPLE_ID, TARGET
+from src.data.contract import ESTABLISHMENT_ID, SAMPLE_DATE, TARGET
+from src.evaluation import splits as generic
 from src.features.leakage import assert_disjoint_splits
 
 log = logging.getLogger(__name__)
@@ -27,13 +26,8 @@ class Split:
 
 def temporal_split(df: pd.DataFrame, train_frac: float, val_frac: float) -> Split:
     """Assign whole collection dates to splits in time order so no date straddles two splits."""
-    dated = df.dropna(subset=[SAMPLE_DATE])
-    dropped = len(df) - len(dated)
-    counts = dated.groupby(SAMPLE_DATE).size().sort_index()
-    start = (counts.cumsum() - counts) / counts.sum()  # fraction of rows before each date
-    label = np.where(start < train_frac, "train", np.where(start < train_frac + val_frac, "val", "test"))
-    which = dated[SAMPLE_DATE].map(pd.Series(label, index=counts.index))
-    parts = {k: dated[which == k].reset_index(drop=True) for k in ("train", "val", "test")}
+    parts = generic.temporal_split(df, SAMPLE_DATE, train_frac, val_frac)
+    dropped = len(df) - sum(len(v) for v in parts.values())
     notes = (f"chronological split on {SAMPLE_DATE}; {dropped} rows without a date excluded; "
              + "; ".join(f"{k}: {v[SAMPLE_DATE].min().date()}..{v[SAMPLE_DATE].max().date()}"
                          for k, v in parts.items() if len(v)))
@@ -43,14 +37,8 @@ def temporal_split(df: pd.DataFrame, train_frac: float, val_frac: float) -> Spli
 def group_split(df: pd.DataFrame, train_frac: float, val_frac: float, seed: int) -> Split:
     """Fallback when dates are unreliable: whole establishments go to one split so correlated samples from
     one plant are never on both sides. Rows without an establishment are their own group."""
-    groups = df[ESTABLISHMENT_ID].astype("string").fillna("sample:" + df[SAMPLE_ID].astype(str))
-    test_frac = 1 - train_frac - val_frac
-    rest_idx, test_idx = next(GroupShuffleSplit(1, test_size=test_frac, random_state=seed).split(df, groups=groups))
-    rest = df.iloc[rest_idx]
-    tr_idx, val_idx = next(GroupShuffleSplit(1, test_size=val_frac / (train_frac + val_frac), random_state=seed)
-                           .split(rest, groups=groups.iloc[rest_idx]))
-    return Split(rest.iloc[tr_idx].reset_index(drop=True), rest.iloc[val_idx].reset_index(drop=True),
-                 df.iloc[test_idx].reset_index(drop=True), method="group_establishment",
+    parts = generic.grouped_split(df, ESTABLISHMENT_ID, train_frac, val_frac, seed)
+    return Split(**parts, method="group_establishment",
                  notes="FALLBACK: dates unreliable; grouped random split by establishment_id (seeded). "
                        "Evaluation does not measure performance on future periods.")
 

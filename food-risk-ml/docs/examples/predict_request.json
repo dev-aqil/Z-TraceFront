@@ -1,5 +1,10 @@
 {
-  "sample_date": "2025-03-14",
-  "product_category": "REPLACE_WITH_A_PRODUCT_CATEGORY_VALUE_FROM_TRAINING_DATA",
-  "establishment_id": "REPLACE_WITH_AN_ESTABLISHMENT_ID_FROM_TRAINING_DATA"
+  "sample_date": "2026-07-15",
+  "product_category": "HC_CPT_LBW01",
+  "establishment_id": "581",
+  "metadata": {
+    "meta_cat_sample_source_name": "Product-Raw-Intact-Chicken",
+    "meta_cat_product_type": "Breast",
+    "meta_cat_establishment_state": "NC"
+  }
 }

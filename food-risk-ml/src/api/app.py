@@ -63,8 +63,8 @@ def create_app(model_dir: Path | None = None) -> FastAPI:
             model_dir = Path(os.environ["FOOD_RISK_MODEL_DIR"]) if "FOOD_RISK_MODEL_DIR" in os.environ \
                 else latest_model_dir(resolve(load_config()["paths"]["registry"]))
         state["predictor"] = Predictor(model_dir)
-    except (FileNotFoundError, OSError) as e:
-        state["error"] = str(e)
+    except Exception as e:  # missing file, missing library (e.g. xgboost on s390x), version-incompatible pickle
+        state["error"] = f"{type(e).__name__}: {e}"
         log.warning("starting without a model: %s", e)
 
     @app.get("/health", response_model=Health)

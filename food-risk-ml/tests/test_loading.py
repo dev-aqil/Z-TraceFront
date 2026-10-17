@@ -106,13 +106,22 @@ def test_deduplicate_drops_conflicting_ids():
     assert deduplicate(df)["sample_id"].tolist() == ["b"]
 
 
-def test_load_canonical_accepts_person_a_aliases(tmp_path):
+def test_load_canonical_accepts_person_a_flat_export(tmp_path):
+    # Flat export shaped like configs/canonical_schema.json (repo root): observations joined with labels.
     p = tmp_path / "a.csv"
     pd.DataFrame({
-        "sample_id": ["1", "2", "3"], "sample_time": ["2023-01-01", "2023-01-02", "2023-01-03"],
-        "factory_id": ["F1", "F1", "F2"], "food_category": ["c", "c", "d"],
-        "pathogen": ["Salmonella", "Campylobacter", "salmonella"], "pathogen_positive": ["1", "0", "0"],
+        "observation_id": ["o1", "o2", "o3", "o4"], "dataset_id": ["fsis"] * 4, "prediction_time": ["x"] * 4,
+        "sample_id": ["1", "2", "3", "4"],
+        "sample_time": ["2023-01-01", "2023-01-02", "2023-01-03", "2023-01-04"],
+        "factory_id": ["fsis:1", "fsis:1", "fsis:2", "fsis:2"], "sampling_program": ["HC_CH_CARC01", "", "F_CH_COM01", "X"],
+        "food_category": ["chicken", "chicken", "", "turkey"], "is_synthetic": ["false"] * 4,
+        "analyte": ["Salmonella", "Campylobacter", "salmonella", "Salmonella"],
+        "pathogen_positive": ["true", "false", "false", ""],
+        "label_status": ["observed", "observed", "observed", "untested"],
     }).to_csv(p, index=False)
     df = load_canonical(p)
-    assert df["sample_id"].tolist() == ["1", "3"]  # Campylobacter row is a different target, dropped
-    assert {"establishment_id", "product_category", "salmonella_positive"} <= set(df.columns)
+    assert df["sample_id"].tolist() == ["1", "3", "4"]  # Campylobacter row is a different target, dropped
+    assert df["salmonella_positive"].tolist()[:2] == [1, 0] and pd.isna(df["salmonella_positive"].iloc[2])
+    assert df["product_category"].tolist() == ["HC_CH_CARC01", "F_CH_COM01", "X"]  # project code, not commodity
+    assert df["meta_cat_food_category"].tolist() == ["chicken", "__unknown__", "turkey"]
+    assert "observation_id" not in df and not df["is_synthetic"].any()

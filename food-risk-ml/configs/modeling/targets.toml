@@ -1,0 +1,142 @@
+# Machine-readable target contracts. Human-readable version: reports/modeling_target_contracts.md (repo root).
+#
+# The experiment runner (src/models/experiment.py) refuses any target whose status is not "READY", any target
+# listed under [non_targets], and any handoff whose features match a forbidden pattern for its target.
+# Changing a status to READY is a reviewed decision recorded in that report, never a code default.
+#
+# task_type: "binary" | "multiclass" | "regression"
+# split: "temporal" | "grouped" | "geographic" | "random" (random only where allow_random = true)
+
+[targets.pathogen_positive]
+domain = "BIOLOGICAL"
+task_type = "binary"
+unit = "none (0/1 per sample x analyte)"
+positive_meaning = "official laboratory result reports the named analyte detected in this sample"
+requires_analyte = true
+status = "BLOCKED_PENDING_PERSON_A_FSIS_HANDOFF"
+forbidden_feature_patterns = [
+  "pathogen_positive", "salmonella", "campylobacter", "listeria", "stec", "e_coli", "ecoli", "serotype", "serovar",
+  "allele", "pfge", "wgs", "isolate", "amr", "resist", "mpn", "cfu", "plate_count", "enterobacteriaceae",
+  "not_analyzed", "cancel", "result", "outcome", "finding", "recall", "enforcement", "investigation",
+  "termination", "label_status", "result_available_at",
+]
+split = "temporal"
+group_column = "factory_id"
+primary_metric = "pr_auc"
+threshold_policy = "min_recall"
+target_recall = 0.80
+
+[targets.pesticide_detected]
+domain = "CHEMICAL"
+task_type = "binary"
+unit = "none (0/1 per sample x pesticide)"
+positive_meaning = "PDP analytical result for this sample and pesticide is a detection under Person A's documented MEAN/ANNOTATE semantics"
+requires_analyte = true
+status = "BLOCKED_PENDING_PDP_CODE_SEMANTICS"
+forbidden_feature_patterns = [
+  "pesticide_detected", "concen", "lod", "loq", "mean", "annotate", "quantitate", "confmethod", "detection",
+  "residue_concentration", "exceedance", "tolerance", "extract", "determin",
+]
+split = "temporal"
+group_column = "site"
+primary_metric = "pr_auc"
+threshold_policy = "max_f1"
+target_recall = 0.80
+
+[targets.residue_concentration]
+domain = "CHEMICAL"
+task_type = "regression"
+unit = "ppm (PDP CONUNIT = M), left-censored at LOD"
+positive_meaning = "not applicable (continuous)"
+requires_analyte = true
+status = "BLOCKED_PENDING_CENSORING_POLICY"
+forbidden_feature_patterns = [
+  "residue_concentration", "concen", "lod", "loq", "mean", "annotate", "quantitate", "confmethod",
+  "pesticide_detected", "detection", "exceedance", "tolerance", "extract", "determin",
+]
+split = "temporal"
+group_column = "site"
+primary_metric = "mae"
+
+[targets.chemical_exceedance]
+domain = "CHEMICAL"
+task_type = "binary"
+unit = "none (0/1 per sample x pesticide)"
+positive_meaning = "UNDEFINED: requires an authoritative tolerance with effective date, residue definition and commodity mapping"
+requires_analyte = true
+status = "BLOCKED_NO_AUTHORITATIVE_LIMITS"
+forbidden_feature_patterns = [
+  "chemical_exceedance", "exceedance", "tolerance", "applicable_limit", "concen", "lod", "loq", "mean",
+  "annotate", "pesticide_detected", "detection", "residue_concentration",
+]
+split = "temporal"
+group_column = "site"
+primary_metric = "pr_auc"
+threshold_policy = "min_recall"
+target_recall = 0.80
+
+[targets.microbial_count]
+domain = "COLD_CHAIN"
+task_type = "regression"
+unit = "log10 CFU per declared unit (g or ml); unit column required"
+positive_meaning = "not applicable (continuous)"
+requires_analyte = false
+status = "BLOCKED_PENDING_SOURCE"
+forbidden_feature_patterns = [
+  "microbial_count", "tvc", "total_viable", "cfu", "spoilage_class", "freshness_class", "storage_condition_class",
+  "quality_grade",
+]
+split = "grouped"
+group_column = "experiment_id"
+primary_metric = "mae"
+
+[targets.spoilage_class]
+domain = "COLD_CHAIN"
+task_type = "multiclass"
+unit = "source-specific ordered classes"
+positive_meaning = "not applicable (classes defined per source)"
+requires_analyte = false
+status = "BLOCKED_PENDING_SOURCE"
+forbidden_feature_patterns = [
+  "spoilage_class", "freshness_class", "microbial_count", "tvc", "total_viable", "cfu", "quality_grade",
+]
+split = "grouped"
+group_column = "experiment_id"
+primary_metric = "macro_f1"
+
+[targets.cold_chain_failure]
+domain = "COLD_CHAIN"
+task_type = "binary"
+unit = "none (0/1 per batch or shipment, at a prediction cutoff)"
+positive_meaning = "pre-registered failure rule satisfied AFTER the prediction cutoff (forecasting, not rule reproduction)"
+requires_analyte = false
+status = "BLOCKED_PENDING_SOURCE_AND_RULE"
+forbidden_feature_patterns = [
+  "cold_chain_failure", "final_", "actual_arrival", "total_minutes_above_threshold_full", "post_cutoff",
+]
+split = "temporal"
+group_column = "shipment_id"
+primary_metric = "pr_auc"
+threshold_policy = "min_recall"
+target_recall = 0.80
+
+[targets.storage_condition_class]
+domain = "COLD_CHAIN"
+task_type = "binary"
+unit = "none (publisher Good/Bad storage-condition class)"
+positive_meaning = "publisher labels storage conditions Bad (environmental suitability, NOT microbial or pathogen evidence)"
+requires_analyte = false
+status = "BLOCKED_PENDING_SOURCE"
+forbidden_feature_patterns = ["storage_condition_class", "class", "quality"]
+split = "grouped"
+group_column = "experiment_id"
+primary_metric = "pr_auc"
+threshold_policy = "max_f1"
+target_recall = 0.80
+
+# Sources that are context only. They may never be a target, whatever a column is called.
+[non_targets]
+recall_or_enforcement = "openFDA recall/enforcement is a regulatory action, not tested truth; no tested-negative denominator"
+inspection_classification = "FDA NAI/VAI/OAI is a compliance classification, not measured contamination"
+weather = "NOAA observations are environmental context"
+agricultural_statistics = "OpenDOSM production/area is regional context"

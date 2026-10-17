@@ -1,5 +1,6 @@
 """Experiment runner: split -> features -> baselines -> validation thresholds -> calibration -> SHAP -> registry."""
 
+import importlib.metadata
 import json
 import logging
 import platform
@@ -13,18 +14,15 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
-import shap  # noqa: E402
 import sklearn  # noqa: E402
-import xgboost  # noqa: E402
 from sklearn.metrics import precision_recall_curve  # noqa: E402
 
 from src.config import ROOT  # noqa: E402
 from src.data.contract import (  # noqa: E402
     ESTABLISHMENT_ID,
-    SAMPLE_ID,
-    SYNTHETIC_ID_PREFIX,
     TARGET,
     TASK,
+    is_synthetic,
     validate_canonical,
 )
 from src.evaluation.calibration import PlattCalibrated, assess_calibration, reliability_plot  # noqa: E402
@@ -44,6 +42,13 @@ from src.models.registry import save_model  # noqa: E402
 
 log = logging.getLogger(__name__)
 MEDIUM_BAND_RECALL = 0.95  # "medium" band = scores inside the validation 95%-recall net but below the threshold
+
+
+def _version(package: str) -> str | None:
+    try:
+        return importlib.metadata.version(package)
+    except importlib.metadata.PackageNotFoundError:
+        return None
 
 
 def _git_commit() -> str | None:
@@ -76,7 +81,7 @@ def run_training(df: pd.DataFrame, cfg: dict, reports_dir: Path, registry_dir: P
     (reports_dir / "thresholds").mkdir(parents=True, exist_ok=True)
 
     validate_canonical(df)
-    synthetic = bool(df[SAMPLE_ID].astype(str).str.startswith(SYNTHETIC_ID_PREFIX).any())
+    synthetic = is_synthetic(df)
     if synthetic:
         log.warning("SYNTHETIC fixture data detected: outputs are code tests, not evaluation results")
     provenance = {**provenance, "synthetic": synthetic, "git_commit": _git_commit()}
@@ -105,7 +110,8 @@ def run_training(df: pd.DataFrame, cfg: dict, reports_dir: Path, registry_dir: P
         p_val[name] = fitted[name].predict_proba(X["val"])[:, 1]
         p_test[name] = fitted[name].predict_proba(X["test"])[:, 1]
         thr, _ = choose_threshold(y["val"], p_val[name], t["policy"], t["target_recall"])
-        threshold_table(y["val"], p_val[name]).to_csv(reports_dir / "thresholds" / f"{name}_val.csv", index=False)
+        table = threshold_table(y["val"], p_val[name])  # thinned to <=500 evenly spaced rows for the report
+        table.iloc[:: max(1, len(table) // 500)].to_csv(reports_dir / "thresholds" / f"{name}_val.csv", index=False)
         for s, p in (("val", p_val[name]), ("test", p_test[name])):
             rows.append({"model": name, "split": s, "synthetic": synthetic, **binary_metrics(y[s], p, thr)})
     metrics = pd.DataFrame(rows)
@@ -155,7 +161,7 @@ def run_training(df: pd.DataFrame, cfg: dict, reports_dir: Path, registry_dir: P
         "calibration": cal, "imbalance_strategy": cfg["imbalance"]["strategy"], "explain_top_k": cfg["explain"]["top_k"],
         "metrics": {"val": final_report["val"], "test": final_report["test"]},
         "versions": {"python": platform.python_version(), "sklearn": sklearn.__version__,
-                     "xgboost": xgboost.__version__, "shap": shap.__version__, "pandas": pd.__version__},
+                     "xgboost": _version("xgboost"), "shap": _version("shap"), "pandas": pd.__version__},
         "config": cfg,
     }
     model_dir = save_model(registry_dir, final, metadata, daily, background)

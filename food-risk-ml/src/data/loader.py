@@ -15,9 +15,12 @@ from src.data.contract import (
     ALIASES,
     ESTABLISHMENT_ID,
     GENERIC_TARGET,
+    IS_SYNTHETIC,
+    LABEL_STATUS,
+    LINEAGE_COLUMNS,
     META_CAT_PREFIX,
     META_NUM_PREFIX,
-    PATHOGEN_COLUMN,
+    PATHOGEN_COLUMNS,
     PRODUCT_CATEGORY,
     SAMPLE_DATE,
     SAMPLE_ID,
@@ -192,19 +195,31 @@ def load_fsis(raw_paths: list[str | Path], mapping_path: str | Path) -> pd.DataF
 
 
 def resolve_aliases(df: pd.DataFrame, pathogen: str = "Salmonella") -> pd.DataFrame:
-    """Accept Person A's project-wide names. A generic pathogen_positive label is only accepted together with
-    a pathogen column, and only that pathogen's rows are kept: other pathogens are separate targets."""
+    """Accept a flat export of Person A's schema (configs/canonical_schema.json at the repo root).
+
+    Lineage columns are dropped. A generic pathogen_positive label needs a pathogen/analyte column, and only
+    that pathogen's rows are kept: other pathogens are separate targets. Rows whose label_status is not
+    "observed" (untested, indeterminate, missing) get no label."""
+    df = df.drop(columns=[c for c in LINEAGE_COLUMNS if c in df])
     clashes = [a for a, c in ALIASES.items() if a in df and c in df]
     if clashes:
         raise SchemaError([f"both {a!r} and {ALIASES[a]!r} present; deliver one" for a in clashes])
     df = df.rename(columns={a: c for a, c in ALIASES.items() if a in df})
     if GENERIC_TARGET in df:
-        if TARGET in df or PATHOGEN_COLUMN not in df:
-            raise SchemaError([f"{GENERIC_TARGET} needs a {PATHOGEN_COLUMN!r} column and no {TARGET!r} column"])
-        keep = df[PATHOGEN_COLUMN].astype(str).str.strip().str.casefold() == pathogen.casefold()
-        log.info("keeping %d/%d rows where %s == %s", keep.sum(), len(df), PATHOGEN_COLUMN, pathogen)
-        df = df[keep].drop(columns=PATHOGEN_COLUMN).rename(columns={GENERIC_TARGET: TARGET})
+        pcol = next((c for c in PATHOGEN_COLUMNS if c in df), None)
+        if TARGET in df or pcol is None:
+            raise SchemaError([f"{GENERIC_TARGET} needs one of {PATHOGEN_COLUMNS} and no {TARGET!r} column"])
+        keep = df[pcol].astype(str).str.strip().str.casefold() == pathogen.casefold()
+        log.info("keeping %d/%d rows where %s == %s", keep.sum(), len(df), pcol, pathogen)
+        df = df[keep].drop(columns=pcol).rename(columns={GENERIC_TARGET: TARGET})
+    if LABEL_STATUS in df:
+        if TARGET in df:
+            df.loc[df[LABEL_STATUS].astype(str).str.strip().str.casefold() != "observed", TARGET] = pd.NA
+        df = df.drop(columns=LABEL_STATUS)
     return df
+
+
+LABEL_CODES = {"1": 1, "0": 0, "true": 1, "false": 0}
 
 
 def load_canonical(path: str | Path, pathogen: str = "Salmonella") -> pd.DataFrame:
@@ -214,10 +229,19 @@ def load_canonical(path: str | Path, pathogen: str = "Salmonella") -> pd.DataFra
     if SAMPLE_DATE in df:
         df[SAMPLE_DATE] = pd.to_datetime(df[SAMPLE_DATE], format="ISO8601", errors="coerce")
     if TARGET in df:
-        # Only exact "0"/"1" are labels; anything else is left as text so validation reports it.
-        if df[TARGET].dropna().isin(["0", "1"]).all():
-            df[TARGET] = pd.to_numeric(df[TARGET]).astype("Int8")
+        # Only 0/1/true/false are labels; anything else is left as text so validation reports it.
+        norm = df[TARGET].astype("string").str.strip().str.casefold()
+        if norm.dropna().isin(list(LABEL_CODES)).all():
+            df[TARGET] = norm.map(LABEL_CODES).astype("Int8")
+    if IS_SYNTHETIC in df:
+        flag = df[IS_SYNTHETIC].astype("string").str.strip().str.casefold()
+        if flag.dropna().isin(list(LABEL_CODES)).all():
+            df[IS_SYNTHETIC] = flag.map(LABEL_CODES).fillna(0).astype(bool)
+    if PRODUCT_CATEGORY in df:
+        df[PRODUCT_CATEGORY] = df[PRODUCT_CATEGORY].fillna(UNKNOWN_CATEGORY)
     for c in df.columns:
         if c.startswith(META_NUM_PREFIX):
             df[c] = pd.to_numeric(df[c], errors="coerce")
+        elif c.startswith(META_CAT_PREFIX):
+            df[c] = df[c].fillna(UNKNOWN_CATEGORY)
     return validate_canonical(df.reset_index(drop=True))

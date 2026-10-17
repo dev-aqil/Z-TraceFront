@@ -17,3 +17,6 @@ artifacts/registry/*
 
 # Generated plots and per-run outputs (regenerate with the CLI)
 reports/**/*.png
+
+# Generic experiment outputs (regenerate with `experiment`)
+artifacts/experiments/

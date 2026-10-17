@@ -1,8 +1,42 @@
-"""Classification metrics and validation-only threshold selection."""
+"""Classification and regression metrics, and validation-only threshold selection."""
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import average_precision_score, brier_score_loss, precision_recall_curve, roc_auc_score
+from sklearn.metrics import (
+    average_precision_score,
+    balanced_accuracy_score,
+    brier_score_loss,
+    confusion_matrix,
+    f1_score,
+    mean_absolute_error,
+    precision_recall_curve,
+    r2_score,
+    recall_score,
+    roc_auc_score,
+)
+
+
+def regression_metrics(y: np.ndarray, pred: np.ndarray) -> dict:
+    """MAE/RMSE in target units, R^2, and a residual summary (bias and spread) for residual analysis."""
+    y, pred = np.asarray(y, dtype=float), np.asarray(pred, dtype=float)
+    resid = y - pred
+    return {
+        "n": len(y), "mae": float(mean_absolute_error(y, pred)), "rmse": float(np.sqrt(np.mean(resid ** 2))),
+        "r2": float(r2_score(y, pred)) if len(y) > 1 and np.var(y) > 0 else None,
+        "residual_mean": float(resid.mean()), "residual_p05": float(np.percentile(resid, 5)),
+        "residual_p95": float(np.percentile(resid, 95)),
+    }
+
+
+def multiclass_metrics(y: np.ndarray, pred: np.ndarray, labels: list) -> dict:
+    """Macro-F1 and per-class recall: a missed spoiled class matters regardless of its frequency."""
+    return {
+        "n": len(y), "macro_f1": float(f1_score(y, pred, labels=labels, average="macro", zero_division=0)),
+        "balanced_accuracy": float(balanced_accuracy_score(y, pred)),
+        "per_class_recall": dict(zip(map(str, labels), map(float, recall_score(y, pred, labels=labels, average=None,
+                                                                              zero_division=0)), strict=True)),
+        "confusion_matrix": confusion_matrix(y, pred, labels=labels).tolist(), "labels": [str(x) for x in labels],
+    }
 
 
 def binary_metrics(y: np.ndarray, p: np.ndarray, threshold: float) -> dict:

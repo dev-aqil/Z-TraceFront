@@ -8,17 +8,36 @@ ESTABLISHMENT_ID = "establishment_id"
 PRODUCT_CATEGORY = "product_category"
 TARGET = "salmonella_positive"
 
+IS_SYNTHETIC = "is_synthetic"
+
 REQUIRED_COLUMNS = [SAMPLE_ID, SAMPLE_DATE, PRODUCT_CATEGORY, TARGET]
-OPTIONAL_COLUMNS = [ESTABLISHMENT_ID]
+OPTIONAL_COLUMNS = [ESTABLISHMENT_ID, IS_SYNTHETIC]
 UNKNOWN_CATEGORY = "__unknown__"
 META_CAT_PREFIX = "meta_cat_"
 META_NUM_PREFIX = "meta_num_"
 SYNTHETIC_ID_PREFIX = "SYNTH-"  # rows whose sample_id starts with this are synthetic test fixtures
 TASK = "biological_pathogen_positive"  # one of three separate problem types; see docs/data_contract.md
 
-# Person A's project-wide feature-group names -> this model's canonical names (see docs/data_contract.md).
-ALIASES = {"sample_time": SAMPLE_DATE, "factory_id": ESTABLISHMENT_ID, "food_category": PRODUCT_CATEGORY}
-PATHOGEN_COLUMN, GENERIC_TARGET = "pathogen", "pathogen_positive"
+# Person A's configs/canonical_schema.json names -> this model's canonical names (docs/data_contract.md §7).
+# The FSIS project code is Person A's sampling_program; their commodity-type fields become extra features.
+ALIASES = {
+    "sample_time": SAMPLE_DATE, "factory_id": ESTABLISHMENT_ID, "sampling_program": PRODUCT_CATEGORY,
+    "food_category": META_CAT_PREFIX + "food_category", "commodity": META_CAT_PREFIX + "commodity",
+    "food_type": META_CAT_PREFIX + "food_type", "state": META_CAT_PREFIX + "state",
+}
+PATHOGEN_COLUMNS = ("pathogen", "analyte")  # Person A uses analyte
+GENERIC_TARGET, LABEL_STATUS = "pathogen_positive", "label_status"
+# Person A lineage/label metadata: kept in their store, not model inputs, so dropped on load.
+LINEAGE_COLUMNS = (
+    "observation_id", "dataset_id", "dataset_version", "source_record_id", "prediction_time",
+    "prediction_time_precision", "label_id", "target_name", "label_source_record_id", "label_definition_version",
+    "assay_method", "result_available_at",
+)
+
+
+def is_synthetic(df: pd.DataFrame) -> bool:
+    flagged = bool(df[IS_SYNTHETIC].fillna(False).astype(bool).any()) if IS_SYNTHETIC in df else False
+    return flagged or bool(df[SAMPLE_ID].astype(str).str.startswith(SYNTHETIC_ID_PREFIX).any())
 
 
 class SchemaError(ValueError):
@@ -65,6 +84,9 @@ def validate_canonical(df: pd.DataFrame, require_labels: bool = True) -> pd.Data
         problems.append(f"salmonella_positive must be 0, 1 or missing; found {sorted(map(str, bad.unique()))[:10]}")
     if require_labels and df[TARGET].notna().sum() == 0:
         problems.append("no labelled rows (salmonella_positive is entirely missing)")
+
+    if IS_SYNTHETIC in df and not pd.api.types.is_bool_dtype(df[IS_SYNTHETIC]):
+        problems.append("is_synthetic must be boolean")
 
     _, nums = meta_columns(df)
     for c in nums:

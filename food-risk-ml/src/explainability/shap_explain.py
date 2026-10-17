@@ -14,10 +14,15 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
-import shap  # noqa: E402
 from sklearn.ensemble import RandomForestClassifier  # noqa: E402
 from sklearn.linear_model import LogisticRegression  # noqa: E402
-from xgboost import XGBClassifier  # noqa: E402
+
+from src.models.baselines import XGBClassifier  # noqa: E402  (None when xgboost is not installed)
+
+try:
+    import shap
+except ImportError:  # ponytail: no s390x wheel; predictions still work, explanations are omitted
+    shap = None
 
 
 def source_feature(name: str, inputs: list[str]) -> str:
@@ -33,9 +38,11 @@ class Explainer:
         model = pipeline.named_steps["model"]
         self.inputs = list(self.pre.feature_names_in_)
         self.names = list(self.pre.get_feature_names_out())
-        if isinstance(model, LogisticRegression):
+        if shap is None:
+            self._exp, self.units = None, None
+        elif isinstance(model, LogisticRegression):
             self._exp, self.units = shap.LinearExplainer(model, self.pre.transform(background)), "log-odds"
-        elif isinstance(model, XGBClassifier):
+        elif XGBClassifier is not None and isinstance(model, XGBClassifier):
             self._exp, self.units = shap.TreeExplainer(model), "log-odds"
         elif isinstance(model, RandomForestClassifier):
             self._exp, self.units = shap.TreeExplainer(model), "probability"

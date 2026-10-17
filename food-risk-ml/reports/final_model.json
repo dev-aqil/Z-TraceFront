@@ -1,0 +1,87 @@
+{
+  "model_version": "salmonella-xgboost-20261017T062839Z",
+  "selected_model": "xgboost",
+  "selection": "max validation PR-AUC (dummy excluded)",
+  "calibration": {
+    "raw_brier": 0.1383981704711914,
+    "platt_oof_brier": 0.0749627877167074,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "threshold": 0.06050295755267143,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "val": {
+    "n": 48671,
+    "prevalence": 0.0903207248669639,
+    "threshold": 0.06050295755267143,
+    "precision": 0.13443098903617678,
+    "recall": 0.8005004549590536,
+    "f1": 0.23020312040035323,
+    "specificity": 0.48824392998306043,
+    "false_negative_rate": 0.1994995450409463,
+    "pr_auc": 0.2669156081789448,
+    "roc_auc": 0.7288646909129957,
+    "brier": 0.07495888322591782,
+    "tn": 21617,
+    "fp": 22658,
+    "fn": 877,
+    "tp": 3519
+  },
+  "test": {
+    "n": 48707,
+    "prevalence": 0.09797359722421828,
+    "threshold": 0.06050295755267143,
+    "precision": 0.14288300684361083,
+    "recall": 0.8269069572506287,
+    "f1": 0.24366297199666553,
+    "specificity": 0.46122681233640606,
+    "false_negative_rate": 0.17309304274937135,
+    "pr_auc": 0.29855562105901556,
+    "roc_auc": 0.7395112569614622,
+    "brier": 0.07926137000322342,
+    "tn": 20264,
+    "fp": 23671,
+    "fn": 826,
+    "tp": 3946
+  },
+  "model_dir": "D:\\Documents\\Portfolio\\hackathon\\Z-TraceFront\\food-risk-ml\\artifacts\\registry\\salmonella-xgboost-20261017T062839Z",
+  "synthetic": false,
+  "top_features": [
+    {
+      "source_feature": "product_category",
+      "mean_abs_shap": 0.8074132800102234
+    },
+    {
+      "source_feature": "est_prior_rate_smoothed",
+      "mean_abs_shap": 0.2993057370185852
+    },
+    {
+      "source_feature": "meta_cat_sample_source_name",
+      "mean_abs_shap": 0.22216404974460602
+    },
+    {
+      "source_feature": "meta_cat_product_type",
+      "mean_abs_shap": 0.21957837045192719
+    },
+    {
+      "source_feature": "meta_cat_establishment_state",
+      "mean_abs_shap": 0.14256379008293152
+    },
+    {
+      "source_feature": "est_prior_samples",
+      "mean_abs_shap": 0.13774362206459045
+    },
+    {
+      "source_feature": "est_prior_positives",
+      "mean_abs_shap": 0.09233871102333069
+    },
+    {
+      "source_feature": "sample_month",
+      "mean_abs_shap": 0.023320384323596954
+    },
+    {
+      "source_feature": "est_days_since_prior",
+      "mean_abs_shap": 0.015573489479720592
+    }
+  ]
+}

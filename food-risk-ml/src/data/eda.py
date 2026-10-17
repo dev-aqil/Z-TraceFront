@@ -12,9 +12,8 @@ from src.data.contract import (  # noqa: E402
     ESTABLISHMENT_ID,
     PRODUCT_CATEGORY,
     SAMPLE_DATE,
-    SAMPLE_ID,
-    SYNTHETIC_ID_PREFIX,
     TARGET,
+    is_synthetic,
 )
 
 
@@ -46,7 +45,7 @@ def run_eda(df: pd.DataFrame, out_dir: str | Path) -> dict:
         plt.close(fig)
 
     summary = {
-        "synthetic": bool(df[SAMPLE_ID].astype(str).str.startswith(SYNTHETIC_ID_PREFIX).any()),
+        "synthetic": is_synthetic(df),
         "n_rows": len(df),
         "n_labelled": len(labelled),
         "n_unlabelled": int(df[TARGET].isna().sum()),

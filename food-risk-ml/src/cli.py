@@ -37,6 +37,12 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("predict", help="score a JSON request file (object or list) with a registered model")
     p.add_argument("request", type=Path)
     p.add_argument("--model-dir", type=Path)
+    p = sub.add_parser("check-handoff", help="validate a Person A model-ready handoff manifest (no training)")
+    p.add_argument("manifest", type=Path)
+    p = sub.add_parser("experiment", help="baseline experiment on a validated Person A handoff")
+    p.add_argument("manifest", type=Path)
+    p.add_argument("--out", type=Path, default=Path("artifacts/experiments"))
+    p.add_argument("--no-xgboost", action="store_true")
     args = ap.parse_args(argv)
 
     setup_logging()
@@ -47,6 +53,7 @@ def main(argv: list[str] | None = None) -> int:
     # Imports are local so `inspect` works before the heavier ML stack is needed.
     from src.data.contract import SchemaError
     from src.data.loader import MappingIncompleteError, load_canonical, load_fsis
+    from src.models.contracts import ContractError, NotModelReadyError
 
     try:
         if args.cmd == "inspect":
@@ -89,7 +96,15 @@ def main(argv: list[str] | None = None) -> int:
             req = json.loads(args.request.read_text())
             predictor = Predictor(args.model_dir or latest_model_dir(resolve(paths["registry"])))
             print(json.dumps(predictor.predict(req if isinstance(req, list) else [req]), indent=2))
-    except (MappingIncompleteError, SchemaError, FileNotFoundError) as e:
+        elif args.cmd == "check-handoff":
+            from src.models.contracts import load_handoff
+            h = load_handoff(args.manifest)
+            print(f"OK: {h.manifest['target']} handoff, {len(h.table)} labelled rows, {len(h.features())} features")
+        elif args.cmd == "experiment":
+            from src.models.experiment import run_experiment
+            rep = run_experiment(args.manifest, resolve(args.out), cfg["seed"], use_xgboost=not args.no_xgboost)
+            print(json.dumps({r["model_type"]: r["metrics"]["test"] for r in rep["runs"]}, indent=2, default=str))
+    except (MappingIncompleteError, SchemaError, FileNotFoundError, NotModelReadyError, ContractError) as e:
         print(f"BLOCKED: {e}", file=sys.stderr)
         return 2
     return 0
