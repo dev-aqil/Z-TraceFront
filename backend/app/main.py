@@ -2,6 +2,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
+from app.analysis import router as analysis_router
 from app.database import Base, engine, get_db
 from app.graph import trace_backward, trace_forward
 from app.models import Batch, LabResult, SensorReading
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(analysis_router)
 
 
 @app.get("/api/health")

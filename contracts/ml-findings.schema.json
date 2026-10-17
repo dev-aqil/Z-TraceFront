@@ -23,7 +23,7 @@
           "batch_id": { "type": "string", "minLength": 1, "description": "Exact external batch ID from the supplier data." },
           "shipment_id": { "type": ["string", "null"], "description": "Exact external shipment ID, or null for a batch-level finding." },
           "anomaly_type": {
-            "enum": ["temperature_excursion", "shipment_delay", "humidity_excursion", "quantity_mismatch", "other"]
+            "enum": ["temperature_excursion", "shipment_delay", "humidity_excursion", "quantity_mismatch", "sensor_gap", "destination_mismatch", "other"]
           },
           "severity": { "enum": ["low", "medium", "high", "unknown"] },
           "priority_score": {
