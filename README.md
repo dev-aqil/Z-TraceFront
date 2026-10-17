@@ -30,7 +30,11 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Dashboard at http://localhost:3000, lists batches from the API and shows API health.
+Dashboard at http://localhost:3000. The supplier-report list is sample UI data and the file control only selects a local file. Report storage and analysis endpoints are not connected yet.
+
+Design workspace at http://localhost:3000/design. It maps the two HTML mockups into three planned Next.js screens and keeps the original mockups under `frontend/design/reference/`. The full screens have not been converted yet.
+
+The network animation preview is at http://localhost:3000/ml-process. Connections draw over three seconds, then new links appear while older ones retract and signal dots move rapidly across active links. The dots thin out over three seconds, leaving the lines to retract into their endpoint dashes. The dash circle closes into the first dash, then the camera slowly zooms toward it. This is an illustrative sequence, not a trained model visualization. It includes pause and replay controls and a static view for reduced-motion settings.
 
 ## Not built yet
 

@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B2B Kitchen Supply Chain & Distribution Analytics - Interactive Mockup</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            overflow-x: hidden;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Smooth transitions */
+        .page-transition {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseRing {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        .anomaly-pulse {
+            animation: pulseRing 2s infinite;
+        }
+        .wireframe-badge {
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- TOP NAVIGATION & STEPPER BAR (Memudahkan review Page 1 - Page 6) -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+            <!-- Brand Identity -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                    <i class="fa-solid fa-boxes-packing text-pink-400"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-slate-900 tracking-tight text-base">B2B RawMat<span class="text-pink-600">Sync</span></span>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-50 text-pink-700 border border-pink-200">Interactive Mockup</span>
+                    </div>
+                    <p class="text-xs text-slate-500">Sistem Distribusi Bahan Baku & Setengah Jadi (Dapur F&B, Restoran & Kantin)</p>
+                </div>
+            </div>
+
+            <!-- Interactive 6-Page Stepper -->
+            <nav class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto max-w-full py-1 px-1 bg-slate-100 rounded-xl border border-slate-200" aria-label="Mockup Pages">
+                <button onclick="goToPage(1)" id="step-btn-1" class="step-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold step-num">1</span>
+                    <span>Upload File</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                <button onclick="goToPage(2)" id="step-btn-2" class="step-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold step-num">2</span>
+                    <span>Confirm Blur</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                <button onclick="goToPage(3)" id="step-btn-3" class="step-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold step-num">3</span>
+                    <span>Korelasi Data</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                <button onclick="goToPage(4)" id="step-btn-4" class="step-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold step-num">4</span>
+                    <span>6 Distribusi</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                <button onclick="goToPage(5)" id="step-btn-5" class="step-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold step-num">5</span>
+                    <span>Jaringan B2B</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                <button onclick="goToPage(6)" id="step-btn-6" class="step-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold step-num">6</span>
+                    <span>Notify & Call</span>
+                </button>
+            </nav>
+
+            <!-- Wireframe Reference Guide Toggle -->
+            <div class="hidden lg:flex items-center gap-2">
+                <span id="current-page-badge" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 text-white">
+                    Page 1 / 6
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
+
+        <!-- =====================================================================
+             PAGE 1 & PAGE 2: FILE UPLOAD INTERFACE + BLUR CONFIRMATION MODAL
+             (Sesuai Wireframe Page 1 & Page 2)
+        ====================================================================== -->
+        <section id="view-page-1-2" class="page-transition relative">
+            <!-- Header Konteks Mockup -->
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-pink-600">Tahap 1 & 2 — Ingesti Data Rantai Pasok Dapur B2B</span>
+                    <h1 class="text-xl font-bold text-slate-900">Unggah File Log Distribusi Bahan Baku & Setengah Jadi</h1>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+                    <i class="fa-solid fa-circle-info text-pink-500"></i>
+                    <span>Target Pelanggan: Dapur Sentral (Central Kitchen), Restoran, Kantin Industri & Katering</span>
+                </div>
+            </div>
+
+            <!-- Kontainer Utama Page 1 (Akan di-blur saat masuk ke Page 2) -->
+            <div id="page1-content-wrapper" class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-10 transition-all duration-300">
+
+                <!-- KOTAK BESAR ATAS (Sesuai kotak pink besar di Wireframe Page 1) -->
+                <div id="upload-dropzone" onclick="triggerSimulatedFileSelect()"
+                     class="w-full min-h-[360px] sm:min-h-[400px] rounded-3xl border-2 border-dashed border-pink-300 bg-gradient-to-br from-pink-50/70 via-rose-50/40 to-white hover:from-pink-100/60 hover:border-pink-400 transition-all cursor-pointer flex flex-col items-center justify-center p-8 text-center relative group shadow-inner">
+
+                    <!-- Badge Indikator Wireframe -->
+                    <div class="absolute top-4 left-4 flex items-center gap-2 bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl border border-pink-200 text-xs font-medium text-pink-700 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+                        <span>Area Input File Distribusi B2B</span>
+                    </div>
+
+                    <div class="absolute top-4 right-4 hidden sm:flex items-center gap-2">
+                        <span class="text-xs bg-white/80 text-slate-600 px-2.5 py-1 rounded-lg border border-slate-200 font-medium">.CSV</span>
+                        <span class="text-xs bg-white/80 text-slate-600 px-2.5 py-1 rounded-lg border border-slate-200 font-medium">.XLSX</span>
+                        <span class="text-xs bg-white/80 text-slate-600 px-2.5 py-1 rounded-lg border border-slate-200 font-medium">.JSON ERP</span>
+                    </div>
+
+                    <!-- Icon & Visual Tengah -->
+                    <div id="upload-icon-box" class="w-20 h-20 rounded-2xl bg-pink-500/10 border border-pink-200 text-pink-600 flex items-center justify-center text-3xl mb-5 group-hover:scale-110 group-hover:bg-pink-500 group-hover:text-white transition-all duration-300 shadow-sm">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+
+                    <h2 id="upload-title" class="text-xl sm:text-2xl font-bold text-slate-800 mb-2">
+                        Tarik & Lepaskan File Batch Distribusi Bahan Baku di Sini
+                    </h2>
+                    <p id="upload-subtitle" class="text-sm text-slate-500 max-w-xl mb-6 leading-relaxed">
+                        Masukkan data pengiriman bahan mentah & bahan olahan setengah jadi (daging marinasi, kaldu dasar, sayuran pre-cut, tepung industri) untuk seluruh jaringan dapur restoran & kantin B2B.
+                    </p>
+
+                    <!-- Kartu File Terpilih (Muncul otomatis / bisa diganti) -->
+                    <div id="selected-file-card" class="w-full max-w-lg bg-white rounded-2xl p-4 border border-pink-200 shadow-md flex items-center justify-between gap-4 text-left">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+                                <i class="fa-solid fa-file-csv"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <p id="file-name-display" class="text-sm font-bold text-slate-900">B2B_Kitchen_RawMaterial_Oct2026.csv</p>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">SIAP DIANALISIS</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-0.5">6 Jalur Distribusi Utama • 142 Titik Dapur Komersial & Kantin • 4,820 Baris Log</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="event.stopPropagation(); cycleSimulatedFiles();" class="text-xs font-semibold text-pink-600 hover:text-pink-700 bg-pink-50 hover:bg-pink-100 px-3 py-2 rounded-xl transition-colors shrink-0">
+                            Ganti Contoh File
+                        </button>
+                    </div>
+
+                    <input type="file" id="real-file-input" class="hidden" onchange="handleRealFileSelect(event)">
+                </div>
+
+                <!-- TOMBOL BAWAH KIRI (Sesuai kotak pink kecil di kiri bawah pada Wireframe Page 1) -->
+                <div class="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <button onclick="goToPage(2)"
+                            class="w-full sm:w-80 py-4 px-6 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-base shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 transition-all flex items-center justify-center gap-3 group">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Proses & Analisis File</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+
+                    <div class="flex items-center gap-4 text-xs text-slate-500">
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-check-circle text-emerald-500"></i> Validasi Cold-Chain</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-check-circle text-emerald-500"></i> Deteksi Anomali Dapur B2B</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =====================================================================
+                 PAGE 2 OVERLAY: BLUR + CONFIRMATION MODAL
+                 (Muncul saat tombol Page 1 ditekan / saat berada di Page 2)
+            ====================================================================== -->
+            <div id="page2-blur-overlay" class="hidden absolute inset-0 z-30 rounded-3xl bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300">
+                <!-- Kotak Abu-abu/Putih di Tengah (Sesuai Wireframe Page 2) -->
+                <div class="bg-white w-full max-w-xl rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-8 text-center relative animate-[fadeIn_0.25s_ease-out]">
+
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+                        <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-slate-100 text-slate-700">
+                            Page 2 — Konfirmasi Ingesti & Analisis
+                        </span>
+                        <button onclick="goToPage(1)" class="text-slate-400 hover:text-slate-600 text-sm px-2 py-1 rounded-lg">
+                            <i class="fa-solid fa-xmark"></i> Kembali ke Page 1
+                        </button>
+                    </div>
+
+                    <div class="w-16 h-16 rounded-2xl bg-pink-50 border border-pink-200 text-pink-600 flex items-center justify-center text-2xl mx-auto mb-4">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Konfirmasi Masuk & Analisis Data B2B</h3>
+                    <p class="text-sm text-slate-600 mb-6">
+                        Sistem telah memverifikasi struktur file log distribusi bahan baku dapur komersial. Apakah Anda siap menjalankan pemetaan korelasi menyeluruh?
+                    </p>
+
+                    <!-- Ringkasan Parameter Sebelum Analisis -->
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-left mb-6 grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80">
+                            <span class="text-slate-400 block">Nama Batch File</span>
+                            <span id="confirm-file-name" class="font-bold text-slate-800 truncate block mt-0.5">B2B_Kitchen_RawMaterial_Oct2026.csv</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80">
+                            <span class="text-slate-400 block">Kategori Distribusi</span>
+                            <span class="font-bold text-pink-600 block mt-0.5">6 Jalur Distribusi Utama</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80">
+                            <span class="text-slate-400 block">Tipe Pelanggan</span>
+                            <span class="font-bold text-slate-800 block mt-0.5">Restoran, Kantin, Central Kitchen</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80">
+                            <span class="text-slate-400 block">Status Pengecekan Awal</span>
+                            <span class="font-bold text-amber-600 block mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i> 4 Potensi Anomali Ditemukan</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons di dalam Modal Page 2 -->
+                    <div class="flex flex-col sm:flex-row items-center gap-3">
+                        <button onclick="goToPage(1)" class="w-full sm:w-1/3 py-3.5 px-4 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition-colors">
+                            Batal / Ganti File
+                        </button>
+                        <button onclick="goToPage(3)" class="w-full sm:w-2/3 py-3.5 px-6 rounded-xl bg-slate-900 hover:bg-pink-600 text-white font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Confirm & Jalankan Analisis (Ke Page 3)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =====================================================================
+             PAGE 3: DATA CORRELATION & RADIAL CHORD VISUALIZATION
+             (Sesuai Wireframe Page 3: Panel Pink di kiri-atas + Lingkaran Korelasi Besar)
+        ====================================================================== -->
+        <section id="view-page-3" class="hidden page-transition">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 relative overflow-hidden">
+
+                <!-- Top Accent Banner (Meniru aksen blok pink L-shape di kiri atas Wireframe Page 3) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                    <!-- PANEL KIRI (Kotak Pink di sebelah kiri pada Wireframe Page 3) -->
+                    <div class="lg:col-span-4 bg-gradient-to-b from-pink-100/90 via-pink-50/70 to-rose-50/40 border border-pink-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-pink-500 text-white mb-3">
+                                <i class="fa-solid fa-diagram-project"></i> Page 3 — Korelasi Data
+                            </div>
+                            <h2 class="text-lg font-extrabold text-slate-900 leading-snug mb-2">
+                                Peta Korelasi Rantai Pasok Bahan Baku Dapur
+                            </h2>
+                            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                                Grafik melingkar ini menampilkan korelasi antara <strong>6 Supplier Bahan Baku Olahan</strong> dengan <strong>Dapur Restoran, Central Kitchen, dan Kantin B2B</strong> (ketepatan suhu, waktu tiba, & kualitas batch).
+                            </p>
+
+                            <!-- Filter Lensa Korelasi Interaktif -->
+                            <div class="space-y-2 mb-5">
+                                <label class="text-[11px] font-bold uppercase text-slate-500 block">Filter Fokus Korelasi:</label>
+                                <button onclick="filterChord('all')" id="chord-filter-all" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 text-white flex items-center justify-between shadow-sm transition-all">
+                                    <span>Semua Korelasi Pasokan (142 Relasi)</span>
+                                    <span class="px-2 py-0.5 rounded bg-white/20 text-[10px]">Aktif</span>
+                                </button>
+                                <button onclick="filterChord('coldchain')" id="chord-filter-coldchain" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-pink-50 text-slate-700 border border-pink-200 flex items-center justify-between transition-all">
+                                    <span>Korelasi Suhu Cold-Chain & Daging</span>
+                                    <span class="text-rose-600 font-bold">r = 0.89</span>
+                                </button>
+                                <button onclick="filterChord('leadtime')" id="chord-filter-leadtime" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-pink-50 text-slate-700 border border-pink-200 flex items-center justify-between transition-all">
+                                    <span>Korelasi Lead-Time & Jam Masak Dapur</span>
+                                    <span class="text-amber-600 font-bold">r = 0.76</span>
+                                </button>
+                            </div>
+
+                            <!-- Detail Node yang sedang di-hover / dipilih -->
+                            <div id="chord-node-inspector" class="bg-white/90 rounded-xl p-3.5 border border-pink-200 shadow-sm">
+                                <p class="text-[11px] font-bold uppercase text-pink-600 mb-1">Detail Titik Korelasi Aktif</p>
+                                <p id="inspector-title" class="text-xs font-bold text-slate-900">Arahkan kursor pada titik lingkaran di samping</p>
+                                <p id="inspector-desc" class="text-[11px] text-slate-600 mt-1">
+                                    Setiap garis melengkung menunjukkan ketergantungan pasokan bahan mentah/setengah jadi antar fasilitas pengolahan dan dapur B2B.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Tombol NEXT ke Page 4 -->
+                        <div class="mt-6 pt-4 border-t border-pink-200/80">
+                            <button onclick="goToPage(4)" class="w-full py-3.5 px-5 rounded-xl bg-slate-900 hover:bg-pink-600 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 group">
+                                <span>Next: Lihat 6 Detail Distribusi</span>
+                                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- VISUALISASI LINGKARAN KORELASI BESAR (Sesuai gambar jaringan melingkar di Wireframe Page 3) -->
+                    <div class="lg:col-span-8 flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 relative min-h-[480px]">
+                        <!-- Top pink bar extension matching wireframe L-shape -->
+                        <div class="w-full h-3 bg-pink-200/80 rounded-full mb-4"></div>
+
+                        <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-2 px-2">
+                            <div class="flex items-center gap-3 text-xs">
+                                <span class="flex items-center gap-1.5 font-medium text-slate-600">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span> Node Supplier & Dapur B2B
+                                </span>
+                                <span class="flex items-center gap-1.5 font-medium text-slate-600">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Korelasi Anomali Tinggi
+                                </span>
+                            </div>
+                            <span class="text-[11px] text-slate-400">Klik atau arahkan kursor pada label di sekeliling lingkaran</span>
+                        </div>
+
+                        <!-- Interactive SVG Chord Diagram -->
+                        <div class="w-full max-w-[540px] aspect-square flex items-center justify-center">
+                            <svg id="chord-svg" viewBox="0 0 600 600" class="w-full h-full select-none"></svg>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =====================================================================
+             PAGE 4: 6 DISTRIBUTION DETAILS (SCROLLABLE + EXPAND ON CLICK + NEXT)
+             (Sesuai Wireframe Page 4: Header "6", List Kartu Pink yang bisa membesar,
+              dan tombol "NEXT" di sebelah kanan)
+        ====================================================================== -->
+        <section id="view-page-4" class="hidden page-transition">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8">
+
+                <div class="max-w-5xl mx-auto">
+                    <!-- HEADER KOTAK "6" (Sesuai kotak pink paling atas dengan angka 6 di Wireframe Page 4) -->
+                    <div class="w-full md:w-10/12 bg-gradient-to-r from-pink-200/90 via-pink-100 to-rose-100 border-2 border-pink-300 rounded-2xl p-6 mb-6 text-center shadow-sm relative">
+                        <span class="text-xs font-bold uppercase tracking-widest text-pink-700 block mb-1">
+                            Ringkasan Jaringan Distribusi Bahan Baku B2B
+                        </span>
+                        <div class="text-5xl sm:text-6xl font-black text-slate-900 leading-none my-1">6</div>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-700 mt-2">
+                            6 Klaster Distribusi Bahan Baku & Setengah Jadi untuk Dapur Komersial
+                        </p>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Klik pada salah satu kotak distribusi di bawah untuk membuka pandangan detail yang lebih besar & lengkap (Scroll ke bawah untuk melihat keenam distribusi).
+                        </p>
+                    </div>
+
+                    <!-- LAYOUT UTAMA PAGE 4: KIRI = DAFTAR SCROLLABLE 6 DISTRIBUSI, KANAN = TOMBOL STICKY "NEXT" -->
+                    <div class="flex flex-col md:flex-row items-start gap-6 relative">
+
+                        <!-- Daftar 6 Distribusi (Scrollable & Expandable saat diklik) -->
+                        <div id="distribution-cards-container" class="w-full md:w-10/12 space-y-5">
+                            <!-- Di-render secara dinamis oleh JavaScript agar interaktif saat diklik -->
+                        </div>
+
+                        <!-- TOMBOL "NEXT" DI SEBELAH KANAN (Sesuai posisi tombol NEXT di samping pada Wireframe Page 4) -->
+                        <div class="w-full md:w-2/12 md:sticky md:top-28 flex flex-col gap-3">
+                            <button onclick="goToPage(5)"
+                                    class="w-full py-8 px-4 rounded-2xl bg-pink-200 hover:bg-pink-500 text-slate-900 hover:text-white border-2 border-pink-300 hover:border-pink-600 font-extrabold text-sm tracking-wider shadow-md hover:shadow-xl transition-all flex flex-col items-center justify-center gap-2 group">
+                                <span>NEXT</span>
+                                <i class="fa-solid fa-arrow-right text-lg group-hover:translate-x-1 transition-transform"></i>
+                                <span class="text-[10px] font-medium opacity-75 text-center leading-tight">Ke Peta Jaringan & Anomali (Page 5)</span>
+                            </button>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-[11px] text-slate-500 leading-relaxed hidden md:block">
+                                <p class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-hand-pointer text-pink-500"></i> Petunjuk Page 4:</p>
+                                Klik kartu di sebelah kiri untuk memperbesar (expand) detail SKU bahan baku dapur dan melihat metrik pengiriman.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- =====================================================================
+             PAGE 5 & PAGE 6: B2B F&B SUPPLY NETWORK TREE + ANOMALY TRIANGLES + NOTIFY MODAL
+             (Sesuai Wireframe Page 5 & Page 6)
+        ====================================================================== -->
+        <section id="view-page-5-6" class="hidden page-transition relative">
+            <div class="bg-white rounded-3xl border-2 border-violet-400/80 shadow-sm p-5 sm:p-8 relative overflow-hidden">
+
+                <!-- Header Informasi Page 5 -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 mb-6 border-b border-slate-200">
+                    <div>
+                        <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-violet-700 bg-violet-50 px-3 py-1 rounded-full border border-violet-200 mb-2">
+                            <i class="fa-solid fa-sitemap"></i> Page 5 — Jaringan Pasokan Bahan Baku Dapur B2B (Bukan Konsumen Ritel Rumah)
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                            Peta Alur Distribusi Bahan Baku & Titik Anomali Dapur Komersial
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                            Memetakan alur dari <strong>Pusat Pengolahan Bahan Baku (Raw & Semi-Processed)</strong> menuju <strong>Central Kitchen, Dapur Restoran, dan Kantin Industri</strong>. Klik segitiga kuning <i class="fa-solid fa-play -rotate-90 text-amber-500 text-xs"></i> untuk memeriksa anomali.
+                        </p>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="flex flex-wrap items-center gap-3 text-xs bg-slate-50 p-3 rounded-2xl border border-slate-200 shrink-0">
+                        <span class="flex items-center gap-1.5 font-semibold text-slate-700">
+                            <span class="w-3 h-3 rounded bg-amber-400 inline-block"></span> Hub Bahan Baku
+                        </span>
+                        <span class="flex items-center gap-1.5 font-semibold text-slate-700">
+                            <span class="w-3 h-3 rounded bg-emerald-600 inline-block"></span> Kategori Proses
+                        </span>
+                        <span class="flex items-center gap-1.5 font-semibold text-slate-700">
+                            <span class="w-3 h-3 rounded bg-blue-600 inline-block"></span> Dapur B2B (Resto/Kantin)
+                        </span>
+                        <span class="flex items-center gap-1.5 font-bold text-amber-600">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Segitiga Anomali
+                        </span>
+                    </div>
+                </div>
+
+                <!-- GRID UTAMA PAGE 5: KIRI/TENGAH = INTERACTIVE TREE NETWORK, KANAN = TOMBOL "NOTIFY" -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+
+                    <!-- DIAGRAM POHON JARINGAN B2B F&B (Functional & Clean SVG + Interactive Nodes) -->
+                    <div class="lg:col-span-9 bg-slate-50/70 rounded-2xl border border-slate-200 p-4 overflow-x-auto">
+                        <div class="min-w-[780px]">
+                            <svg id="b2b-tree-svg" viewBox="0 0 920 560" class="w-full h-auto select-none">
+                                <!-- Garis Penghubung Kurva Bezier (Root ke Cabang 1) -->
+                                <g stroke="#475569" stroke-width="2.2" fill="none">
+                                    <path d="M 170 280 C 230 280, 220 75, 280 75" />
+                                    <path d="M 170 280 C 230 280, 220 195, 280 195" />
+                                    <path d="M 170 280 C 230 280, 220 355, 280 355" />
+                                    <path d="M 170 280 C 230 280, 220 485, 280 485" />
+                                </g>
+
+                                <!-- Garis Penghubung Level 1 ke Level 2 & 3 -->
+                                <g stroke="#94a3b8" stroke-width="1.8" fill="none">
+                                    <!-- Cabang 1: Protein & Cold Chain -->
+                                    <path d="M 410 75 L 470 75" />
+                                    <!-- Cabang 2: Bahan Setengah Jadi & Bumbu Marinasi -->
+                                    <path d="M 410 195 C 440 195, 440 155, 470 155" />
+                                    <path d="M 410 195 C 440 195, 440 235, 470 235" />
+                                    <!-- Sub-cabang 2a -->
+                                    <path d="M 595 155 C 620 155, 620 125, 645 125" />
+                                    <path d="M 595 155 C 620 155, 620 160, 645 160" />
+                                    <path d="M 595 155 C 620 155, 620 195, 645 195" />
+                                    <!-- Sub-cabang 2b -->
+                                    <path d="M 595 235 C 620 235, 620 230, 645 230" />
+                                    <path d="M 595 235 C 620 235, 620 265, 645 265" />
+
+                                    <!-- Cabang 3: Sayur Pre-Cut & Bahan Segar Dapur -->
+                                    <path d="M 410 355 C 440 355, 440 320, 470 320" />
+                                    <path d="M 410 355 C 440 355, 440 395, 470 395" />
+                                    <!-- Sub-cabang 3a -->
+                                    <path d="M 595 320 C 620 320, 620 300, 645 300" />
+                                    <path d="M 595 320 C 620 320, 620 335, 645 335" />
+                                    <!-- Sub-cabang 3b -->
+                                    <path d="M 595 395 C 620 395, 620 380, 645 380" />
+                                    <path d="M 595 395 C 620 395, 620 420, 645 420" />
+
+                                    <!-- Cabang 4: Bahan Kering, Tepung & Minyak Curah -->
+                                    <path d="M 410 485 C 440 485, 440 465, 470 465" />
+                                    <path d="M 410 485 C 440 485, 440 515, 470 515" />
+                                    <path d="M 595 465 L 645 465" />
+                                    <path d="M 595 515 L 645 515" />
+                                </g>
+
+                                <!-- ROOT NODE (Kiri - Kuning Emas seperti "Pollution" pada contoh gambar, diganti "Hub Bahan Baku") -->
+                                <g class="cursor-pointer" onclick="selectAnomalyNode(0)">
+                                    <rect x="20" y="250" width="150" height="60" rx="28" fill="#f59e0b" stroke="#d97706" stroke-width="2"/>
+                                    <text x="95" y="276" text-anchor="middle" fill="#0f172a" font-weight="800" font-size="13">HUB BAHAN BAKU</text>
+                                    <text x="95" y="294" text-anchor="middle" fill="#1e293b" font-weight="600" font-size="10">Processed & Raw Supply</text>
+                                </g>
+
+                                <!-- LEVEL 1 NODES (Hijau seperti pada Wireframe Page 5) -->
+                                <g>
+                                    <rect x="280" y="55" width="130" height="40" rx="6" fill="#059669" />
+                                    <text x="345" y="79" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="11">1. Cold-Chain Protein</text>
+
+                                    <rect x="280" y="175" width="130" height="40" rx="6" fill="#059669" />
+                                    <text x="345" y="199" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="11">2. Bahan Marinasi</text>
+
+                                    <rect x="280" y="335" width="130" height="40" rx="6" fill="#059669" />
+                                    <text x="345" y="359" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="11">3. Sayur Pre-Cut</text>
+
+                                    <rect x="280" y="465" width="130" height="40" rx="6" fill="#059669" />
+                                    <text x="345" y="489" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="11">4. Tepung & Curah</text>
+                                </g>
+
+                                <!-- LEVEL 2 NODES (Pink Muda - Sub-Hub Distribusi B2B) -->
+                                <g>
+                                    <!-- Top Pink Bar -->
+                                    <rect x="470" y="58" width="290" height="34" rx="5" fill="#fecdd3" stroke="#fda4af" />
+                                    <text x="615" y="79" text-anchor="middle" fill="#881337" font-weight="600" font-size="10.5">Daging Sapi Iris, Fillet Ayam Beku, Seafood Dapur</text>
+
+                                    <rect x="470" y="140" width="125" height="30" rx="5" fill="#fecdd3" stroke="#fda4af" />
+                                    <text x="532" y="159" text-anchor="middle" fill="#881337" font-weight="600" font-size="10.5">Central Kitchen</text>
+
+                                    <rect x="470" y="220" width="125" height="30" rx="5" fill="#fecdd3" stroke="#fda4af" />
+                                    <text x="532" y="239" text-anchor="middle" fill="#881337" font-weight="600" font-size="10.5">Restoran & Grill</text>
+
+                                    <rect x="470" y="305" width="125" height="30" rx="5" fill="#fecdd3" stroke="#fda4af" />
+                                    <text x="532" y="324" text-anchor="middle" fill="#881337" font-weight="600" font-size="10.5">Kantin & Katering</text>
+
+                                    <rect x="470" y="380" width="125" height="30" rx="5" fill="#fecdd3" stroke="#fda4af" />
+                                    <text x="532" y="399" text-anchor="middle" fill="#881337" font-weight="600" font-size="10.5">Cloud Kitchen B2B</text>
+
+                                    <rect x="470" y="450" width="125" height="30" rx="5" fill="#fecdd3" stroke="#fda4af" />
+                                    <text x="532" y="469" text-anchor="middle" fill="#881337" font-weight="600" font-size="10.5">Komisari Bakery</text>
+
+                                    <rect x="470" y="500" width="125" height="30" rx="5" fill="#fecdd3" stroke="#fda4af" />
+                                    <text x="532" y="519" text-anchor="middle" fill="#881337" font-weight="600" font-size="10.5">Dapur Hotel/Horeka</text>
+                                </g>
+
+                                <!-- LEVEL 3 NODES (Biru - Titik Dapur Pelanggan B2B yang memasak bahan baku) -->
+                                <g>
+                                    <rect x="645" y="112" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="128" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Sentral QSR Grup A</text>
+
+                                    <rect x="645" y="146" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="162" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Produksi Ramen B2B</text>
+
+                                    <rect x="645" y="180" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="196" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Commissary Saus & Kaldu</text>
+
+                                    <rect x="645" y="216" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="232" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Resto Steak & Hotpot</text>
+
+                                    <rect x="645" y="250" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="266" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Jaringan Bistro</text>
+
+                                    <rect x="645" y="288" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="304" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Kantin Pabrik Kawasan Industri</text>
+
+                                    <rect x="645" y="322" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="338" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Katering Korporat</text>
+
+                                    <rect x="645" y="368" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="384" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Cloud Kitchen Hub Utara</text>
+
+                                    <rect x="645" y="405" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="421" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Cloud Kitchen Hub Selatan</text>
+
+                                    <rect x="645" y="453" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="469" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Pabrik Roti & Pastry B2B</text>
+
+                                    <rect x="645" y="503" width="165" height="24" rx="4" fill="#3b82f6" />
+                                    <text x="727" y="519" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="10">Dapur Banquet & Katering</text>
+                                </g>
+
+                                <!-- =================================================================
+                                     4 SEGITIGA KUNING PERINGATAN ANOMALI (Persis seperti Wireframe Page 5)
+                                ================================================================== -->
+                                <!-- Segitiga 1 (Atas) -->
+                                <g class="cursor-pointer hover:opacity-90 transition-opacity" onclick="selectAnomalyNode(1)">
+                                    <polygon points="855,95 825,155 885,155" fill="#f59e0b" stroke="#b45309" stroke-width="2" />
+                                    <text x="855" y="147" text-anchor="middle" fill="#0f172a" font-weight="900" font-size="16">!</text>
+                                </g>
+
+                                <!-- Segitiga 2 (Tengah Atas) -->
+                                <g class="cursor-pointer hover:opacity-90 transition-opacity" onclick="selectAnomalyNode(2)">
+                                    <polygon points="875,210 845,270 905,270" fill="#f59e0b" stroke="#b45309" stroke-width="2" />
+                                    <text x="875" y="262" text-anchor="middle" fill="#0f172a" font-weight="900" font-size="16">!</text>
+                                </g>
+
+                                <!-- Segitiga 3 (Tengah Bawah) -->
+                                <g class="cursor-pointer hover:opacity-90 transition-opacity" onclick="selectAnomalyNode(3)">
+                                    <polygon points="885,325 855,385 915,385" fill="#f59e0b" stroke="#b45309" stroke-width="2" />
+                                    <text x="885" y="377" text-anchor="middle" fill="#0f172a" font-weight="900" font-size="16">!</text>
+                                </g>
+
+                                <!-- Segitiga 4 (Bawah) -->
+                                <g class="cursor-pointer hover:opacity-90 transition-opacity" onclick="selectAnomalyNode(4)">
+                                    <polygon points="860,445 830,505 890,505" fill="#f59e0b" stroke="#b45309" stroke-width="2" />
+                                    <text x="860" y="497" text-anchor="middle" fill="#0f172a" font-weight="900" font-size="16">!</text>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- Bar Detail Anomali Aktif di bawah Pohon Jaringan -->
+                        <div id="anomaly-detail-bar" class="mt-3 bg-amber-50 border border-amber-300 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex items-start gap-3">
+                                <div class="w-9 h-9 rounded-lg bg-amber-400 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div>
+                                    <span id="anomaly-bar-badge" class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-200 text-amber-900">
+                                        Anomali #1 Terpilih (Segitiga Kuning Atas)
+                                    </span>
+                                    <h4 id="anomaly-bar-title" class="text-sm font-bold text-slate-900 mt-0.5">
+                                        Deviasi Suhu Truk Chiller (+8.4°C) — Batch Ayam Marinasi & Kaldu Pekat
+                                    </h4>
+                                    <p id="anomaly-bar-desc" class="text-xs text-slate-600">
+                                        Tujuan: <strong>Dapur Sentral QSR Grup A & Dapur Produksi Ramen B2B</strong>. Berisiko mengganggu jadwal masak shift pagi di 18 cabang dapur.
+                                    </p>
+                                </div>
+                            </div>
+                            <button onclick="goToPage(6)" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shrink-0 transition-colors shadow-sm">
+                                Tangani Anomali Ini <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PANEL KANAN: TOMBOL "NOTIFY" BESAR (Sesuai kotak abu-abu "Notify" di kanan pada Wireframe Page 5) -->
+                    <div class="lg:col-span-3 flex flex-col justify-between gap-4 h-full">
+                        <div class="bg-slate-100 border-2 border-slate-300 rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-sm">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                                Panel Tindakan Distribusi
+                            </span>
+                            <!-- Tombol Notify sesuai posisi dan gaya di Wireframe Page 5 -->
+                            <button onclick="goToPage(6)"
+                                    class="w-full py-10 px-6 rounded-2xl bg-slate-300/90 hover:bg-pink-600 text-slate-900 hover:text-white border-2 border-slate-400 hover:border-pink-700 font-extrabold text-xl tracking-wide shadow-md hover:shadow-xl transition-all flex flex-col items-center justify-center gap-2 group">
+                                <i class="fa-solid fa-bell text-2xl text-amber-600 group-hover:text-white transition-colors"></i>
+                                <span>Notify</span>
+                                <span class="text-xs font-medium opacity-80">Klik untuk Hubungi Distribusi (Page 6)</span>
+                            </button>
+
+                            <div class="mt-4 w-full text-left space-y-2 border-t border-slate-200 pt-3">
+                                <p class="text-xs font-bold text-slate-700">Daftar Peringatan Segitiga Kuning:</p>
+                                <button onclick="selectAnomalyNode(1)" class="w-full text-left p-2 rounded-lg bg-white hover:bg-amber-50 border border-slate-200 text-[11px] flex items-center gap-2">
+                                    <i class="fa-solid fa-play -rotate-90 text-amber-500"></i>
+                                    <span class="truncate font-medium">1. Anomali Suhu Chiller Dapur QSR</span>
+                                </button>
+                                <button onclick="selectAnomalyNode(2)" class="w-full text-left p-2 rounded-lg bg-white hover:bg-amber-50 border border-slate-200 text-[11px] flex items-center gap-2">
+                                    <i class="fa-solid fa-play -rotate-90 text-amber-500"></i>
+                                    <span class="truncate font-medium">2. Keterlambatan Daging Iris Resto</span>
+                                </button>
+                                <button onclick="selectAnomalyNode(3)" class="w-full text-left p-2 rounded-lg bg-white hover:bg-amber-50 border border-slate-200 text-[11px] flex items-center gap-2">
+                                    <i class="fa-solid fa-play -rotate-90 text-amber-500"></i>
+                                    <span class="truncate font-medium">3. Kualitas Sayur Pre-Cut Kantin</span>
+                                </button>
+                                <button onclick="selectAnomalyNode(4)" class="w-full text-left p-2 rounded-lg bg-white hover:bg-amber-50 border border-slate-200 text-[11px] flex items-center gap-2">
+                                    <i class="fa-solid fa-play -rotate-90 text-amber-500"></i>
+                                    <span class="truncate font-medium">4. Selisih Stok Tepung Komisari</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- =====================================================================
+                     PAGE 6 OVERLAY: CUSTOMER / DISTRIBUTOR CONTACT DETAILS & URGENT CALL
+                     (Sesuai Wireframe Page 6: Kotak Pink Besar menimpa Page 5 + Tombol Merah "Urgent Notify Call")
+                ====================================================================== -->
+                <div id="page6-modal-overlay" class="hidden absolute inset-0 z-30 bg-slate-900/45 backdrop-blur-[2px] flex items-center justify-center p-4 sm:p-8">
+
+                    <!-- Kotak Pink Besar (Sesuai Wireframe Page 6) -->
+                    <div class="w-full max-w-4xl bg-gradient-to-br from-pink-200 via-pink-100 to-rose-100 border-2 border-pink-400 rounded-3xl shadow-2xl p-6 sm:p-10 relative animate-[fadeIn_0.25s_ease-out]">
+
+                        <!-- Top Bar Modal Page 6 -->
+                        <div class="flex items-center justify-between border-b border-pink-300/80 pb-4 mb-6">
+                            <div class="flex items-center gap-2.5">
+                                <span class="px-3 py-1 rounded-full bg-pink-600 text-white text-xs font-bold uppercase tracking-wider">
+                                    Page 6 — Eskalasi & Notifikasi Distribusi
+                                </span>
+                                <span class="text-xs font-semibold text-pink-900 hidden sm:inline">
+                                    Laporan Anomali Pasokan Bahan Baku Dapur B2B
+                                </span>
+                            </div>
+                            <button onclick="goToPage(5)" class="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 font-semibold text-xs border border-pink-300 transition-colors">
+                                <i class="fa-solid fa-xmark mr-1"></i> Tutup (Kembali ke Page 5)
+                            </button>
+                        </div>
+
+                        <!-- Isi Utama Modal Page 6: Kiri = Customer/Distributor Contact Details & Email Sent, Kanan = Urgent Notify Call Merah -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+
+                            <!-- KIRI/TENGAH: Detail Kontak & Status Email (Sesuai teks "customer: Contact details: email sent?" di Wireframe Page 6) -->
+                            <div class="md:col-span-7 bg-white/95 rounded-2xl p-5 sm:p-6 border border-pink-300 shadow-sm space-y-4">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div>
+                                        <span class="text-[11px] font-bold uppercase tracking-wider text-pink-600">Target Notifikasi Distribusi & Dapur B2B</span>
+                                        <h3 id="p6-contact-title" class="text-lg font-extrabold text-slate-900 mt-0.5">
+                                            Hub Distribusi Cold-Chain & Dapur Sentral QSR
+                                        </h3>
+                                    </div>
+                                    <span id="email-status-pill" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> Siap Kirim Email
+                                    </span>
+                                </div>
+
+                                <!-- Detail Kontak & Tiket Anomali -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                                    <div>
+                                        <span class="text-slate-400 block">Kepala Distribusi (Supplier PIC):</span>
+                                        <span class="font-bold text-slate-800">Bpk. Hendra Wijaya (Logistik Bahan Baku)</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block">Penerima Dapur B2B:</span>
+                                        <span class="font-bold text-slate-800">Chef Operasional — Central Kitchen Grup A</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block">Email Distribusi & QC:</span>
+                                        <span class="font-mono font-semibold text-pink-700">dispatch-coldchain@rawmatsync.id</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block">Kode Batch Bermasalah:</span>
+                                        <span class="font-bold text-rose-600">BATCH #RM-402 (Ayam Marinasi & Kaldu)</span>
+                                    </div>
+                                </div>
+
+                                <!-- Pesan Otomatis Anomali -->
+                                <div>
+                                    <label class="text-xs font-bold text-slate-700 block mb-1">Isi Laporan Anomali ke Pihak Distribusi:</label>
+                                    <textarea id="anomaly-email-body" rows="3" class="w-full rounded-xl border border-slate-300 p-3 text-xs text-slate-700 bg-white focus:outline-none focus:border-pink-500">PERINGATAN ANOMALI: Terdeteksi kenaikan suhu chiller (+8.4°C) dan potensi keterlambatan 95 menit pada pengiriman bahan baku setengah jadi (Batch #RM-402) menuju Dapur Sentral QSR. Mohon kirimkan armada pengganti segera sebelum jam persiapan masak dapur pukul 05:00.</textarea>
+                                </div>
+
+                                <!-- Tombol Kirim Email Laporan -->
+                                <div class="flex flex-wrap items-center gap-3 pt-1">
+                                    <button onclick="triggerSendEmail()" id="btn-send-email" class="flex-1 py-3 px-5 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow transition-all flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                        <span>Kirim Email Notifikasi Anomali</span>
+                                    </button>
+                                </div>
+
+                                <!-- Feedback Box saat email berhasil dikirim -->
+                                <div id="email-sent-confirmation" class="hidden bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-xl p-3 text-xs flex items-center gap-2.5">
+                                    <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                                    <div>
+                                        <strong>Email Sent!</strong> Laporan anomali beserta log sensor batch bahan baku telah terkirim ke tim Distribusi & Kepala Dapur Sentral.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- KANAN: KOTAK MERAH "URGENT NOTIFY CALL" (Sesuai kotak merah di sebelah kanan pada Wireframe Page 6) -->
+                            <div class="md:col-span-5 flex flex-col items-center justify-center">
+                                <div class="w-full bg-red-600 hover:bg-red-700 text-white rounded-2xl p-6 sm:p-8 border-2 border-red-400 shadow-xl transition-all text-center flex flex-col items-center justify-center">
+                                    <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-2xl mb-3 animate-bounce">
+                                        <i class="fa-solid fa-phone-volume"></i>
+                                    </div>
+                                    <span class="text-[11px] font-bold uppercase tracking-widest text-red-100 mb-1">
+                                        Skenario Darurat Dapur B2B
+                                    </span>
+                                    <h4 class="text-xl font-black tracking-tight mb-2">
+                                        Urgent Notify Call
+                                    </h4>
+                                    <p class="text-xs text-red-100 mb-5 leading-relaxed">
+                                        Bahan baku kritis untuk operasional memasak dapur tidak boleh terlambat. Tekan untuk panggilan langsung (Direct Call) ke Manajer Distribusi.
+                                    </p>
+
+                                    <button onclick="triggerUrgentCall()" id="btn-urgent-call" class="w-full py-3.5 px-5 rounded-xl bg-white text-red-700 hover:bg-red-50 font-black text-sm shadow-md transition-all flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-phone"></i>
+                                        <span>Hubungi Distribusi Sekarang</span>
+                                    </button>
+
+                                    <!-- Simulasi Active Call Panel -->
+                                    <div id="urgent-call-active-box" class="hidden mt-4 w-full bg-red-900/90 border border-red-300 rounded-xl p-3.5 text-left text-xs">
+                                        <div class="flex items-center justify-between mb-1.5">
+                                            <span class="font-bold text-emerald-300 flex items-center gap-1.5">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> TERHUBUNG LANGSUNG
+                                            </span>
+                                            <span id="call-timer" class="font-mono text-white font-bold">00:08</span>
+                                        </div>
+                                        <p class="text-red-100 text-[11px]">
+                                            Berbicara dengan: <strong>Hendra Wijaya (Dispatcher Gudang Bahan Baku)</strong> — Armada backup sedang diberangkatkan ke Central Kitchen.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER RINGKAS -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+            <div>
+                <strong>Mockup Fungsional Alur Page 1 – Page 6</strong> • Konteks: Supplier Bahan Baku & Setengah Jadi untuk Dapur B2B (Restoran, Central Kitchen, Kantin)
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="goToPage(1)" class="text-pink-600 hover:underline font-semibold">Ulangi dari Page 1</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC UNTUK SELURUH INTERAKSI PAGE 1 SAMPAI PAGE 6 -->
+    <script>
+        // State Halaman Aktif (1 - 6)
+        let currentPage = 1;
+        let activeDistCardId = 1; // Default kartu yang di-expand pada Page 4 (Kotak ke-2 seperti pada wireframe)
+
+        // Daftar Contoh File Simulasi untuk Page 1
+        const sampleFiles = [
+            { name: "B2B_Kitchen_RawMaterial_Oct2026.csv", desc: "6 Jalur Distribusi Utama • 142 Titik Dapur Komersial & Kantin • 4,820 Baris Log" },
+            { name: "CentralKitchen_ColdChain_Batch402.xlsx", desc: "6 Jalur Distribusi • Fokus Daging Marinasi, Kaldu & Bahan Setengah Jadi" },
+            { name: "IndustrialCanteen_Supply_Network.json", desc: "6 Jalur Distribusi • Katering Pabrik, Komisari Roti & Restoran" }
+        ];
+        let sampleFileIdx = 0;
+
+        // Data 6 Jalur Distribusi Bahan Baku B2B (Untuk Page 4)
+        const distributionsData = [
+            {
+                id: 0,
+                code: "DIST-01",
+                name: "1. Distribusi Protein & Daging Marinasi (Cold-Chain Dapur)",
+                summary: "Pasokan potongan daging sapi siap masak, fillet ayam marinasi, dan bahan dasar kaldu beku untuk dapur restoran & central kitchen.",
+                clients: "38 Dapur Restoran & 6 Central Kitchen",
+                tempStatus: "-18.2°C (Stabil)",
+                reliability: "96.4%",
+                anomalyStatus: "1 Peringatan Suhu Armada",
+                skus: [
+                    { sku: "RM-PRO-101", item: "Fillet Ayam Marinasi Bumbu Dasar (Kemasan Vakum 5kg)", target: "Dapur Sentral QSR Grup A", status: "Anomali Suhu (+8.4°C)" },
+                    { sku: "RM-PRO-104", item: "Daging Sapi Slice Shortplate (Siap Masak Grill/Hotpot)", target: "Dapur Resto Steak & Hotpot", status: "Tepat Waktu" },
+                    { sku: "RM-PRO-109", item: "Tulang Sapi & Konsentrat Kaldu Kolagen 20L", target: "Dapur Produksi Ramen B2B", status: "Tepat Waktu" }
+                ]
+            },
+            {
+                id: 1,
+                code: "DIST-02",
+                name: "2. Bahan Setengah Jadi, Saus Dasar & Pasta Bumbu Komersial",
+                summary: "Bumbu dasar giling, saus marinasi jerigen 10L, dan pasta rempah matang untuk mempercepat waktu masak di dapur B2B.",
+                clients: "44 Dapur Restoran, Bistro & Cloud Kitchen",
+                tempStatus: "+4.0°C (Chiller)",
+                reliability: "94.1%",
+                anomalyStatus: "Terdeteksi Keterlambatan Rute",
+                skus: [
+                    { sku: "RM-SAU-201", item: "Bumbu Dasar Merah & Putih Matang (Pail 15kg)", target: "Dapur Katering Korporat", status: "Tepat Waktu" },
+                    { sku: "RM-SAU-205", item: "Saus Demi-Glace & Marinasi Lada Hitam B2B", target: "Dapur Jaringan Bistro", status: "Terlambat 45 Menit" },
+                    { sku: "RM-SAU-210", item: "Konsentrat Kuah Kari Industri", target: "Cloud Kitchen Hub Utara", status: "Tepat Waktu" }
+                ]
+            },
+            {
+                id: 2,
+                code: "DIST-03",
+                name: "3. Sayuran Pre-Cut, Cuci Bersih & Bahan Segar Siap Masak",
+                summary: "Sayuran yang sudah dikupas, dipotong standar industri, dan disanitasi khusus untuk langsung masuk kuali/wajan kantin & katering.",
+                clients: "29 Kantin Pabrik & Dapur Katering Besar",
+                tempStatus: "+5.5°C (Berisiko)",
+                reliability: "91.8%",
+                anomalyStatus: "Deviasi Kelembaban Kemasan",
+                skus: [
+                    { sku: "RM-VEG-301", item: "Kentang Potong Wedges & Dadu Pre-Blanched (Karung 10kg)", target: "Kantin Pabrik Kawasan Industri", status: "Perlu Cek QC" },
+                    { sku: "RM-VEG-308", item: "Bawang Bombay & Bawang Putih Kupas Cincang", target: "Central Kitchen Grup A", status: "Tepat Waktu" }
+                ]
+            },
+            {
+                id: 3,
+                code: "DIST-04",
+                name: "4. Tepung Industri, Premiks Adonan & Bahan Kering Dapur",
+                summary: "Tepung terigu protein tinggi curah, tepung bumbu krispi B2B, beras karung 50kg, dan mi mentah untuk komisari bakery & restoran.",
+                clients: "19 Komisari Bakery & 22 Dapur Restoran",
+                tempStatus: "Suhu Ruang Kering",
+                reliability: "98.9%",
+                anomalyStatus: "Normal (Selisih 2 Sak)",
+                skus: [
+                    { sku: "RM-DRY-401", item: "Tepung Bumbu Marinasi Ayam Krispi (Sak 25kg)", target: "Dapur Sentral QSR Grup A", status: "Tepat Waktu" },
+                    { sku: "RM-DRY-405", item: "Adonan Roti Beku (Frozen Dough Ball B2B)", target: "Pabrik Roti & Pastry B2B", status: "Tepat Waktu" }
+                ]
+            },
+            {
+                id: 4,
+                code: "DIST-05",
+                name: "5. Produk Olahan Susu, Keju Blok & Bahan Masak Bakery/Kafe",
+                summary: "Keju mozzarella blok 10kg, butter lembaran industri, dan krim masak (cooking cream) untuk kebutuhan dapur hotel & pizza B2B.",
+                clients: "18 Dapur Hotel (Horeka) & Komisari",
+                tempStatus: "+2.8°C (Stabil)",
+                reliability: "97.5%",
+                anomalyStatus: "Aman / Normal",
+                skus: [
+                    { sku: "RM-DAI-501", item: "Keju Mozzarella Parut Industri (Kemasan 5kg)", target: "Cloud Kitchen Hub Selatan", status: "Tepat Waktu" },
+                    { sku: "RM-DAI-504", item: "Unsalted Butter Lembaran untuk Lapis Pastry", target: "Pabrik Roti & Pastry B2B", status: "Tepat Waktu" }
+                ]
+            },
+            {
+                id: 5,
+                code: "DIST-06",
+                name: "6. Minyak Goreng Curah (Deep-Fry) & Lemak Masak Komersial",
+                summary: "Minyak goreng padat (solid frying fat) dan minyak sawit jerigen 20L khusus penggorengan suhu tinggi di dapur komersial.",
+                clients: "Seluruh 142 Titik Dapur & Kantin",
+                tempStatus: "Suhu Ruang (Stabil)",
+                reliability: "99.2%",
+                anomalyStatus: "Aman / Normal",
+                skus: [
+                    { sku: "RM-OIL-601", item: "Minyak Padat Deep-Frying (Karton 15kg)", target: "Dapur Sentral QSR Grup A", status: "Tepat Waktu" },
+                    { sku: "RM-OIL-603", item: "Minyak Goreng Komersial Jerigen 20L", target: "Kantin Pabrik Kawasan Industri", status: "Tepat Waktu" }
+                ]
+            }
+        ];
+
+        // Data 4 Segitiga Kuning Anomali di Page 5
+        const anomaliesData = {
+            0: {
+                badge: "Status Root Hub Bahan Baku",
+                title: "Pusat Pengolahan & Gudang Bahan Baku B2B (Raw & Semi-Processed)",
+                desc: "Menyuplai 6 kategori bahan baku ke 142 dapur restoran, central kitchen, dan kantin industri. Terdapat 4 titik peringatan (segitiga kuning) di hilir."
+            },
+            1: {
+                badge: "Anomali #1 Terpilih (Segitiga Kuning Atas)",
+                title: "Deviasi Suhu Truk Chiller (+8.4°C) — Batch Ayam Marinasi & Kaldu Pekat",
+                desc: "Tujuan: Dapur Sentral QSR Grup A & Dapur Produksi Ramen B2B. Berisiko mengganggu jadwal masak shift pagi.",
+                contactTitle: "Hub Distribusi Cold-Chain & Dapur Sentral QSR",
+                emailText: "PERINGATAN ANOMALI #1: Terdeteksi kenaikan suhu chiller (+8.4°C) pada pengiriman Ayam Marinasi & Kaldu Pekat (Batch #RM-402) menuju Dapur Sentral QSR Grup A. Mohon segera kirim armada pengganti sebelum jam persiapan masak dapur pukul 05:00."
+            },
+            2: {
+                badge: "Anomali #2 Terpilih (Segitiga Kuning Tengah-Atas)",
+                title: "Keterlambatan Pengiriman 95 Menit — Daging Iris & Saus Dasar Marinasi",
+                desc: "Tujuan: Dapur Resto Steak & Hotpot serta Jaringan Bistro. Kemacetan di jalur tol distribusi utama.",
+                contactTitle: " Koordinator Armada Distribusi Resto & Grill",
+                emailText: "PERINGATAN ANOMALI #2: Armada pengangkut Daging Sapi Iris & Saus Marinasi (Batch #RM-205) mengalami keterlambatan 95 menit menuju Dapur Resto Steak & Bistro. Mohon alihkan stok cadangan dari sub-hub terdekat."
+            },
+            3: {
+                badge: "Anomali #3 Terpilih (Segitiga Kuning Tengah-Bawah)",
+                title: "Temuan Kelembaban Tinggi pada Kemasan Sayur Pre-Cut & Kupas",
+                desc: "Tujuan: Kantin Pabrik Kawasan Industri & Dapur Katering Korporat (Kebutuhan masak 5.000 porsi siang).",
+                contactTitle: "Divisi QC Sayur Pre-Cut & Logistik Kantin Industri",
+                emailText: "PERINGATAN ANOMALI #3: Sensor kelembaban mendeteksi kondensasi berlebih pada Batch #RM-301 (Sayur Pre-Cut & Kentang Kupas) untuk Kantin Pabrik Kawasan Industri. Mohon lakukan inspeksi cepat saat bongkar muat di dapur."
+            },
+            4: {
+                badge: "Anomali #4 Terpilih (Segitiga Kuning Bawah)",
+                title: "Selisih Kuantitas Muatan Tepung Premiks & Adonan Beku (-4 Sak)",
+                desc: "Tujuan: Pabrik Roti & Pastry B2B serta Dapur Banquet Hotel.",
+                contactTitle: "Gudang Bahan Kering & Komisari Bakery B2B",
+                emailText: "PERINGATAN ANOMALI #4: Tercatat selisih 4 sak Tepung Premiks Industri pada manifes pengiriman menuju Komisari Bakery B2B. Mohon kirimkan kekurangan muatan pada kloter pengiriman pagi ini."
+            }
+        };
+
+        // Fungsi Navigasi Utama (Page 1 s/d Page 6)
+        function goToPage(pageNum) {
+            currentPage = pageNum;
+
+            // Sembunyikan semua section utama terlebih dahulu
+            document.getElementById('view-page-1-2').classList.add('hidden');
+            document.getElementById('page2-blur-overlay').classList.add('hidden');
+            document.getElementById('page1-content-wrapper').classList.remove('blur-sm', 'scale-[0.99]', 'pointer-events-none');
+
+            document.getElementById('view-page-3').classList.add('hidden');
+            document.getElementById('view-page-4').classList.add('hidden');
+            document.getElementById('view-page-5-6').classList.add('hidden');
+            document.getElementById('page6-modal-overlay').classList.add('hidden');
+
+            // Tampilkan sesuai halaman yang dipilih
+            if (pageNum === 1) {
+                document.getElementById('view-page-1-2').classList.remove('hidden');
+            } else if (pageNum === 2) {
+                document.getElementById('view-page-1-2').classList.remove('hidden');
+                document.getElementById('page1-content-wrapper').classList.add('blur-sm', 'scale-[0.99]', 'pointer-events-none');
+                document.getElementById('page2-blur-overlay').classList.remove('hidden');
+            } else if (pageNum === 3) {
+                document.getElementById('view-page-3').classList.remove('hidden');
+                renderChordDiagram('all');
+            } else if (pageNum === 4) {
+                document.getElementById('view-page-4').classList.remove('hidden');
+                renderDistributionCards();
+            } else if (pageNum === 5) {
+                document.getElementById('view-page-5-6').classList.remove('hidden');
+            } else if (pageNum === 6) {
+                document.getElementById('view-page-5-6').classList.remove('hidden');
+                document.getElementById('page6-modal-overlay').classList.remove('hidden');
+            }
+
+            // Update Indikator Stepper di Header
+            updateStepperUI(pageNum);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateStepperUI(activePage) {
+            const badge = document.getElementById('current-page-badge');
+            if (badge) badge.textContent = `Page ${activePage} / 6`;
+
+            for (let i = 1; i <= 6; i++) {
+                const btn = document.getElementById(`step-btn-${i}`);
+                const numCircle = btn.querySelector('.step-num');
+                if (i === activePage) {
+                    btn.className = "step-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap bg-slate-900 text-white shadow-sm";
+                    numCircle.className = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold step-num bg-pink-500 text-white";
+                } else if (i < activePage) {
+                    btn.className = "step-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap bg-white text-slate-700 hover:bg-slate-200/70";
+                    numCircle.className = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold step-num bg-emerald-100 text-emerald-700";
+                } else {
+                    btn.className = "step-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 whitespace-nowrap text-slate-500 hover:bg-white/60";
+                    numCircle.className = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold step-num bg-slate-200 text-slate-600";
+                }
+            }
+        }
+
+        // =========================================================================
+        // LOGIKA PAGE 1: SIMULASI PILIH FILE
+        // =========================================================================
+        function triggerSimulatedFileSelect() {
+            document.getElementById('real-file-input').click();
+        }
+
+        function handleRealFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('file-name-display').textContent = file.name;
+                document.getElementById('confirm-file-name').textContent = file.name;
+            }
+        }
+
+        function cycleSimulatedFiles() {
+            sampleFileIdx = (sampleFileIdx + 1) % sampleFiles.length;
+            const chosen = sampleFiles[sampleFileIdx];
+            document.getElementById('file-name-display').textContent = chosen.name;
+            document.getElementById('confirm-file-name').textContent = chosen.name;
+        }
+
+        // =========================================================================
+        // LOGIKA PAGE 3: GENERATE CHORD / CIRCULAR NETWORK SVG
+        // (Meniru grafik lingkaran penuh garis korelasi pada gambar Page 3)
+        // =========================================================================
+        const b2bNodes = [
+            "Hub Protein Beku", "Hub Ayam Marinasi", "Hub Sayur Pre-Cut", "Hub Saus & Bumbu",
+            "Hub Tepung B2B", "Hub Olahan Susu", "Hub Minyak Curah", "Central Kitchen A",
+            "Central Kitchen B", "Dapur Ramen B2B", "Dapur Steak & Grill", "Dapur Hotpot",
+            "Kantin Pabrik #1", "Kantin Pabrik #2", "Kantin Industri #3", "Katering Korporat",
+            "Cloud Kitchen Utara", "Cloud Kitchen Selatan", "Cloud Kitchen Barat", "Komisari Bakery",
+            "Dapur Pastry B2B", "Dapur Hotel Bintang 5", "Dapur Banquet", "Dapur Resto Cepat Saji",
+            "Dapur Bistro Group", "Dapur Kantin Kampus", "Dapur Rumah Sakit", "Sub-Hub Cold Chain",
+            "Gudang Bumbu Matang", "Unit Potong Daging", "Unit Cuci Sayur", "Dapur Katering Penerbangan"
+        ];
+
+        function renderChordDiagram(mode = 'all') {
+            const svg = document.getElementById('chord-svg');
+            svg.innerHTML = '';
+
+            const cx = 300, cy = 300, radius = 215;
+            const total = b2bNodes.length;
+            const coords = [];
+
+            // Hitung posisi setiap node di keliling lingkaran
+            for (let i = 0; i < total; i++) {
+                const angle = (i / total) * Math.PI * 2 - Math.PI / 2;
+                const x = cx + radius * Math.cos(angle);
+                const y = cy + radius * Math.sin(angle);
+                coords.push({ x, y, angle, name: b2bNodes[i], idx: i });
+            }
+
+            // Buat grup garis korelasi (Chords)
+            const linksGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            svg.appendChild(linksGroup);
+
+            // Buat sekitar 95 garis melengkung melalui tengah lingkaran (mirip gambar Page 3)
+            for (let i = 0; i < total; i++) {
+                for (let step = 3; step <= 15; step += 4) {
+                    const targetIdx = (i + step + (i % 3)) % total;
+                    if (mode === 'coldchain' && (i % 2 !== 0)) continue;
+                    if (mode === 'leadtime' && (i % 3 === 0)) continue;
+
+                    const p1 = coords[i];
+                    const p2 = coords[targetIdx];
+
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    // Quadratic bezier melewati dekat titik pusat agar persis seperti chord diagram di gambar Page 3
+                    const ctrlX = cx + (Math.sin(i * 1.7) * 28);
+                    const ctrlY = cy + (Math.cos(targetIdx * 1.3) * 28);
+                    path.setAttribute("d", `M ${p1.x} ${p1.y} Q ${ctrlX} ${ctrlY} ${p2.x} ${p2.y}`);
+
+                    const isAnomalyLink = (i === 1 || i === 7 || targetIdx === 12);
+                    if (mode !== 'all' && isAnomalyLink) {
+                        path.setAttribute("stroke", "#e11d48");
+                        path.setAttribute("stroke-opacity", "0.55");
+                        path.setAttribute("stroke-width", "1.6");
+                    } else {
+                        path.setAttribute("stroke", "#334155");
+                        path.setAttribute("stroke-opacity", "0.22");
+                        path.setAttribute("stroke-width", "1.1");
+                    }
+                    path.setAttribute("fill", "none");
+                    path.dataset.source = i;
+                    path.dataset.target = targetIdx;
+                    linksGroup.appendChild(path);
+                }
+            }
+
+            // Buat titik node dan label melingkar di sekeliling luar lingkaran
+            const nodesGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            svg.appendChild(nodesGroup);
+
+            coords.forEach((pt, idx) => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("class", "cursor-pointer");
+
+                // Titik Node
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", pt.x);
+                circle.setAttribute("cy", pt.y);
+                circle.setAttribute("r", idx < 7 ? "4.5" : "3.5");
+                circle.setAttribute("fill", idx < 7 ? "#db2777" : "#334155");
+                g.appendChild(circle);
+
+                // Label Teks Radial di sekeliling lingkaran
+                const labelRadius = radius + 10;
+                const lx = cx + labelRadius * Math.cos(pt.angle);
+                const ly = cy + labelRadius * Math.sin(pt.angle);
+                const deg = (pt.angle * 180) / Math.PI;
+
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", lx);
+                text.setAttribute("y", ly);
+                text.setAttribute("font-size", "7.5");
+                text.setAttribute("font-weight", idx < 7 ? "700" : "500");
+                text.setAttribute("fill", idx < 7 ? "#be185d" : "#475569");
+
+                if (deg > 90 || deg < -90) {
+                    text.setAttribute("text-anchor", "end");
+                    text.setAttribute("transform", `rotate(${deg + 180}, ${lx}, ${ly})`);
+                } else {
+                    text.setAttribute("text-anchor", "start");
+                    text.setAttribute("transform", `rotate(${deg}, ${lx}, ${ly})`);
+                }
+                text.textContent = pt.name;
+                g.appendChild(text);
+
+                // Event Hover untuk menyorot korelasi spesifik
+                g.addEventListener("mouseenter", () => highlightChordNode(idx, pt.name));
+                nodesGroup.appendChild(g);
+            });
+        }
+
+        function highlightChordNode(nodeIdx, nodeName) {
+            const paths = document.querySelectorAll("#chord-svg path");
+            paths.forEach(p => {
+                if (Number(p.dataset.source) === nodeIdx || Number(p.dataset.target) === nodeIdx) {
+                    p.setAttribute("stroke", "#db2777");
+                    p.setAttribute("stroke-opacity", "0.85");
+                    p.setAttribute("stroke-width", "2.2");
+                } else {
+                    p.setAttribute("stroke", "#94a3b8");
+                    p.setAttribute("stroke-opacity", "0.12");
+                    p.setAttribute("stroke-width", "0.9");
+                }
+            });
+
+            document.getElementById('inspector-title').textContent = `${nodeName} (Korelasi Aktif: r = 0.87)`;
+            document.getElementById('inspector-desc').textContent = `Menampilkan ketergantungan pengiriman bahan baku antara ${nodeName} dengan titik pengolahan dan dapur B2B lainnya.`;
+        }
+
+        function filterChord(mode) {
+            ['all', 'coldchain', 'leadtime'].forEach(m => {
+                const btn = document.getElementById(`chord-filter-${m}`);
+                if (m === mode) {
+                    btn.className = "w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 text-white flex items-center justify-between shadow-sm transition-all";
+                } else {
+                    btn.className = "w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-pink-50 text-slate-700 border border-pink-200 flex items-center justify-between transition-all";
+                }
+            });
+            renderChordDiagram(mode);
+        }
+
+        // =========================================================================
+        // LOGIKA PAGE 4: RENDER 6 KARTU DISTRIBUSI (KLIK UNTUK MEMPERBESAR / EXPAND)
+        // =========================================================================
+        function renderDistributionCards() {
+            const container = document.getElementById('distribution-cards-container');
+            container.innerHTML = '';
+
+            distributionsData.forEach((dist) => {
+                const isExpanded = (dist.id === activeDistCardId);
+
+                const card = document.createElement('div');
+                card.onclick = () => toggleExpandDistCard(dist.id);
+
+                // Jika sedang diklik/expanded, berikan border ungu tebal seperti kotak kedua di Wireframe Page 4
+                // dan ukuran tampilan yang jauh lebih besar, bersih, dan detail
+                if (isExpanded) {
+                    card.className = "w-full rounded-2xl bg-gradient-to-br from-pink-100 via-pink-50 to-white border-[3px] border-violet-600 shadow-xl p-6 sm:p-8 transition-all duration-300 cursor-pointer relative";
+
+                    let skuRowsHtml = dist.skus.map(s => `
+                        <tr class="border-b border-pink-100 last:border-none">
+                            <td class="py-2.5 px-3 font-mono text-[11px] font-bold text-slate-700">${s.sku}</td>
+                            <td class="py-2.5 px-3 text-xs font-semibold text-slate-900">${s.item}</td>
+                            <td class="py-2.5 px-3 text-xs text-slate-600">${s.target}</td>
+                            <td class="py-2.5 px-3 text-right">
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${s.status.includes('Tepat') ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                                    ${s.status}
+                                </span>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    card.innerHTML = `
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-pink-200">
+                            <div class="flex items-center gap-2.5">
+                                <span class="px-3 py-1 rounded-lg bg-violet-600 text-white font-bold text-xs uppercase tracking-wider">
+                                    ${dist.code} • PANDANGAN DETAIL DIPERBESAR
+                                </span>
+                                <span class="text-xs font-semibold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-md border border-violet-200">
+                                    Sedang Dibuka
+                                </span>
+                            </div>
+                            <span class="text-xs text-slate-500"><i class="fa-solid fa-magnifying-glass-plus text-violet-600 mr-1"></i> Klik kartu lain untuk berpindah fokus</span>
+                        </div>
+
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2">${dist.name}</h3>
+                        <p class="text-sm text-slate-700 leading-relaxed mb-6">${dist.summary}</p>
+
+                        <!-- 4 Metrik Utama Distribusi -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                            <div class="bg-white p-3.5 rounded-xl border border-pink-200 shadow-sm">
+                                <span class="text-[11px] text-slate-400 block">Cakupan Dapur B2B</span>
+                                <span class="text-xs sm:text-sm font-bold text-slate-900 mt-0.5 block">${dist.clients}</span>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-xl border border-pink-200 shadow-sm">
+                                <span class="text-[11px] text-slate-400 block">Suhu Rantai Pasok</span>
+                                <span class="text-xs sm:text-sm font-bold text-blue-700 mt-0.5 block">${dist.tempStatus}</span>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-xl border border-pink-200 shadow-sm">
+                                <span class="text-[11px] text-slate-400 block">Ketepatan Jadwal Masak</span>
+                                <span class="text-xs sm:text-sm font-bold text-emerald-700 mt-0.5 block">${dist.reliability}</span>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-xl border border-pink-200 shadow-sm">
+                                <span class="text-[11px] text-slate-400 block">Status Anomali</span>
+                                <span class="text-xs sm:text-sm font-bold text-amber-700 mt-0.5 block">${dist.anomalyStatus}</span>
+                            </div>
+                        </div>
+
+                        <!-- Tabel Rincian Batch Bahan Baku Dapur -->
+                        <div class="bg-white rounded-xl border border-pink-200 overflow-hidden shadow-sm">
+                            <div class="bg-pink-50/80 px-4 py-2.5 border-b border-pink-200 flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-800">Rincian Batch Bahan Baku & Alokasi Dapur B2B</span>
+                                <span class="text-[11px] text-pink-700 font-semibold">Live Batch Log</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-[11px] uppercase text-slate-500 border-b border-slate-200">
+                                            <th class="py-2 px-3">Kode SKU</th>
+                                            <th class="py-2 px-3">Material / Bahan Setengah Jadi</th>
+                                            <th class="py-2 px-3">Penerima Dapur Komersial</th>
+                                            <th class="py-2 px-3 text-right">Status Logistik</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${skuRowsHtml}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Tampilan Kartu Ringkas (Kotak Pink standar di Wireframe Page 4 sebelum diklik)
+                    card.className = "w-full rounded-2xl bg-pink-200/75 hover:bg-pink-200 border-2 border-pink-300 hover:border-violet-400 p-5 transition-all duration-200 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm";
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[11px] font-bold uppercase px-2 py-0.5 rounded bg-white/80 text-pink-800">${dist.code}</span>
+                                <span class="text-xs font-semibold text-slate-600">${dist.clients}</span>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900">${dist.name}</h3>
+                            <p class="text-xs text-slate-700 mt-1 line-clamp-1">${dist.summary}</p>
+                        </div>
+                        <div class="shrink-0 flex items-center gap-2">
+                            <span class="px-3 py-2 rounded-xl bg-white/90 text-slate-800 font-bold text-xs border border-pink-300 shadow-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-expand text-pink-600"></i> Klik untuk Perbesar Detail
+                            </span>
+                        </div>
+                    `;
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        function toggleExpandDistCard(id) {
+            activeDistCardId = id;
+            renderDistributionCards();
+        }
+
+        // =========================================================================
+        // LOGIKA PAGE 5 & PAGE 6: PILIH SEGITIGA ANOMALI, KIRIM EMAIL & URGENT CALL
+        // =========================================================================
+        function selectAnomalyNode(anomalyId) {
+            const info = anomaliesData[anomalyId];
+            if (!info) return;
+
+            document.getElementById('anomaly-bar-badge').textContent = info.badge;
+            document.getElementById('anomaly-bar-title').textContent = info.title;
+            document.getElementById('anomaly-bar-desc').textContent = info.desc;
+
+            if (info.contactTitle) {
+                document.getElementById('p6-contact-title').textContent = info.contactTitle;
+                document.getElementById('anomaly-email-body').value = info.emailText;
+            }
+        }
+
+        function triggerSendEmail() {
+            const confirmBox = document.getElementById('email-sent-confirmation');
+            const pill = document.getElementById('email-status-pill');
+            const btn = document.getElementById('btn-send-email');
+
+            confirmBox.classList.remove('hidden');
+            pill.className = "px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold flex items-center gap-1.5";
+            pill.innerHTML = `<i class="fa-solid fa-check"></i> Email Sent: Terkirim`;
+
+            btn.innerHTML = `<i class="fa-solid fa-check-double"></i> <span>Email Laporan Anomali Terkirim</span>`;
+            btn.className = "flex-1 py-3 px-5 rounded-xl bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow transition-all flex items-center justify-center gap-2";
+        }
+
+        let callInterval = null;
+        function triggerUrgentCall() {
+            const callBox = document.getElementById('urgent-call-active-box');
+            const btn = document.getElementById('btn-urgent-call');
+            const timerEl = document.getElementById('call-timer');
+
+            callBox.classList.remove('hidden');
+            btn.innerHTML = `<i class="fa-solid fa-phone-slash"></i> <span>Panggilan Darurat Sedang Berlangsung...</span>`;
+
+            let seconds = 1;
+            if (callInterval) clearInterval(callInterval);
+            callInterval = setInterval(() => {
+                seconds++;
+                const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+                const secs = String(seconds % 60).padStart(2, '0');
+                timerEl.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Inisialisasi saat halaman pertama kali dibuka
+        window.onload = function () {
+            goToPage(1);
+        };
+    </script>
+</body>
+</html>

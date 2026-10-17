@@ -2,3 +2,8 @@ desktop.ini
 alt-landslide-idea/data/raw/
 alt-landslide-idea/__pycache__/
 ssh-public-keys/
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/next-env.d.ts
+frontend/*.tsbuildinfo
