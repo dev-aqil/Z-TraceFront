@@ -1,0 +1,429 @@
+{
+  "created_at": "2026-10-17T05:39:58.804129+00:00",
+  "datasets": {
+    "fsis_raw_poultry": {
+      "acquisition_gaps": [
+        "fsis_resource_page",
+        "fsis_dictionary_reference"
+      ],
+      "artifacts": [
+        {
+          "artifact_id": "fsis_catalog_page",
+          "attempted_at": "2026-10-17T05:39:58.805778+00:00",
+          "content_type": "text/html; charset=utf-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": null,
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/fsis/sha256/ce9ab489a207ae0faa1aaaf80a6a31318c4f118d81af4a2c8839f2223c4a4ce3/catalog.html",
+          "resolved_url": "https://catalog.data.gov/dataset/fsis-laboratory-sampling-data-raw-poultry-sampling",
+          "retrieved_at": "2026-10-17T05:39:59.722602+00:00",
+          "reused": true,
+          "role": "authoritative_catalog_and_license_evidence",
+          "sha256": "ce9ab489a207ae0faa1aaaf80a6a31318c4f118d81af4a2c8839f2223c4a4ce3",
+          "size_bytes": 123843,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://catalog.data.gov/dataset/fsis-laboratory-sampling-data-raw-poultry-sampling",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "fsis_catalog_metadata",
+          "attempted_at": "2026-10-17T05:39:59.722801+00:00",
+          "content_type": "application/json",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": null,
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/fsis/sha256/e8f3d9d7641f8109eab5405de93e833f573ed349e13266f1b03e71058338c3a0/catalog_metadata.json",
+          "resolved_url": "https://catalog.data.gov/harvest_record/8bd3606e-32f0-415c-ab74-38527ec5f9aa/raw",
+          "retrieved_at": "2026-10-17T05:40:00.232526+00:00",
+          "reused": true,
+          "role": "authoritative_catalog_metadata",
+          "sha256": "e8f3d9d7641f8109eab5405de93e833f573ed349e13266f1b03e71058338c3a0",
+          "size_bytes": 1581,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://catalog.data.gov/harvest_record/8bd3606e-32f0-415c-ab74-38527ec5f9aa/raw",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "fsis_resource_page",
+          "attempted_at": "2026-10-17T05:40:00.232663+00:00",
+          "declared_download_url": null,
+          "error": "HTTP Error 403: Forbidden",
+          "error_type": "HTTPError",
+          "expected_sha256": null,
+          "http_status": 403,
+          "imported_at": null,
+          "method": "download",
+          "retrieved_at": null,
+          "role": "resource_discovery_page_not_sample_data",
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.fsis.usda.gov/news-events/publications/raw-poultry-sampling",
+          "source_version": null,
+          "status": "failed"
+        },
+        {
+          "artifact_id": "fsis_dictionary_reference",
+          "attempted_at": "2026-10-17T05:40:00.401775+00:00",
+          "declared_download_url": null,
+          "error": "HTTP Error 403: Forbidden",
+          "error_type": "HTTPError",
+          "expected_sha256": null,
+          "http_status": 403,
+          "imported_at": null,
+          "method": "download",
+          "retrieved_at": null,
+          "role": "historical_dictionary_reference_not_verified_against_current_release",
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://downloads.regulations.gov/FSIS-2014-0032-0086/content.pdf",
+          "source_version": null,
+          "status": "failed"
+        }
+      ],
+      "catalog_evidence": {
+        "distribution": [
+          {
+            "@type": "dcat:Distribution",
+            "accessURL": "https://www.fsis.usda.gov/news-events/publications/raw-poultry-sampling",
+            "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "title": "Raw Poultry Sampling"
+          }
+        ],
+        "identifier": "usda-fsis-105",
+        "issued": "2023-10-13",
+        "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "modified": "2025-01-22"
+      },
+      "inspection": {
+        "reason": "No official sample artifact registered. HTTP 403 is a session access restriction, not evidence of dataset unavailability.",
+        "status": "awaiting_official_file",
+        "training_eligible": false
+      },
+      "license": "CC0-1.0 (Data.gov catalog declaration)",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "role": "biological_source_only; cohort and dictionary review pending",
+      "source_release_version": null
+    },
+    "openfda_enforcement": {
+      "acquisition_gaps": [],
+      "artifacts": [
+        {
+          "artifact_id": "openfda_local_json",
+          "attempted_at": "2026-10-17T05:40:01.127165+00:00",
+          "declared_download_url": null,
+          "expected_sha256": "02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d",
+          "imported_at": "2026-10-17T05:40:01.353543+00:00",
+          "method": "local_import",
+          "path": "data/external/openfda/sha256/02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d/food-enforcement-0001-of-0001.json",
+          "retrieved_at": null,
+          "reused": true,
+          "role": "context_data",
+          "sha256": "02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d",
+          "size_bytes": 39906111,
+          "source_path": "tmp/food-enforcement-0001-of-0001.json",
+          "source_reference_url": "https://open.fda.gov/apis/food/enforcement/download/",
+          "source_url": null,
+          "source_version": "embedded 2026-10-14; original retrieval unknown",
+          "status": "captured"
+        },
+        {
+          "artifact_id": "openfda_local_zip",
+          "attempted_at": "2026-10-17T05:40:01.353700+00:00",
+          "declared_download_url": null,
+          "expected_sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+          "imported_at": "2026-10-17T05:40:01.406927+00:00",
+          "method": "local_import",
+          "path": "data/external/openfda/sha256/7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6/food-enforcement-0001-of-0001.json.zip",
+          "retrieved_at": null,
+          "reused": true,
+          "role": "original_local_archive",
+          "sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+          "size_bytes": 5858570,
+          "source_path": "tmp/food-enforcement-0001-of-0001.json.zip",
+          "source_reference_url": "https://open.fda.gov/apis/food/enforcement/download/",
+          "source_url": null,
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "openfda_download_index",
+          "attempted_at": "2026-10-17T05:40:01.407070+00:00",
+          "content_type": "application/json; charset=utf-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "W/\"90f87-nnQbPecO5MBKHkCf43i4mDGGqV0\"",
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/external/openfda/sha256/e9c8536852ecd25fdc15b79a5f7c41cb3803f31dbc7c52b86a6feddc3ac220a1/download_index.json",
+          "resolved_url": "https://api.fda.gov/download.json",
+          "retrieved_at": "2026-10-17T05:40:03.609682+00:00",
+          "reused": true,
+          "role": "official_download_metadata",
+          "sha256": "e9c8536852ecd25fdc15b79a5f7c41cb3803f31dbc7c52b86a6feddc3ac220a1",
+          "size_bytes": 593799,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://api.fda.gov/download.json",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "openfda_license",
+          "attempted_at": "2026-10-17T05:40:03.609827+00:00",
+          "content_type": "text/html; charset=utf-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"c7c23090779db92de761c5d528b1fb6a\"",
+          "http_last_modified": "Fri, 09 Oct 2026 15:48:36 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/external/openfda/sha256/7fda0041a24f8d7139a1781d4462ae39643a2ee6f3b0f079946c989a8e1982d2/license.html",
+          "resolved_url": "https://open.fda.gov/license/",
+          "retrieved_at": "2026-10-17T05:40:05.044709+00:00",
+          "reused": true,
+          "role": "license_evidence",
+          "sha256": "7fda0041a24f8d7139a1781d4462ae39643a2ee6f3b0f079946c989a8e1982d2",
+          "size_bytes": 123019,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://open.fda.gov/license/",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "openfda_dictionary",
+          "attempted_at": "2026-10-17T05:40:05.044844+00:00",
+          "content_type": "application/pdf",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"4aff5859123bcd0f8134f27f5cf11957\"",
+          "http_last_modified": "Fri, 09 Oct 2026 15:48:51 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/external/openfda/sha256/9c92fc04f447e70936c8646d9ac0f7a50af2118f01fd3b26d039e19860418baa/foodenforcement_reference.pdf",
+          "resolved_url": "https://open.fda.gov/fields/foodenforcement_reference.pdf",
+          "retrieved_at": "2026-10-17T05:40:05.830130+00:00",
+          "reused": true,
+          "role": "official_field_dictionary",
+          "sha256": "9c92fc04f447e70936c8646d9ac0f7a50af2118f01fd3b26d039e19860418baa",
+          "size_bytes": 55827,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://open.fda.gov/fields/foodenforcement_reference.pdf",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "openfda_upstream_zip",
+          "attempted_at": "2026-10-17T05:40:05.830261+00:00",
+          "content_type": "application/zip",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"994f924b4c879f12928a92ab608bb107\"",
+          "http_last_modified": "Fri, 16 Oct 2026 11:05:33 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/external/openfda/sha256/7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6/food-enforcement-0001-of-0001.json.zip",
+          "resolved_url": "https://download.open.fda.gov/food/enforcement/food-enforcement-0001-of-0001.json.zip",
+          "retrieved_at": "2026-10-17T05:40:08.830596+00:00",
+          "reused": true,
+          "role": "official_archive_comparison",
+          "sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+          "size_bytes": 5858570,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://download.open.fda.gov/food/enforcement/food-enforcement-0001-of-0001.json.zip",
+          "source_version": null,
+          "status": "captured"
+        }
+      ],
+      "inspection": {
+        "column_count": 25,
+        "embedded_source_metadata": {
+          "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.",
+          "last_updated": "2026-10-14",
+          "license": "https://open.fda.gov/license/",
+          "results": {
+            "limit": 29485,
+            "skip": 0,
+            "total": 29485
+          },
+          "terms": "https://open.fda.gov/terms/"
+        },
+        "joined_to_fsis": false,
+        "json_sha256": "02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d",
+        "local_archive_matches_json": true,
+        "official_archive_matches_local_archive": true,
+        "official_download_metadata": {
+          "export_date": "2026-10-14",
+          "partitions": [
+            {
+              "display_name": "/food/enforcement data",
+              "file": "https://download.open.fda.gov/food/enforcement/food-enforcement-0001-of-0001.json.zip",
+              "records": 29485,
+              "size_mb": "5.59"
+            }
+          ],
+          "total_records": 29485
+        },
+        "original_acquisition_time": null,
+        "provenance_note": "A current byte match verifies this copy against today's official artifact; it does not recover its original retrieval time.",
+        "role": "context_only",
+        "rows": 29485,
+        "status": "registered_context_only",
+        "training_eligible": false
+      },
+      "license": "CC0-1.0 generally, subject to stated exceptions and service terms",
+      "license_url": "https://open.fda.gov/license/",
+      "role": "context_only; no lab outcome labels or negative cohort",
+      "source_release_version": "embedded last_updated=2026-10-14; initial acquisition unknown"
+    }
+  },
+  "fsis_contract": {
+    "cohort_filters": {},
+    "contract_version": "0.1.0-unverified",
+    "csv_delimiter": ",",
+    "dictionary_pointer": null,
+    "dictionary_release_match_verified": false,
+    "fields": {},
+    "identity_columns": [],
+    "intended_cohort": "One raw chicken-parts sampling program, one fiscal-year release, Salmonella assay; exact field values require actual-release review",
+    "mapping_reviewed": false,
+    "note": "Do not guess current field names or codes from legacy metadata. Inspect the manually downloaded or directly retrieved official release and matching dictionary before activating a cohort. Null, blank, untested and unknown codes must never be assumed negative.",
+    "records_pointer": null,
+    "result_codes": {},
+    "reviewed_source_sha256": null
+  },
+  "fsis_contract_sha256": "2131c7377fba09a0f6497b645db8b373306e12dc2546793270c861898d99899f",
+  "integrity": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 8,
+    "failures": [],
+    "integrity_ok": true
+  },
+  "manifest_version": 1,
+  "milestone": "M1",
+  "pipeline_code_sha256": {
+    "__init__.py": "970c6fbf9be374749e1eb3bf1175ed49a13d6d207f94233f68d91256865e6934",
+    "audit.py": "f814084aaa462f45b9d0855aec70fc1390f84ffaa1b4f347cdae0041b5daf993",
+    "fsis.py": "1b10bac7f98e713122f8a5c505d38ad979515f48369e7d1321d2ae9ad3010141",
+    "ingest.py": "4dd1af8247e91915692361018f4b720b1999bf724c6ca25cd573fb7b5174a753",
+    "provenance.py": "f33da99fbaa1eb9540a7588e7cf3c5361a1cd88bb2afc9b44fea101fc997c6f7"
+  },
+  "run_id": "20261017T053958804059Z-a2601437",
+  "runtime": {
+    "architecture": "x86_64",
+    "python": "3.14.7",
+    "system": "Linux"
+  },
+  "source_config": {
+    "config_version": 1,
+    "datasets": {
+      "fsis_raw_poultry": {
+        "artifacts": [
+          {
+            "artifact_id": "fsis_catalog_page",
+            "filename": "catalog.html",
+            "role": "authoritative_catalog_and_license_evidence",
+            "url": "https://catalog.data.gov/dataset/fsis-laboratory-sampling-data-raw-poultry-sampling"
+          },
+          {
+            "artifact_id": "fsis_catalog_metadata",
+            "filename": "catalog_metadata.json",
+            "role": "authoritative_catalog_metadata",
+            "url": "https://catalog.data.gov/harvest_record/8bd3606e-32f0-415c-ab74-38527ec5f9aa/raw"
+          },
+          {
+            "artifact_id": "fsis_resource_page",
+            "filename": "resource.html",
+            "role": "resource_discovery_page_not_sample_data",
+            "url": "https://www.fsis.usda.gov/news-events/publications/raw-poultry-sampling"
+          },
+          {
+            "artifact_id": "fsis_dictionary_reference",
+            "filename": "historical_dictionary.pdf",
+            "role": "historical_dictionary_reference_not_verified_against_current_release",
+            "url": "https://downloads.regulations.gov/FSIS-2014-0032-0086/content.pdf"
+          }
+        ],
+        "catalog_url": "https://catalog.data.gov/dataset/fsis-laboratory-sampling-data-raw-poultry-sampling",
+        "directory": "data/raw/fsis",
+        "intended_role": "biological_source_only; cohort and dictionary review pending",
+        "license": "CC0-1.0 (Data.gov catalog declaration)",
+        "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "resource_url": "https://www.fsis.usda.gov/news-events/publications/raw-poultry-sampling",
+        "source_identifier": "usda-fsis-105",
+        "source_release_version": null
+      },
+      "openfda_enforcement": {
+        "artifacts": [
+          {
+            "artifact_id": "openfda_local_json",
+            "expected_sha256": "02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d",
+            "filename": "food-enforcement-0001-of-0001.json",
+            "local_path": "tmp/food-enforcement-0001-of-0001.json",
+            "role": "context_data",
+            "source_reference_url": "https://open.fda.gov/apis/food/enforcement/download/",
+            "source_version": "embedded 2026-10-14; original retrieval unknown"
+          },
+          {
+            "artifact_id": "openfda_local_zip",
+            "expected_sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+            "filename": "food-enforcement-0001-of-0001.json.zip",
+            "local_path": "tmp/food-enforcement-0001-of-0001.json.zip",
+            "role": "original_local_archive",
+            "source_reference_url": "https://open.fda.gov/apis/food/enforcement/download/"
+          },
+          {
+            "artifact_id": "openfda_download_index",
+            "filename": "download_index.json",
+            "role": "official_download_metadata",
+            "url": "https://api.fda.gov/download.json"
+          },
+          {
+            "artifact_id": "openfda_license",
+            "filename": "license.html",
+            "role": "license_evidence",
+            "url": "https://open.fda.gov/license/"
+          },
+          {
+            "artifact_id": "openfda_dictionary",
+            "filename": "foodenforcement_reference.pdf",
+            "role": "official_field_dictionary",
+            "url": "https://open.fda.gov/fields/foodenforcement_reference.pdf"
+          },
+          {
+            "artifact_id": "openfda_upstream_zip",
+            "filename": "food-enforcement-0001-of-0001.json.zip",
+            "role": "official_archive_comparison",
+            "url": "https://download.open.fda.gov/food/enforcement/food-enforcement-0001-of-0001.json.zip"
+          }
+        ],
+        "directory": "data/external/openfda",
+        "intended_role": "context_only; no lab outcome labels or negative cohort",
+        "license": "CC0-1.0 generally, subject to stated exceptions and service terms",
+        "license_url": "https://open.fda.gov/license/",
+        "source_release_version": "embedded last_updated=2026-10-14; initial acquisition unknown"
+      }
+    }
+  },
+  "source_config_sha256": "09e24b4be03a5841546c4f6c15f5e292052b43d49a4834039cdeafc87a22d9c6",
+  "status": "partial"
+}

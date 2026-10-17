@@ -1,0 +1,51 @@
+{
+  "assay_codes": null,
+  "checked_at": "2026-10-17T05:44:21.502144+00:00",
+  "contract_changed": false,
+  "contract_path": "configs/fsis_pilot.json",
+  "contract_sha256": "2131c7377fba09a0f6497b645db8b373306e12dc2546793270c861898d99899f",
+  "directory": "data/raw/fsis",
+  "existing_receipt": "data/manifests/20261017T053958804059Z-a2601437.json",
+  "existing_receipt_verification": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 8,
+    "failures": [],
+    "integrity_ok": true
+  },
+  "implementation_changed": false,
+  "interpretation": "Null counts mean unobserved because sample data is missing, not zero positives or negatives.",
+  "m2_started": false,
+  "milestone": "M1",
+  "models_trained": false,
+  "negative_count": null,
+  "next_required_input": "Local paths to the officially downloaded FSIS JSON/CSV release and matching documentation, or place them under data/raw/fsis/.",
+  "observed_files": [
+    {
+      "path": "data/raw/fsis/README.md",
+      "role": "intake_instructions",
+      "sha256": "13f7d19e9de9f111f73e6d17c1a2072fc944d48ba4cc1c25744a4eb58d05b046",
+      "size_bytes": 2759
+    },
+    {
+      "path": "data/raw/fsis/sha256/ce9ab489a207ae0faa1aaaf80a6a31318c4f118d81af4a2c8839f2223c4a4ce3/catalog.html",
+      "role": "authoritative_catalog_and_license_evidence",
+      "sha256": "ce9ab489a207ae0faa1aaaf80a6a31318c4f118d81af4a2c8839f2223c4a4ce3",
+      "size_bytes": 123843
+    },
+    {
+      "path": "data/raw/fsis/sha256/e8f3d9d7641f8109eab5405de93e833f573ed349e13266f1b03e71058338c3a0/catalog_metadata.json",
+      "role": "authoritative_catalog_metadata",
+      "sha256": "e8f3d9d7641f8109eab5405de93e833f573ed349e13266f1b03e71058338c3a0",
+      "size_bytes": 1581
+    }
+  ],
+  "positive_count": null,
+  "reason": "Official FSIS sample file and matching dictionary are not present in the inspected workspace.",
+  "registered_matching_dictionary_artifacts": 0,
+  "registered_sample_artifacts": 0,
+  "sample_key_fields": null,
+  "sample_rows": null,
+  "selected_cohort_rows": null,
+  "status": "partial",
+  "untested_count": null
+}

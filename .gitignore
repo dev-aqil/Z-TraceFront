@@ -2,3 +2,15 @@ desktop.ini
 alt-landslide-idea/data/raw/
 alt-landslide-idea/__pycache__/
 ssh-public-keys/
+tmp/
+
+# Offline Python data tooling (M0); tracked historical bytecode is unaffected.
+__pycache__/
+*.egg-info/
+.venv/
+.pytest_cache/
+
+# M1 source bytes are restored from versioned SHA-256 manifests.
+/data/raw/fsis/*
+!/data/raw/fsis/README.md
+/data/external/openfda/

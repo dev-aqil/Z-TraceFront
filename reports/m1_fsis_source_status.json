@@ -1,0 +1,92 @@
+{
+  "actual_sample_filename": null,
+  "assay_codes": null,
+  "catalog_artifact": {
+    "artifact_id": "fsis_catalog_metadata",
+    "attempted_at": "2026-10-17T05:39:59.722801+00:00",
+    "content_type": "application/json",
+    "declared_download_url": null,
+    "expected_sha256": null,
+    "http_etag": null,
+    "http_last_modified": null,
+    "http_status": 200,
+    "imported_at": null,
+    "method": "download",
+    "path": "data/raw/fsis/sha256/e8f3d9d7641f8109eab5405de93e833f573ed349e13266f1b03e71058338c3a0/catalog_metadata.json",
+    "resolved_url": "https://catalog.data.gov/harvest_record/8bd3606e-32f0-415c-ab74-38527ec5f9aa/raw",
+    "retrieved_at": "2026-10-17T05:40:00.232526+00:00",
+    "reused": true,
+    "role": "authoritative_catalog_metadata",
+    "sha256": "e8f3d9d7641f8109eab5405de93e833f573ed349e13266f1b03e71058338c3a0",
+    "size_bytes": 1581,
+    "source_path": null,
+    "source_reference_url": null,
+    "source_url": "https://catalog.data.gov/harvest_record/8bd3606e-32f0-415c-ab74-38527ec5f9aa/raw",
+    "source_version": null,
+    "status": "captured"
+  },
+  "catalog_evidence": {
+    "catalog_dates_are_sample_release_dates": false,
+    "data_dictionary_status": "pending_official_sample_file_or_documentation",
+    "distribution": [
+      {
+        "@type": "dcat:Distribution",
+        "accessURL": "https://www.fsis.usda.gov/news-events/publications/raw-poultry-sampling",
+        "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "title": "Raw Poultry Sampling"
+      }
+    ],
+    "identifier": "usda-fsis-105",
+    "issued": "2023-10-13",
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "modified": "2025-01-22",
+    "sample_field_descriptions": null,
+    "sample_schema_references": []
+  },
+  "catalog_url": "https://catalog.data.gov/dataset/fsis-laboratory-sampling-data-raw-poultry-sampling",
+  "checked_at": "2026-10-17T05:48:15.803369+00:00",
+  "cohort_contract_sha256": "f659df1285a944310032892df00fe9e51c6f51d8a498f4dce966936b17452716",
+  "cohort_mapping_reviewed": false,
+  "data_dictionary_status": "pending_official_sample_file_or_documentation",
+  "downstream_processing_permitted": false,
+  "evidence_manifest": "data/manifests/20261017T053958804059Z-a2601437.json",
+  "manual_intake": {
+    "directory": "data/raw/fsis/incoming",
+    "documentation_directory": "data/raw/fsis/incoming/docs",
+    "documentation_filename_convention": "Publisher's original documentation basename, only when actually downloaded; embedded JSON documentation is also acceptable",
+    "filename_convention": "Publisher's original basename with its actual .json or .csv extension; no fixed official filename is known yet",
+    "immutable_destination_convention": "data/raw/fsis/sha256/<actual_sha256>/<publisher-original-basename>",
+    "sample_schema_status": "pending_official_sample_file_or_documentation",
+    "source_status_reference": "official source confirmed, raw file not yet acquired",
+    "status_evidence_manifest": "data/manifests/20261017T053958804059Z-a2601437.json",
+    "unofficial_mirror_policy": "Do not substitute an unofficial mirror"
+  },
+  "milestone": "M1",
+  "milestone_status": "partial",
+  "negative_count": null,
+  "official_resource_url": "https://www.fsis.usda.gov/news-events/publications/raw-poultry-sampling",
+  "pipeline_code_sha256": {
+    "__init__.py": "970c6fbf9be374749e1eb3bf1175ed49a13d6d207f94233f68d91256865e6934",
+    "audit.py": "f814084aaa462f45b9d0855aec70fc1390f84ffaa1b4f347cdae0041b5daf993",
+    "fsis.py": "13a47a3796427300939e7371588880b4edec61baf51b6e7d38433b72b8996f81",
+    "ingest.py": "067d68724acd766c25beeb5d92d306fffce6b28c7e3ff8c3e964b00528350037",
+    "provenance.py": "896baf305dfd7ee2fbe40f6b8cc868fb67eb849652a9aeb5b856807e4240e97f"
+  },
+  "positive_count": null,
+  "preserved_artifact_verification": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 8,
+    "failures": [],
+    "integrity_ok": true
+  },
+  "raw_file_acquired": false,
+  "sample_keys": null,
+  "sample_rows": null,
+  "scope": "M1 source confirmation, convention and validation gates only",
+  "selected_cohort_rows": null,
+  "source_config_sha256": "8f95d47f3c6730d4c0af880597697e9473e3aa0466fdb6dbc4a303b664b0daf9",
+  "source_status": "official source confirmed, raw file not yet acquired",
+  "training_eligible": false,
+  "unofficial_mirror_used": false,
+  "untested_count": null
+}

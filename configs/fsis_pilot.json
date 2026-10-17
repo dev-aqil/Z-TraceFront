@@ -1,0 +1,16 @@
+{
+  "contract_version": "0.1.0-unverified",
+  "intended_cohort": "One raw chicken-parts sampling program, one fiscal-year release, Salmonella assay; exact field values require actual-release review",
+  "mapping_reviewed": false,
+  "dictionary_release_match_verified": false,
+  "reviewed_source_sha256": null,
+  "data_dictionary_status": "pending_official_sample_file_or_documentation",
+  "records_pointer": null,
+  "dictionary_pointer": null,
+  "csv_delimiter": ",",
+  "identity_columns": [],
+  "fields": {},
+  "cohort_filters": {},
+  "result_codes": {},
+  "note": "Do not guess current field names or codes from legacy metadata. Inspect the manually downloaded or directly retrieved official release and matching dictionary before activating a cohort. Null, blank, untested and unknown codes must never be assumed negative."
+}

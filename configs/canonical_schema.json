@@ -1,0 +1,89 @@
+{
+  "schema_version": "0.1.0-draft",
+  "status": "M0 design only; no source adapters or training table exist",
+  "column_definition": "Each column maps to a logical dtype. All source mappings are UNVERIFIED until source dictionaries are inspected. See reports/data_dictionary.md for units, roles and availability.",
+  "null_policy": "Only required columns must be nonnull. Other columns may be unknown, unmeasured or inapplicable; never manufacture values to complete the schema. Preserve missingness reasons in source-specific quality metadata.",
+  "time_policy": "Store genuine instants in UTC with original timezone and precision retained. Date-only records remain dates and need conservative availability boundaries. No fabricated intraday precision.",
+  "predictor_allowlist": [],
+  "tables": {
+    "observations": {
+      "grain": "one source observation/sample-analyte at one prediction cutoff; repeated snapshots have distinct observation_id and a shared sample_id or experiment group",
+      "primary_key": ["observation_id"],
+      "required": ["observation_id", "dataset_id", "dataset_version", "source_record_id", "prediction_time", "prediction_time_precision", "is_synthetic"],
+      "columns": {
+        "observation_id": "string", "dataset_id": "string", "dataset_version": "string", "source_record_id": "string",
+        "sample_id": "string", "experiment_id": "string", "batch_id": "string", "supplier_id": "string",
+        "farm_id": "string", "factory_id": "string", "shipment_id": "string", "retailer_id": "string",
+        "analyte": "string", "sampling_program": "string", "is_synthetic": "bool",
+        "prediction_time": "timestamp_utc", "prediction_time_precision": "string", "sample_time": "timestamp_utc_or_date",
+        "food_type": "string", "food_category": "string", "commodity": "string", "processing_type": "string",
+        "batch_size": "float64", "batch_size_unit": "string", "moisture_pct": "float64", "ph": "float64", "shelf_life_days": "float64",
+        "country": "string", "state": "string", "district": "string", "latitude": "float64", "longitude": "float64", "location_role": "string",
+        "harvest_time": "timestamp_utc_or_date", "processing_time": "timestamp_utc_or_date",
+        "shipment_start": "timestamp_utc_or_date", "shipment_end": "timestamp_utc_or_date",
+        "retail_arrival": "timestamp_utc_or_date", "expiry_time": "timestamp_utc_or_date",
+        "ambient_temperature_c": "float64", "humidity_pct": "float64", "rainfall_mm": "float64",
+        "process_temperature_c": "float64", "process_duration_min": "float64", "sanitation_score": "float64",
+        "sanitation_score_scale": "string", "packaging_condition": "string"
+      }
+    },
+    "sensor_readings": {
+      "grain": "one device reading tied to an actual batch/shipment/experimental run",
+      "primary_key": ["sensor_reading_id"],
+      "required": ["sensor_reading_id", "dataset_id", "source_record_id", "observed_at", "available_at", "sensor_id"],
+      "columns": {
+        "sensor_reading_id": "string", "dataset_id": "string", "source_record_id": "string", "sensor_id": "string",
+        "batch_id": "string", "shipment_id": "string", "experiment_id": "string", "stage": "string",
+        "observed_at": "timestamp_utc", "available_at": "timestamp_utc", "temperature_c": "float64",
+        "humidity_pct": "float64", "co2_ppm": "float64", "light_lux": "float64", "quality_flag": "string"
+      }
+    },
+    "labels": {
+      "grain": "one target determination for an observation; labels are separate from predictor inputs",
+      "primary_key": ["label_id"],
+      "required": ["label_id", "observation_id", "target_name", "label_source_record_id", "label_status"],
+      "columns": {
+        "label_id": "string", "observation_id": "string", "target_name": "string", "label_source_record_id": "string",
+        "sample_time": "timestamp_utc_or_date", "result_available_at": "timestamp_utc_or_date", "label_status": "string",
+        "assay_method": "string", "analyte": "string", "pathogen_positive": "bool", "chemical_exceedance": "bool",
+        "microbial_count": "float64", "microbial_count_unit": "string", "microbial_count_scale": "string",
+        "spoilage_class": "string", "storage_condition_class": "string", "label_definition_version": "string",
+        "residue_concentration": "float64", "concentration_unit": "string", "detection_qualifier": "string",
+        "lod": "float64", "loq": "float64", "applicable_limit": "float64", "limit_reference_id": "string"
+      }
+    },
+    "history_events": {
+      "grain": "one version of a test, recall or inspection event; event_id alone need not uniquely identify source product records",
+      "primary_key": ["history_record_id"],
+      "required": ["history_record_id", "dataset_id", "source_record_id", "event_id", "event_type", "event_time", "time_precision"],
+      "columns": {
+        "history_record_id": "string", "dataset_id": "string", "source_record_id": "string", "event_id": "string",
+        "entity_id": "string", "entity_namespace": "string", "event_type": "string", "commodity": "string", "analyte": "string",
+        "event_time": "timestamp_utc_or_date", "available_at": "timestamp_utc_or_date", "time_precision": "string",
+        "source_version": "string", "source_retrieved_at": "timestamp_utc", "outcome": "string", "crosswalk_version": "string"
+      }
+    },
+    "feature_snapshots": {
+      "grain": "one feature vector per observation_id; only verified source-specific candidates may be emitted",
+      "primary_key": ["observation_id"],
+      "required": ["observation_id", "feature_definition_version"],
+      "columns": {
+        "observation_id": "string", "feature_definition_version": "string", "temperature_policy_id": "string",
+        "storage_avg_temp_c": "float64", "storage_max_temp_c": "float64", "storage_min_temp_c": "float64",
+        "storage_duration_hours": "float64", "storage_humidity_pct": "float64", "transport_avg_temp_c": "float64",
+        "transport_max_temp_c": "float64", "transport_duration_hours": "float64", "number_of_stops": "int64",
+        "temperature_excursion_count": "int64", "total_minutes_above_threshold": "float64",
+        "maximum_temperature_deviation_c": "float64", "average_temperature_deviation_c": "float64",
+        "temperature_std_c": "float64", "temperature_range_c": "float64", "longest_temperature_excursion_min": "float64",
+        "cold_chain_failure_flag": "bool", "temperature_missing": "bool", "temperature_coverage_fraction": "float64",
+        "farm_to_factory_hours": "float64", "processing_to_shipping_hours": "float64", "shipping_duration_hours": "float64",
+        "total_supply_chain_duration_hours": "float64", "days_until_expiry": "float64", "days_on_retail_shelf": "float64",
+        "previous_positive_tests": "int64", "previous_test_count": "int64", "previous_positive_rate": "float64",
+        "previous_recalls_365d": "int64", "previous_recalls_3y": "int64", "failed_inspections_365d": "int64",
+        "days_since_previous_incident": "float64", "days_since_last_inspection": "float64",
+        "rainfall_1d": "float64", "rainfall_7d": "float64", "rainfall_30d": "float64",
+        "avg_temperature_7d": "float64", "max_temperature_7d": "float64", "extreme_heat_flag": "bool", "heavy_rain_flag": "bool"
+      }
+    }
+  }
+}

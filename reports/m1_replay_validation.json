@@ -1,0 +1,15 @@
+{
+  "input_archive_sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+  "integrity_ok": true,
+  "method": "verified_archive_member_replay",
+  "network_calls": 0,
+  "note": "Real registered openFDA archive replay in a temporary target; no cleaning, feature or training output.",
+  "original_tmp_files_present_in_target": false,
+  "restored_json_sha256": "02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d",
+  "restored_json_size_bytes": 39906111,
+  "source_manifest": "data/manifests/20261017T053958804059Z-a2601437.json",
+  "source_manifest_sha256": "041d6e40f4146cabf61f0058d05b0df2a499666015db7531e0869055c55faf15",
+  "source_manifest_unchanged": true,
+  "validated_at": "2026-10-17T05:41:36.170026+00:00",
+  "verified_artifact_records": 3
+}
