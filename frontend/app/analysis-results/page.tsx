@@ -8,6 +8,8 @@ import { demoFindings } from "./demo-findings";
 
 type RevealStage = "dash" | "zero" | "count" | "results";
 
+const SCROLL_GESTURE_GAP_MS = 180;
+
 const bubbleOffsets = [
   { x: -24, y: -16 },
   { x: 18, y: 12 },
@@ -45,6 +47,7 @@ export default function AnalysisResultsPage() {
   const [leaving, setLeaving] = useState(false);
   const [stage, setStage] = useState<RevealStage>("dash");
   const [count, setCount] = useState(0);
+  const [atBottom, setAtBottom] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [viewport, setViewport] = useState({ width: 1280, height: 800 });
 
@@ -114,7 +117,6 @@ export default function AnalysisResultsPage() {
   const offset = progress * Math.max(0, viewport.height / 2 - (compact ? 42 : 60));
   const headerVisible = stage === "results" && progress > 0.05;
   const headerInteractive = progress > 0.75;
-  const headerTilesVisible = stage === "results" && progress >= 0.99;
 
   const goToDistribution = useCallback(() => {
     if (leavingRef.current || stage !== "results") return;
@@ -135,25 +137,63 @@ export default function AnalysisResultsPage() {
 
   useEffect(() => {
     if (stage !== "results") return;
+    const items = document.querySelectorAll<HTMLElement>("#findings [data-analysis-reveal]");
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      items.forEach((item) => item.classList.add("analysis-content-visible"));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("analysis-content-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.08, rootMargin: "0px 0px -40px 0px" });
+    items.forEach((item) => observer.observe(item));
+    return () => observer.disconnect();
+  }, [stage]);
+
+  useEffect(() => {
+    if (stage !== "results") return;
     let touchStartY = 0;
-    const atBottom = () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 8;
+    let touchStartedAtBottom = false;
+    let lastWheelAt = 0;
+    const isAtBottom = () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 8;
+    const onScroll = () => setAtBottom(isAtBottom());
     const onWheel = (event: WheelEvent) => {
+      const now = performance.now();
+      const newScroll = now - lastWheelAt > SCROLL_GESTURE_GAP_MS;
+      lastWheelAt = now;
       if (event.deltaY <= 0 || leavingRef.current) return;
-      if (atBottom()) {
-        event.preventDefault();
-        goToDistribution();
-      }
+      if (!isAtBottom()) return;
+      event.preventDefault();
+      if (newScroll) goToDistribution();
     };
-    const onTouchStart = (event: TouchEvent) => { touchStartY = event.touches[0]?.clientY ?? 0; };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!isAtBottom() || !["ArrowDown", "PageDown", "End", " "].includes(event.key)) return;
+      if (event.target instanceof HTMLElement && event.target.closest("button, a, summary, input, textarea, select")) return;
+      event.preventDefault();
+      goToDistribution();
+    };
+    const onTouchStart = (event: TouchEvent) => {
+      touchStartY = event.touches[0]?.clientY ?? 0;
+      touchStartedAtBottom = isAtBottom();
+    };
     const onTouchEnd = (event: TouchEvent) => {
       const touchEndY = event.changedTouches[0]?.clientY ?? touchStartY;
-      if (touchStartY - touchEndY > 40 && atBottom()) goToDistribution();
+      if (touchStartY - touchEndY <= 40 || !isAtBottom()) return;
+      if (touchStartedAtBottom) goToDistribution();
     };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("keydown", onKeyDown);
     window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
     return () => {
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
@@ -170,11 +210,11 @@ export default function AnalysisResultsPage() {
   }
 
   return (
-    <main className={`min-h-dvh bg-white text-[#0d293b] ${leaving ? "analysis-exit-right" : ""}`} onAnimationEnd={(event) => {
+    <main className={`min-h-dvh bg-white text-[#0d293b] ${leaving ? "analysis-exit-up" : ""}`} onAnimationEnd={(event) => {
       if (leaving && event.target === event.currentTarget) router.push("/distribution");
     }}>
       {headerVisible && (
-        <header aria-hidden={!headerInteractive} className="fixed inset-x-0 top-0 z-20 h-40 border-b border-slate-200 bg-white/95 backdrop-blur-sm min-[700px]:h-44 lg:h-28" style={{ opacity: progress, pointerEvents: headerInteractive ? "auto" : "none" }}>
+        <header aria-hidden={!headerInteractive} className="fixed inset-x-0 top-0 z-20 h-12 border-b border-slate-200 bg-white/95 backdrop-blur-sm" style={{ opacity: progress, pointerEvents: headerInteractive ? "auto" : "none" }}>
           <div className="mx-auto flex h-12 max-w-7xl items-center justify-between px-6">
             <Link href="/" tabIndex={headerInteractive ? 0 : -1} aria-label="TraceFront home" className="rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-rose-600">
               <span className="relative block h-10 w-36 overflow-hidden">
@@ -185,21 +225,13 @@ export default function AnalysisResultsPage() {
               Next <span aria-hidden="true">→</span>
             </button>
           </div>
-          <nav aria-label="Jump to anomaly" aria-hidden={!headerTilesVisible} className={`header-tile-row absolute inset-x-0 bottom-2 mx-auto flex max-w-5xl flex-wrap justify-center gap-2 px-4 ${headerTilesVisible ? "header-tile-row--visible" : ""}`}>
-            {demoFindings.map((finding) => (
-              <a key={finding.id} href={`#finding-${finding.id}`} tabIndex={headerTilesVisible ? 0 : -1} className="header-finding-tile flex h-10 w-[100px] items-center justify-center gap-1 rounded-full border border-slate-200 bg-white text-[10px] font-semibold text-rose-700 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 min-[700px]:h-12 min-[700px]:w-36 min-[700px]:gap-2 min-[700px]:text-xs">
-                <FindingIcon type={finding.type} />
-                <span>{finding.type}</span>
-              </a>
-            ))}
-          </nav>
         </header>
       )}
 
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-30">
           <div className={`findings-zero ${stage === "dash" ? "findings-zero--dash" : "findings-zero--outline"} ${counting ? "findings-zero--hide" : ""}`} />
-          <span className={`findings-count ${counting ? "findings-count--visible" : ""}`} style={{ transform: `translate(-50%, -50%) translateY(-${offset}px) scale(${1 - progress * 0.6})` }}>{count}</span>
-          <span className={`findings-label ${count === demoFindings.length && counting ? "findings-label--visible" : ""}`} style={{ transform: `translate(-50%, -50%) translateY(${110 - offset - progress * 66}px)` }}>Anomalies Found</span>
+          <span className={`findings-count ${counting ? "findings-count--visible" : ""}`} style={{ opacity: counting ? Math.max(0, 1 - progress / 0.6) : 0, transform: `translate(-50%, -50%) translateY(-${offset}px) scale(${1 - progress * 0.6})` }}>{count}</span>
+          <span className={`findings-label ${count === demoFindings.length && counting ? "findings-label--visible" : ""}`} style={{ opacity: count === demoFindings.length && counting ? Math.max(0, 1 - progress / 0.6) : 0, transform: `translate(-50%, -50%) translateY(${110 - offset - progress * 66}px)` }}>Anomalies Found</span>
       </div>
 
       <nav aria-label="Anomaly icons" aria-hidden={stage !== "results" || progress > 0.35} className="pointer-events-none fixed inset-0 z-30" style={{ opacity: Math.max(0, 1 - progress / 0.35) }}>
@@ -216,20 +248,30 @@ export default function AnalysisResultsPage() {
         {stage === "results" && <p role="status" className="sr-only">Six anomalies found. Scroll to review the findings.</p>}
       </section>
 
+      {stage === "results" && progress < 0.25 && (
+        <button type="button" onClick={() => document.getElementById("findings")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })} className="fixed bottom-8 left-1/2 z-20 flex min-h-14 -translate-x-1/2 flex-col items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600" style={{ opacity: 1 - progress / 0.25 }}>
+          <span>Scroll to continue</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-rose-600"><path d="M12 4v15m-6-6 6 6 6-6" /></svg>
+        </button>
+      )}
+
       {stage === "results" && (
-        <section id="findings" aria-labelledby="findings-heading" className="min-h-dvh bg-[#f7f9fb]">
+        <section id="findings" aria-labelledby="findings-heading" className="min-h-dvh scroll-mt-12 bg-[#f7f9fb]">
           <div className="mx-auto max-w-6xl px-6 pb-16 pt-5">
-            <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div data-analysis-reveal className="analysis-content-reveal mb-8 flex flex-wrap items-center justify-between gap-4">
               <h1 id="findings-heading" className="text-3xl font-semibold tracking-tight">Findings to review</h1>
               <p className="ml-auto whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm">2 high · 3 medium · 1 low</p>
             </div>
             <div className="space-y-3">
               {demoFindings.map((finding) => (
-                <details key={finding.id} id={`finding-${finding.id}`} className="finding-card group scroll-mt-40 rounded-xl border border-slate-200 bg-white min-[700px]:scroll-mt-44 lg:scroll-mt-28">
+                <details key={finding.id} id={`finding-${finding.id}`} data-analysis-reveal className="analysis-content-reveal finding-card group scroll-mt-14 rounded-xl border border-slate-200 bg-white">
                   <summary className="finding-summary flex min-h-28 cursor-pointer items-center gap-5 px-5 py-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
                     <span className="w-14 shrink-0 self-center font-mono text-5xl font-light leading-none tracking-tighter text-slate-400">{finding.id}</span>
                     <div className="min-w-0 flex-1">
-                      <h2 className="text-base font-semibold leading-5 text-[#0d293b]">{finding.title}</h2>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <h2 className="text-base font-semibold leading-5 text-[#0d293b]">{finding.title}</h2>
+                        <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-600">{finding.type}</span>
+                      </div>
                       <p className="mt-1 text-sm leading-5 text-slate-600">{finding.reason}</p>
                     </div>
                     <div className="hidden shrink-0 text-right md:block">
@@ -246,9 +288,11 @@ export default function AnalysisResultsPage() {
                 </details>
               ))}
             </div>
-            <div className="mt-8 flex items-center justify-between border-t border-slate-200 pt-6 text-sm text-slate-500">
-              <span>Scroll down once more to trace the distribution network.</span>
-              <button type="button" onClick={goToDistribution} className="font-semibold text-slate-900 underline decoration-rose-500 underline-offset-4 hover:text-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">Next: distribution network →</button>
+            <div data-analysis-reveal className="analysis-content-reveal mt-8 flex justify-center border-t border-slate-200 pt-6">
+              <button type="button" onClick={goToDistribution} disabled={!atBottom} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-slate-700 transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 ${atBottom ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"}`}>
+                <span>Scroll to continue</span>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-rose-600"><path d="M12 4v15m-6-6 6 6 6-6" /></svg>
+              </button>
             </div>
           </div>
         </section>

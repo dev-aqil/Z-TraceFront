@@ -19,14 +19,16 @@ export default function DistributionPage() {
 
       <div className="mx-auto max-w-screen-2xl px-5 pb-6 pt-5 sm:px-8 sm:pt-6">
         <div className="distribution-reveal distribution-reveal--two flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Distribution Network</h1>
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Distribution Network</h1>
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">Follow the flow from the distributor through route categories and product batches to each receiving site. The amber path leads to a shipment marked for review.</p>
+          </div>
           <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white p-1 pr-3 text-xs font-semibold text-slate-700 shadow-sm"><span className="rounded-full bg-amber-700 px-2.5 py-1 text-white">1 route</span>marked for review</span>
         </div>
 
         <div className="distribution-reveal distribution-reveal--three mt-4 grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_16rem]">
           <section aria-label="Supplier distribution tree" className="min-w-0 rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.05)] sm:p-5">
             <DistributionTree />
-            <p id="review-signal" className="mt-3 scroll-mt-6 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-950"><strong>SHIP-017:</strong> Temperature recorded at 8.4°C against a 7°C review limit. Confirm the shipment and product status with the receiving kitchen.</p>
           </section>
           <aside className="flex flex-col gap-4" aria-label="Distribution actions and legend">
             <NotifyOverlay />

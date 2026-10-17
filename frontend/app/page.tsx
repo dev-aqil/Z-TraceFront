@@ -6,41 +6,75 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const acceptedTypes = ["csv", "xlsx", "json"];
-const exampleFileName = "TraceFront_supplier_shipments.csv";
+const exampleFileName = "supplier_shipments.csv";
+const PICKER_CONFIRM_DELAY_MS = 750;
 
 export default function UploadPage() {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const dialogActionRef = useRef<HTMLButtonElement>(null);
+  const pickerTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [exampleSelected, setExampleSelected] = useState(false);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
-  const [dialogStage, setDialogStage] = useState<"intro" | "picker" | "selected">("intro");
+  const [dialogStage, setDialogStage] = useState<"intro" | "picker-blank" | "picker" | "picker-confirming" | "selected">("intro");
   const [transitioning, setTransitioning] = useState(false);
   const selectedFileLabel = exampleSelected ? `${exampleFileName} selected` : file ? `${file.name} selected` : null;
 
   useEffect(() => {
-    if (dialogRef.current?.open) dialogActionRef.current?.focus();
+    if (dialogRef.current?.open && dialogStage !== "picker-confirming") dialogActionRef.current?.focus();
   }, [dialogStage]);
+
+  useEffect(() => () => pickerTimersRef.current.forEach(clearTimeout), []);
+
+  function clearPickerTimers() {
+    pickerTimersRef.current.forEach(clearTimeout);
+    pickerTimersRef.current = [];
+  }
+
+  function openFilePicker() {
+    clearPickerTimers();
+    pickerTimersRef.current = [
+      setTimeout(() => setDialogStage("picker-blank"), 180),
+      setTimeout(() => { setDialogStage("picker"); pickerTimersRef.current = []; }, 580),
+    ];
+  }
+
+  function confirmExampleFile() {
+    clearPickerTimers();
+    setDialogStage("picker-confirming");
+    pickerTimersRef.current = [setTimeout(() => {
+      setExampleSelected(true);
+      setFile(null);
+      setError("");
+      setDialogStage("selected");
+      pickerTimersRef.current = [];
+    }, PICKER_CONFIRM_DELAY_MS)];
+  }
 
   function chooseFile(nextFile?: File) {
     setError("");
     setFile(null);
     setExampleSelected(false);
-    if (!nextFile) return;
+    if (!nextFile) {
+      setDialogStage("intro");
+      return;
+    }
 
     const extension = nextFile.name.split(".").pop()?.toLowerCase();
     if (!extension || !acceptedTypes.includes(extension)) {
       setError("Choose a CSV, XLSX, or JSON file.");
+      setDialogStage("intro");
       return;
     }
 
     setFile(nextFile);
+    setDialogStage("selected");
   }
 
   function openUploadDialog() {
-    setDialogStage("intro");
+    setDialogStage(file || exampleSelected ? "selected" : "intro");
     dialogRef.current?.showModal();
   }
 
@@ -62,23 +96,16 @@ export default function UploadPage() {
       className={`min-h-screen bg-slate-50 text-slate-900 motion-safe:transition-opacity motion-safe:duration-300 motion-safe:ease-in lg:flex lg:h-dvh lg:flex-col ${transitioning ? "opacity-0" : "opacity-100"}`}
     >
       <header className="bg-[#0d293b] text-white lg:shrink-0">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center px-4 py-2 sm:px-6 lg:px-8">
           <Link href="/" aria-label="TraceFront home" className="rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-rose-300">
             <Image src="/tracefront-logo.png" alt="TraceFront" width={224} height={84} priority className="h-10 w-auto sm:h-12" />
           </Link>
-          <nav aria-label="Main navigation" className="flex flex-wrap items-center gap-1 text-sm">
-            <span aria-current="page" className="rounded-md bg-white/15 px-3 py-2 font-semibold text-white">Upload</span>
-            <Link href="/ml-process" className="rounded-md px-3 py-2 text-slate-200 hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-300">Analysis</Link>
-            <Link href="/reports" className="rounded-md px-3 py-2 text-slate-200 hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-300">Reports</Link>
-            <Link href="/design" className="rounded-md px-3 py-2 text-slate-200 hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-300"><span className="sm:hidden">Design</span><span className="hidden sm:inline">Design map</span></Link>
-          </nav>
         </div>
       </header>
 
       <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:min-h-0 lg:flex-1 lg:px-8 lg:py-2">
         <section aria-labelledby="upload-title" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:flex lg:h-full lg:flex-col lg:p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-700">Step 01 of 06</p>
-          <h1 id="upload-title" className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Upload supply chain data</h1>
+          <h1 id="upload-title" className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Upload supply chain data</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">Choose a supplier shipment file to review batch information.</p>
 
           <div
@@ -101,9 +128,9 @@ export default function UploadPage() {
               </svg>
             </div>
             <h2 className="mt-2 max-w-full break-all text-xl font-semibold text-slate-800 sm:text-2xl" aria-live="polite">{selectedFileLabel ?? "Drop your file here"}</h2>
-            <p className="mt-1 text-sm text-slate-600">{selectedFileLabel ? "You can choose another dataset below." : "or choose a dataset to review"}</p>
+            <p className="mt-1 text-sm text-slate-600">{selectedFileLabel ? "File ready to review." : "or browse for a file"}</p>
             <button type="button" onClick={openUploadDialog} className="mt-3 inline-flex min-h-11 items-center justify-center rounded-lg bg-rose-600 px-8 py-2 text-sm font-semibold text-white hover:bg-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700">
-              Choose dataset
+              {selectedFileLabel ? "Review file" : "Browse files"}
             </button>
             <p className="mt-2 text-xs font-medium tracking-wide text-slate-600">CSV&nbsp;&nbsp;·&nbsp;&nbsp;XLSX&nbsp;&nbsp;·&nbsp;&nbsp;JSON</p>
           </div>
@@ -123,20 +150,23 @@ export default function UploadPage() {
       <dialog
         ref={dialogRef}
         aria-labelledby="upload-dialog-title"
-        onClose={() => setDialogStage("intro")}
-        className={`upload-data-dialog w-[min(760px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl ${dialogStage === "picker" ? "max-w-3xl" : "max-w-xl"}`}
+        aria-busy={dialogStage === "picker-blank" || dialogStage === "picker-confirming"}
+        onClose={() => { clearPickerTimers(); setDialogStage("intro"); }}
+        className={`upload-data-dialog w-[min(760px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl ${dialogStage === "picker" || dialogStage === "picker-confirming" || dialogStage === "picker-blank" ? "max-w-3xl" : "max-w-xl"}`}
       >
-        {dialogStage === "picker" ? (
-          <div className="overflow-hidden rounded-2xl bg-[#f6f8fb]">
+        {dialogStage === "picker-blank" ? (
+          <div className="h-[520px] rounded-2xl bg-white"><h2 id="upload-dialog-title" className="sr-only">Opening files</h2></div>
+        ) : dialogStage === "picker" || dialogStage === "picker-confirming" ? (
+          <div className="upload-picker-content overflow-hidden rounded-2xl bg-[#f6f8fb]">
             <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Select dataset</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Select a file</p>
                 <h2 id="upload-dialog-title" className="text-base font-semibold">Open</h2>
               </div>
-              <button type="button" onClick={() => dialogRef.current?.close()} aria-label="Close file picker" className="flex h-10 w-10 items-center justify-center rounded-lg text-xl text-slate-600 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-600">×</button>
+              <button type="button" onClick={() => dialogRef.current?.close()} aria-label="Close file selection" className="flex h-10 w-10 items-center justify-center rounded-lg text-xl text-slate-600 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-600">×</button>
             </div>
             <div className="border-b border-slate-200 px-5 py-3">
-              <div className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700">This PC <span className="mx-2 text-slate-400">›</span> Documents <span className="mx-2 text-slate-400">›</span> TraceFront Data</div>
+              <div className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700">This PC <span className="mx-2 text-slate-400">›</span> Documents <span className="mx-2 text-slate-400">›</span> Shipment records</div>
             </div>
             <div className="flex min-h-64">
               <aside className="hidden w-44 shrink-0 border-r border-slate-200 bg-white px-4 py-5 text-sm text-slate-600 sm:block" aria-label="File locations">
@@ -146,13 +176,13 @@ export default function UploadPage() {
                 <p className="mt-4">Downloads</p>
               </aside>
               <div className="min-w-0 flex-1 px-5 py-5">
-                <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-slate-200 px-3 pb-3 text-xs font-medium text-slate-500 sm:grid-cols-[1fr_8rem_5rem]">
-                  <span>Name</span><span>Type</span><span className="hidden sm:block">Source</span>
+                <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-slate-200 px-3 pb-3 text-xs font-medium text-slate-500 sm:grid-cols-[1fr_8rem]">
+                  <span>Name</span><span>Type</span>
                 </div>
-                <div className="mt-2 grid grid-cols-[1fr_auto] items-center gap-4 rounded-lg border border-blue-300 bg-blue-100 px-3 py-3 text-sm text-blue-950 sm:grid-cols-[1fr_8rem_5rem]" aria-label="Selected example file">
-                  <span className="min-w-0 truncate font-semibold">📄 {exampleFileName}</span><span>CSV File</span><span className="hidden sm:block">Included</span>
+                <div className="mt-2 grid grid-cols-[1fr_auto] items-center gap-4 rounded-lg border border-blue-300 bg-blue-100 px-3 py-3 text-sm text-blue-950 sm:grid-cols-[1fr_8rem]" aria-label="Selected file">
+                  <span className="min-w-0 truncate font-semibold">📄 {exampleFileName}</span><span>CSV file</span>
                 </div>
-                <p className="mt-4 text-xs text-slate-600">The example dataset is selected and ready to review.</p>
+                <p className="mt-4 text-xs text-slate-600">Select the file, then choose Open.</p>
               </div>
             </div>
             <div className="border-t border-slate-200 bg-white p-5">
@@ -161,38 +191,43 @@ export default function UploadPage() {
                 <input readOnly value={exampleFileName} aria-label="Selected file name" className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900" />
               </div>
               <div className="mt-4 flex justify-end gap-3">
-                <button type="button" onClick={() => setDialogStage("intro")} className="min-h-10 rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-600">Cancel</button>
+                <button type="button" onClick={() => { clearPickerTimers(); setDialogStage(file || exampleSelected ? "selected" : "intro"); }} className="min-h-10 rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-600">Cancel</button>
                 <button
                   ref={dialogActionRef}
                   type="button"
-                  onClick={() => {
-                    setExampleSelected(true);
-                    setFile(null);
-                    setError("");
-                    setDialogStage("selected");
-                  }}
-                  className="min-h-10 rounded-lg bg-blue-600 px-7 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
-                >Open</button>
+                  onClick={confirmExampleFile}
+                  disabled={dialogStage === "picker-confirming"}
+                  className="min-h-10 rounded-lg bg-blue-600 px-7 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-wait disabled:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+                >{dialogStage === "picker-confirming" ? "Opening…" : "Open"}</button>
               </div>
             </div>
           </div>
         ) : (
           <div className="p-6 sm:p-8">
-            <div className="flex items-center justify-between gap-4">
-              <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-rose-800">Step 02 of 06</span>
+            <div className="flex justify-end">
               <button type="button" onClick={() => dialogRef.current?.close()} aria-label="Close upload dialog" className="flex h-10 w-10 items-center justify-center rounded-lg text-xl text-slate-600 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-600">×</button>
             </div>
-            <div className="mt-7 flex h-14 w-14 items-center justify-center rounded-xl bg-rose-50 text-2xl text-rose-600" aria-hidden="true">↑</div>
-            <h2 id="upload-dialog-title" className="mt-5 text-2xl font-semibold tracking-tight">{dialogStage === "selected" ? "Dataset selected" : "Upload supplier data"}</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{dialogStage === "selected" ? "The example dataset is ready for review." : "Choose a shipment file to review. An example dataset is available in the picker."}</p>
-            <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{dialogStage === "selected" ? "Selected file" : "File source"}</p>
-              <p className="mt-1 break-all text-sm font-medium text-slate-900">{dialogStage === "selected" ? exampleFileName : "TraceFront example dataset"}</p>
-              <p className="mt-1 text-xs text-slate-600">{dialogStage === "selected" ? "Ready for review" : "CSV, XLSX, or JSON"}</p>
+            <div className="mt-7 flex h-16 w-16 items-center justify-center rounded-xl bg-rose-50 text-rose-600" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className="h-9 w-9">
+                <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+              </svg>
             </div>
+            <h2 id="upload-dialog-title" className="mt-5 text-2xl font-semibold tracking-tight">{dialogStage === "selected" ? "File ready" : "Upload shipment file"}</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{dialogStage === "selected" ? "Review the selected file before continuing." : "Choose a CSV, XLSX, or JSON file to review."}</p>
+            <div
+              onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(event) => { event.preventDefault(); setDragging(false); chooseFile(event.dataTransfer.files[0]); }}
+              className={`mt-6 rounded-xl border-2 p-4 ${dialogStage === "selected" ? "border-slate-200 bg-slate-50" : dragging ? "border-rose-500 border-dashed bg-rose-50" : "border-slate-300 border-dashed bg-slate-50"}`}
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{dialogStage === "selected" ? "Selected file" : "Drop a file here"}</p>
+              <p className="mt-1 break-all text-sm font-medium text-slate-900">{dialogStage === "selected" ? file?.name ?? exampleFileName : "or browse files from your device"}</p>
+              <p className="mt-1 text-xs text-slate-600">CSV · XLSX · JSON</p>
+            </div>
+            {error && <p role="alert" className="mt-2 text-sm font-medium text-red-700">{error}</p>}
             <div className="mt-6 flex flex-wrap justify-end gap-3">
-              <button type="button" onClick={() => dialogRef.current?.close()} className="min-h-11 rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-600">{dialogStage === "selected" ? "Close" : "Cancel"}</button>
-              <button ref={dialogActionRef} type="button" onClick={() => dialogStage === "selected" ? startAnalysis() : setDialogStage("picker")} className="min-h-11 rounded-lg bg-rose-600 px-6 py-2 text-sm font-semibold text-white hover:bg-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700">{dialogStage === "selected" ? "Review findings" : "Choose dataset"}</button>
+              <button type="button" onClick={() => dialogStage === "selected" ? openFilePicker() : dialogRef.current?.close()} className="min-h-11 rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">{dialogStage === "selected" ? "Change file" : "Cancel"}</button>
+              <button ref={dialogActionRef} type="button" onClick={() => dialogStage === "selected" ? startAnalysis() : openFilePicker()} className="min-h-11 rounded-lg bg-rose-600 px-6 py-2 text-sm font-semibold text-white hover:bg-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700">{dialogStage === "selected" ? "Preview analysis" : "Browse files"}</button>
             </div>
           </div>
         )}
