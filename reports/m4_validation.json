@@ -1,0 +1,142 @@
+{
+  "artifacts": {
+    "configs/canonical_schema.json": {
+      "sha256": "87b3f3fd06f5f7b3527a5cb1e343b2392d4818770207a878fdfa90d27133036a",
+      "size_bytes": 7632
+    },
+    "configs/source_contracts.json": {
+      "sha256": "d7fce7156f82a1dbded326f672c9fd678a95f2c37b918d423c73bed714de29a1",
+      "size_bytes": 298601
+    },
+    "reports/m4_data_dictionary.csv": {
+      "sha256": "ab05809319b87ed17f93c60e82e46c4022fc8e0677f2ffb979f28086636761d2",
+      "size_bytes": 173959
+    },
+    "reports/m4_data_dictionary.md": {
+      "sha256": "b408a53f7f49ee7624aa5d868f031140a4b900ddc65c9344766f4d5211ca879e",
+      "size_bytes": 80949
+    },
+    "reports/m4_schema_report.md": {
+      "sha256": "4447bc544bc89640645a5c1e33cbcb4fb83053f99f2eaed68be1de69f7e43216",
+      "size_bytes": 10999
+    },
+    "reports/m4_schema_summary.json": {
+      "sha256": "ff53212b817228a5090e335cc9369c5ff8bf61268b4b125e9b5e8bababae953c",
+      "size_bytes": 3157
+    }
+  },
+  "baseline_commit": "30746b39b90e78ae68b2f97d7fe84077725a2c0d",
+  "baseline_person_a_tests_passed": 67,
+  "baseline_worktree_status": [
+    " M README.md",
+    " M notebooks/README.md",
+    "?? reports/m2_revalidation.json",
+    "?? reports/m3_eda_report.md",
+    "?? reports/m3_eda_summary.json",
+    "?? reports/m3_eda_visuals.html",
+    "?? reports/m3_quality_findings.md",
+    "?? reports/m3_validation.json",
+    "?? src/tracefront_data/eda.py",
+    "?? tests/test_eda.py"
+  ],
+  "code_sha256": {
+    "src/tracefront_data/contracts.py": "de74c11a6d25d0a36f1e25785c0dd70b04499ad6e50c5c6023480911aecf57dd",
+    "tests/test_contracts.py": "6edb1f25f2eb6a03f83dedc2042bade0fa75626198c35eb47e4f62e98ca5549f"
+  },
+  "command_validation": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m tracefront_data.contracts",
+      "exit_code": 0
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m tracefront_data.contracts --check-only",
+      "exit_code": 0
+    }
+  ],
+  "contract_checks": {
+    "approved_predictors": 0,
+    "data_tables_written": 0,
+    "labels_created": 0,
+    "leakage_class_counts": {
+      "LABEL": 12,
+      "LEAKAGE": 8,
+      "QUESTIONABLE": 65,
+      "SAFE": 21
+    },
+    "mapped_fields": 106,
+    "pending_unit_fields": [
+      "opendosm_crops_district_production.crops_district_production.production",
+      "opendosm_crops_state.crops_state.production"
+    ],
+    "source_tables": 7
+  },
+  "data_status": "NOT MODEL-READY",
+  "determinism": {
+    "all_generated_dictionary_checksums_match_summary": true,
+    "csv_and_markdown_rendering_byte_identical_python_3_11_and_3_14": true,
+    "csv_dictionary_rows": 106,
+    "git_diff_check_passed": true
+  },
+  "milestone": "M4",
+  "not_performed": [
+    "mapped data table materialization",
+    "cross-source joins",
+    "predictive feature engineering",
+    "final label creation",
+    "ML training",
+    "M5 work"
+  ],
+  "pending_sources": {
+    "fda_inspections": "raw inspection records not yet acquired",
+    "fsis_raw_poultry": "official source confirmed, raw file not yet acquired"
+  },
+  "portability": {
+    "authoring_only_tool": "Preinstalled pdftotext used to review the official PDP PDF; not required for runtime or tests",
+    "existing_requirement": "Python sqlite3 support via reused M2 verification helpers",
+    "local_architecture": "x86_64",
+    "python_minimum": "3.11",
+    "runtime_dependencies_added": [],
+    "s390x_executed": false
+  },
+  "preservation": {
+    "future_batch_table_definitions_unchanged": true,
+    "m1_m2_m3_artifact_fingerprints_unchanged": true,
+    "person_b_backend_frontend_untouched": true,
+    "preexisting_m3_code_and_tests_unchanged": true,
+    "preexisting_notebook_readme_change_preserved": true,
+    "raw_interim_tables_written": 0
+  },
+  "remaining_scientific_holds": [
+    "Crop-specific physical units for both OpenDOSM production fields remain PENDING with canonical unit null.",
+    "Historical field availability/versioning remains PENDING for every source table.",
+    "No final target or operational prediction cutoff defined.",
+    "District aggregate conflicts remain quarantined.",
+    "No verified supplier/farm/factory/batch crosswalk."
+  ],
+  "scope": "Source-specific canonical mapping design and dictionary metadata only",
+  "status": "COMPLETE",
+  "test_scope": "Configured Person A suite. Training-dependent tests remain excluded per prior user instruction; separate unchanged modeling/backend suites were not rerun.",
+  "tests": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q tests",
+      "exit_code": 0,
+      "new_m4_tests": 13,
+      "passed": 80,
+      "python": "3.11.17",
+      "subtests_passed": 5
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests -q",
+      "exit_code": 0,
+      "passed": 80,
+      "python": "3.14.7"
+    }
+  ],
+  "upstream_verification": {
+    "full_typed_readback": "Existing matching M3 full typed census reused; no new EDA or row transformation.",
+    "m1_raw_artifact_records_verified": 28,
+    "m2_output_files_verified": 30,
+    "m3_reports_code_and_inputs_verified": true
+  },
+  "verified_at_utc": "2026-10-17T07:16:19.627272+00:00"
+}

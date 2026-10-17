@@ -1,0 +1,144 @@
+{
+  "artifacts": {
+    "configs/m5_feature_scope.json": {
+      "sha256": "caf77e535684747105ebdf5840b3f2e90a40019cd72728c2b263c9adbc7530d5",
+      "size_bytes": 18277
+    },
+    "data/interim/m5_v1/pdp_sample_context_features.csv": {
+      "sha256": "23e7e6db133baf2a9097ff839044c7bcf6df73814749a784ec423800d942b51a",
+      "size_bytes": 419329
+    },
+    "data/interim/m5_v1/pdp_sample_context_features.schema.json": {
+      "sha256": "7b9d06e67f829e1eeef7cee62ed58e814029baca837492f5ad4018395631493a",
+      "size_bytes": 6255
+    },
+    "reports/m5_evidence/usda_ams_pdp_databases_page.md": {
+      "sha256": "4a12e9514b603819ddf03e9339244ca7738a3d9777a92db40e097227b155f423",
+      "size_bytes": 3937
+    },
+    "reports/m5_feature_readiness.json": {
+      "sha256": "bbf214082870a68464199e666efc6f4c617df9972fd5efee95dff44ab0660a56",
+      "size_bytes": 42609
+    },
+    "reports/m5_feature_report.md": {
+      "sha256": "f57755e0602e90ba2f8f246e5bd5c5b95a1747e77edf995a1e58d96583370e9b",
+      "size_bytes": 25296
+    },
+    "reports/m5_pdp_sample_context_features_report.md": {
+      "sha256": "833ce292c01e65ef84e19c8d666d7479b467013d8220e5e4c0b1cfe163320644",
+      "size_bytes": 5341
+    },
+    "reports/m5_pdp_sample_context_features_summary.json": {
+      "sha256": "9ff9ed1224a04f41c17cedca5adba9697dc6ab66e5f884ce80e606daef799b23",
+      "size_bytes": 5259
+    }
+  },
+  "assessment_counts": {
+    "blocked_families": 9,
+    "cleared_families": 2,
+    "cleared_family_names": [
+      "pdp_collection_calendar",
+      "pdp_product_context"
+    ],
+    "excluded_direct_focal_inputs": 20,
+    "families_assessed": 11,
+    "feature_tables_written": 1,
+    "features_emitted": 10,
+    "joined_sources": 0,
+    "joins_performed": 0,
+    "labels_created": 0
+  },
+  "assessment_status": "COMPLETE",
+  "cli": {
+    "feature_materialization": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m tracefront_data.pdp_sample_context_features",
+      "exit_code": 0,
+      "meaning": "The two cleared families were materialized into data/interim/m5_v1; NOT MODEL-READY."
+    },
+    "feature_readiness": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m tracefront_data.feature_readiness",
+      "exit_code": 0,
+      "meaning": "Assessment execution succeeded; milestone remains PARTIAL."
+    },
+    "feature_verification": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m tracefront_data.pdp_sample_context_features --verify-only",
+      "exit_code": 0,
+      "meaning": "Pinned feature-table bytes and typed readback verified."
+    }
+  },
+  "code_sha256": {
+    "src/tracefront_data/feature_readiness.py": "826ddd5b18c963883e82afcab90301b5d7f31653f4d8999b9407034889a2ba93",
+    "src/tracefront_data/pdp_sample_context_features.py": "825505d6100d84227eb4858a6bfb8045f09fd082304d998fa9ae8c69c28b0bf9",
+    "tests/test_feature_readiness.py": "d301106511dd359506c51ab89a7e4a8c0076fca09e896e214bccaef4222704f5",
+    "tests/test_pdp_sample_context_features.py": "2bfcb7c59901aff888913c4fc1bf47a2b1e0d8797d2e79b9434f118970f9f910"
+  },
+  "data_status": "NOT MODEL-READY",
+  "determinism": {
+    "assessment_reproduced_from_pinned_metadata": true,
+    "feature_table_reproduces_identical_bytes_on_rerun": true,
+    "generated_report_bytes_equal_python_3_11_and_3_14": true,
+    "git_diff_check_passed": true,
+    "readback_row_null_counts_equal_pinned_m2_missingness": true
+  },
+  "implementation_status": "pdp_collection_calendar and pdp_product_context materialized as one un-joined, unlabeled source-specific feature table (10 features); the other nine families remain blocked and pending.",
+  "milestone": "M5",
+  "not_performed": [
+    "cross-source joins (single usda_pdp.samples table only)",
+    "final label creation; usda_pdp.results analytical fields unread",
+    "missingness-indicator features (family remains blocked)",
+    "model training",
+    "M6 enrichment",
+    "M7 final leakage audit",
+    "M8 modeling handoff"
+  ],
+  "pending_sources": {
+    "fda_inspections": "raw inspection records not yet acquired",
+    "fsis_raw_poultry": "official source confirmed, raw file not yet acquired"
+  },
+  "portability": {
+    "existing_requirement": "Python SQLite support via reused M2/M4 verification helpers",
+    "local_architecture": "x86_64",
+    "python_minimum": "3.11",
+    "runtime_dependencies_added": [],
+    "s390x_executed": false
+  },
+  "remaining_m5_work": [
+    "Resolve pdp_input_missingness semantics policy and growst/packst availability evidence.",
+    "Obtain per-field as-of/result/public-availability evidence for the other nine families before approving predictors.",
+    "Provide batch-linked sensors and stage/expiry endpoints before cold-chain/timing work.",
+    "Provide verified entity linkage and comparable prior-outcome policies before supplier/facility history.",
+    "Resolve weather interval/window/quality/coverage policies and agricultural release timing.",
+    "Resolve crop-specific OpenDOSM production units without inventing conversions."
+  ],
+  "status": "PARTIAL",
+  "test_scope": "Configured Person A suite only. Training-dependent tests remain excluded per user instruction. Separate unchanged modeling/backend suites were not rerun.",
+  "tests": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q tests",
+      "exit_code": 0,
+      "new_m5_materialization_tests": 13,
+      "new_m5_tests": 24,
+      "passed": 104,
+      "python": "3.11.17",
+      "subtests_passed": 6
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests -q",
+      "exit_code": 0,
+      "passed": 104,
+      "python": "3.14.7"
+    }
+  ],
+  "upstream_verification": {
+    "all_captured_m1_through_m4_code_configs_reports_unchanged": true,
+    "m1_raw_verification": {
+      "acquisition_status": "partial",
+      "checked_artifacts": 28,
+      "failures": [],
+      "integrity_ok": true
+    },
+    "m2_samples_bytes_reverified_against_frozen_summary_before_reading": true,
+    "m4_artifacts_code_and_checks_verified": true,
+    "source_predictor_approvals_not_modified": true
+  }
+}

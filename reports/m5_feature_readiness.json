@@ -1,0 +1,946 @@
+{
+  "assessment_status": "COMPLETE",
+  "assessor_sha256": "826ddd5b18c963883e82afcab90301b5d7f31653f4d8999b9407034889a2ba93",
+  "data_status": "NOT MODEL-READY",
+  "decision_contract": {
+    "applies_to_families": [
+      "pdp_product_context",
+      "pdp_collection_calendar",
+      "pdp_input_missingness"
+    ],
+    "availability_evidence": {
+      "evidence_path": "reports/m5_evidence/usda_ams_pdp_databases_page.md",
+      "evidence_sha256": "4a12e9514b603819ddf03e9339244ca7738a3d9777a92db40e097227b155f423",
+      "fetched_at_utc": "2026-10-17T07:37:00+00:00",
+      "interpretation": "PDP24Samples.txt and PDP24Results.txt are both members of the single pinned 2024PDPDatabase.zip archive (see configs/source_contracts.json usda_pdp.samples/results source.artifacts). AMS records exactly one public posting date for that whole archive, 2025-12-23, with no earlier publication evidence for either member. This establishes a verified upper bound: every usda_pdp.samples field became publicly available no earlier than 2025-12-23, which is at/before the documented prediction_cutoff. It does not show sample-context fields were available earlier than analytical result fields, so it cannot and does not justify treating any usda_pdp.results field as a predictor.",
+      "quoted_text": "2024 Data ZIP File - 10.1MB - Posted on 12/23/2025",
+      "source": "USDA Agricultural Marketing Service, official dataset page 'PDP Databases and Annual Summaries'",
+      "url": "https://www.ams.usda.gov/datasets/pdp/pdpdata"
+    },
+    "experiment_definition": "pdp_2024_sample_context_retrospective: Evaluate 2024 PDP sample-record context fields (native commodity/category/origin/variety/claim codes, sample-unit count and collection-calendar date) as retrospective study inputs for the publicly released 2024 cohort. No chemical-outcome, recall or inspection target is defined or created by this experiment; usda_pdp.results analytical fields remain excluded as label evidence under their existing M4 OUTCOME_EVIDENCE/LABEL classification, independent of this cutoff.",
+    "prediction_cutoff": "2025-12-23",
+    "prediction_cutoff_precision": "DATE (calendar day; the official posting record states a date only, no time-of-day)"
+  },
+  "evidence": {
+    "m4_checks": {
+      "approved_predictors": 0,
+      "data_tables_written": 0,
+      "labels_created": 0,
+      "leakage_class_counts": {
+        "LABEL": 12,
+        "LEAKAGE": 8,
+        "QUESTIONABLE": 65,
+        "SAFE": 21
+      },
+      "mapped_fields": 106,
+      "pending_unit_fields": [
+        "opendosm_crops_district_production.crops_district_production.production",
+        "opendosm_crops_state.crops_state.production"
+      ],
+      "source_tables": 7
+    },
+    "m4_input_sha256": {
+      "configs/canonical_schema.json": "87b3f3fd06f5f7b3527a5cb1e343b2392d4818770207a878fdfa90d27133036a",
+      "configs/source_contracts.json": "d7fce7156f82a1dbded326f672c9fd678a95f2c37b918d423c73bed714de29a1",
+      "reports/m4_data_dictionary.csv": "ab05809319b87ed17f93c60e82e46c4022fc8e0677f2ffb979f28086636761d2",
+      "reports/m4_data_dictionary.md": "b408a53f7f49ee7624aa5d868f031140a4b900ddc65c9344766f4d5211ca879e",
+      "reports/m4_schema_report.md": "4447bc544bc89640645a5c1e33cbcb4fb83053f99f2eaed68be1de69f7e43216",
+      "reports/m4_schema_summary.json": "ff53212b817228a5090e335cc9369c5ff8bf61268b4b125e9b5e8bababae953c",
+      "reports/m4_validation.json": "dbe70aa52c1585d97224ed5420d4e0d92b1158c11ce0575f97c73a2ecc745442",
+      "src/tracefront_data/contracts.py": "de74c11a6d25d0a36f1e25785c0dd70b04499ad6e50c5c6023480911aecf57dd",
+      "tests/test_contracts.py": "6edb1f25f2eb6a03f83dedc2042bade0fa75626198c35eb47e4f62e98ca5549f"
+    },
+    "upstream": {
+      "input_sha256": {
+        "data/interim/m2_v1/noaa/daily_observations.schema.json": "2eef99ce4be46139394f1f5e1be8ab501b5b66e068a3142149e749dd4d8f4128",
+        "data/interim/m2_v1/opendosm_crops_district_area/crops_district_area.schema.json": "02dacccf05aa94ef32a63a504ec7a931168e2d2c5973550ce7ecd8e5852afd43",
+        "data/interim/m2_v1/opendosm_crops_district_production/crops_district_production.schema.json": "80fbc983a985148a6b82c564763615d475e6bc5ad235e67a31531ed06b869ee7",
+        "data/interim/m2_v1/opendosm_crops_state/crops_state.schema.json": "8fa9c2eb042b823d34ca77c65ed1399ed4171e2251e66c7901cdc56bca8c4753",
+        "data/interim/m2_v1/openfda/recalls.schema.json": "58c11318be3d9b017ec9b0ebf0bc6d8102da1bc8c5a49456f8069eea6b10bbb0",
+        "data/interim/m2_v1/usda_pdp/results.schema.json": "1931aefd789db2ef867933288496da36d7489a8591a37f8002f9a15954dae28a",
+        "data/interim/m2_v1/usda_pdp/samples.schema.json": "d376bda04bcea5dc4c6e9e2fdbc419d6c5e295d7172d151e42f7b2f6d6ca08f3",
+        "reports/m2_cleaning_report.md": "13533a82b440e5f01acee2ade2926a43db3193356d1445572bda46ce99e9b1cf",
+        "reports/m2_cleaning_summary.json": "b99300603ddc2cb23cccf4a26a6f15faa5c6e717ee5d1655ad3a25a4114c9afb",
+        "reports/m2_revalidation.json": "bdd0b79430b50c66b743d3b8369937b7a5eedc19d9c71578f7102cfe0893ed32",
+        "reports/m3_eda_report.md": "ac7780090e861964f211296b5c01c8ba5d7ac50981de289f4634a52b938e7fed",
+        "reports/m3_eda_summary.json": "d2eb5aa9df39f97f01ca38a37a68627ce8a3eeefb8f3c829916e62435cd53ae0",
+        "reports/m3_eda_visuals.html": "30cdeb2b096853d40b9a4a5d5444812bb23cd869d63d4eb88456b9616f736bca",
+        "reports/m3_quality_findings.md": "2f9fe2df9d3bcdd10976484a69bc3a3140716253ea5de052ebb51c38f4feab7a",
+        "reports/m3_validation.json": "816a89f9ca2c5f72a0137a86ea1e57fc3a4ea801f0a3d56f44092ff794a03875"
+      },
+      "m2_output_files_checked": 30,
+      "raw_verification": {
+        "acquisition_status": "partial",
+        "checked_artifacts": 28,
+        "failures": [],
+        "integrity_ok": true
+      },
+      "typed_readback_evidence": "Reused matching M3 full typed census; no new row transformations or full EDA scan"
+    }
+  },
+  "excluded_direct_focal_inputs": [
+    {
+      "canonical_name": "recall_classification_date",
+      "column": "center_classification_date",
+      "leakage_class": "LEAKAGE",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "RETROSPECTIVE_CONTEXT",
+      "table": "openfda_enforcement.recalls"
+    },
+    {
+      "canonical_name": "recall_classification",
+      "column": "classification",
+      "leakage_class": "LEAKAGE",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "RETROSPECTIVE_CONTEXT",
+      "table": "openfda_enforcement.recalls"
+    },
+    {
+      "canonical_name": "recall_distribution_text",
+      "column": "distribution_pattern",
+      "leakage_class": "LEAKAGE",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "RETROSPECTIVE_CONTEXT",
+      "table": "openfda_enforcement.recalls"
+    },
+    {
+      "canonical_name": "recall_notification_method",
+      "column": "initial_firm_notification",
+      "leakage_class": "LEAKAGE",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "RETROSPECTIVE_CONTEXT",
+      "table": "openfda_enforcement.recalls"
+    },
+    {
+      "canonical_name": "recall_reason_text",
+      "column": "reason_for_recall",
+      "leakage_class": "LEAKAGE",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "RETROSPECTIVE_CONTEXT",
+      "table": "openfda_enforcement.recalls"
+    },
+    {
+      "canonical_name": "recall_status",
+      "column": "status",
+      "leakage_class": "LEAKAGE",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "RETROSPECTIVE_CONTEXT",
+      "table": "openfda_enforcement.recalls"
+    },
+    {
+      "canonical_name": "recall_termination_date",
+      "column": "termination_date",
+      "leakage_class": "LEAKAGE",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "RETROSPECTIVE_CONTEXT",
+      "table": "openfda_enforcement.recalls"
+    },
+    {
+      "canonical_name": "recall_action_type",
+      "column": "voluntary_mandated",
+      "leakage_class": "LEAKAGE",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "RETROSPECTIVE_CONTEXT",
+      "table": "openfda_enforcement.recalls"
+    },
+    {
+      "canonical_name": "pdp_residue_concentration",
+      "column": "concen",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_detection_limit",
+      "column": "lod",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_concentration_unit_code",
+      "column": "conunit",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_primary_confirmation_method_code",
+      "column": "confmethod",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_secondary_confirmation_method_code",
+      "column": "confmethod2",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_result_annotation_code",
+      "column": "annotate",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_quantitation_method_code",
+      "column": "quantitate",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_result_code",
+      "column": "mean",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_extraction_method_code",
+      "column": "extract",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_determinative_method_code",
+      "column": "determin",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_concentration_raw_token",
+      "column": "concen_raw",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    },
+    {
+      "canonical_name": "pdp_concentration_missing_reason",
+      "column": "concen_missing_reason",
+      "leakage_class": "LABEL",
+      "reason": "Excluded as a direct focal predictor; no new outcome or target derived. Prior-outcome use still requires event/availability/entity/comparability evidence.",
+      "role": "OUTCOME_EVIDENCE",
+      "table": "usda_pdp.results"
+    }
+  ],
+  "families": [
+    {
+      "features_emitted": 0,
+      "field_assessments": [
+        {
+          "canonical_name": "pdp_commodity_code",
+          "column": "commod",
+          "field_availability": "M5_VERIFIED",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": true,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "pdp_commodity_type_code",
+          "column": "commtype",
+          "field_availability": "M5_VERIFIED",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": true,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "pdp_origin_code",
+          "column": "origin",
+          "field_availability": "M5_VERIFIED",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": true,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "pdp_import_origin_country_code",
+          "column": "country",
+          "field_availability": "M5_VERIFIED",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": true,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "pdp_variety_text",
+          "column": "variety",
+          "field_availability": "M5_VERIFIED",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": true,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "pdp_product_claim_code",
+          "column": "claim",
+          "field_availability": "M5_VERIFIED",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": true,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "pdp_sample_unit_count",
+          "column": "quantity",
+          "field_availability": "M5_VERIFIED",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": true,
+          "role": "CONTEXT",
+          "source_unit_status": "VERIFIED",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "CONFIRMED",
+          "use": "INPUT"
+        }
+      ],
+      "id": "pdp_product_context",
+      "pending_sources": [],
+      "purpose": "Potential product/category/origin/sample-unit predictors from the sample table, preserving native codes.",
+      "reason_codes": [],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "REQUIRES_IMPLEMENTATION_REVIEW"
+    },
+    {
+      "features_emitted": 0,
+      "field_assessments": [
+        {
+          "canonical_name": "pdp_collection_date",
+          "column": "collection_date",
+          "field_availability": "M5_VERIFIED",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": true,
+          "role": "REFERENCE_TIME",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "INPUT"
+        }
+      ],
+      "id": "pdp_collection_calendar",
+      "pending_sources": [],
+      "purpose": "Assess collection-date context only; existing M2 year/month/day fields are not new M5 features.",
+      "reason_codes": [],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "REQUIRES_IMPLEMENTATION_REVIEW"
+    },
+    {
+      "features_emitted": 0,
+      "field_assessments": [
+        {
+          "canonical_name": "pdp_import_origin_country_code",
+          "column": "country",
+          "field_availability": "M5_VERIFIED",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": true,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "pdp_sample_unit_count",
+          "column": "quantity",
+          "field_availability": "M5_VERIFIED",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": true,
+          "role": "CONTEXT",
+          "source_unit_status": "VERIFIED",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "CONFIRMED",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "pdp_grower_state_code",
+          "column": "growst",
+          "field_availability": "PENDING",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "pdp_packer_state_code",
+          "column": "packst",
+          "field_availability": "PENDING",
+          "historical_availability": "M5_VERIFIED",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.samples",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "INPUT"
+        }
+      ],
+      "id": "pdp_input_missingness",
+      "pending_sources": [],
+      "purpose": "Potential missingness indicators only for genuine pre-cutoff sample inputs; no assay-censoring proxy.",
+      "reason_codes": [
+        "MISSINGNESS_SEMANTICS_POLICY_UNDEFINED",
+        "PREDICTION_TIME_AVAILABILITY_UNVERIFIED",
+        "PREDICTOR_APPROVAL_PENDING"
+      ],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "BLOCKED"
+    },
+    {
+      "features_emitted": 0,
+      "field_assessments": [],
+      "id": "cold_chain_temperature",
+      "pending_sources": [],
+      "purpose": "Temperature exposure/statistics/excursions for a real batch-linked product/stage series. NOAA weather is not this series.",
+      "reason_codes": [
+        "BATCH_SENSOR_SERIES_ABSENT",
+        "EXPERIMENT_DEFINITION_PENDING",
+        "NO_ELIGIBLE_SOURCE_INPUTS",
+        "PREDICTION_CUTOFF_UNDEFINED",
+        "PREDICTION_TIME_AVAILABILITY_UNVERIFIED",
+        "PRODUCT_STAGE_TEMPERATURE_POLICY_ABSENT",
+        "SENSOR_QA_GAP_POLICY_UNDEFINED"
+      ],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "BLOCKED"
+    },
+    {
+      "features_emitted": 0,
+      "field_assessments": [],
+      "id": "supply_chain_timing",
+      "pending_sources": [],
+      "purpose": "Elapsed-stage, shelf and expiry durations require real, pre-cutoff endpoints.",
+      "reason_codes": [
+        "EXPERIMENT_DEFINITION_PENDING",
+        "EXPIRY_SHELF_METADATA_ABSENT",
+        "NO_ELIGIBLE_SOURCE_INPUTS",
+        "PREDICTION_CUTOFF_UNDEFINED",
+        "PREDICTION_TIME_AVAILABILITY_UNVERIFIED",
+        "SUPPLY_CHAIN_ENDPOINTS_ABSENT"
+      ],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "BLOCKED"
+    },
+    {
+      "features_emitted": 0,
+      "field_assessments": [
+        {
+          "canonical_name": "pdp_sample_id",
+          "column": "sample_pk",
+          "field_availability": "NOT_A_PREDICTOR",
+          "historical_availability": "PENDING",
+          "leakage_class": "SAFE",
+          "predictor_approved": false,
+          "role": "IDENTIFIER",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.results",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "GROUP_KEY"
+        },
+        {
+          "canonical_name": "pdp_result_code",
+          "column": "mean",
+          "field_availability": "NOT_A_PREDICTOR",
+          "historical_availability": "PENDING",
+          "leakage_class": "LABEL",
+          "predictor_approved": false,
+          "role": "OUTCOME_EVIDENCE",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "usda_pdp.results",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "PRIOR_OUTCOME"
+        }
+      ],
+      "id": "supplier_facility_test_history",
+      "pending_sources": [],
+      "purpose": "Prior comparable tests for a verified supplier/facility. Sample IDs, collection sites and labs are not those entities.",
+      "reason_codes": [
+        "COMPARABLE_TEST_POLICY_UNDEFINED",
+        "EXPERIMENT_DEFINITION_PENDING",
+        "FOCAL_SAMPLE_EXCLUSION_POLICY_UNDEFINED",
+        "PREDICTION_CUTOFF_UNDEFINED",
+        "PREDICTION_TIME_AVAILABILITY_UNVERIFIED",
+        "TEST_RESULT_AVAILABILITY_ABSENT",
+        "VERIFIED_SUPPLIER_FACILITY_ID_ABSENT"
+      ],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "BLOCKED"
+    },
+    {
+      "features_emitted": 0,
+      "field_assessments": [
+        {
+          "canonical_name": "recalling_firm_name",
+          "column": "recalling_firm",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "openfda_enforcement.recalls",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "GROUP_KEY"
+        },
+        {
+          "canonical_name": "recall_event_id",
+          "column": "event_id",
+          "field_availability": "NOT_A_PREDICTOR",
+          "historical_availability": "PENDING",
+          "leakage_class": "SAFE",
+          "predictor_approved": false,
+          "role": "IDENTIFIER",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "openfda_enforcement.recalls",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "GROUP_KEY"
+        },
+        {
+          "canonical_name": "recall_number",
+          "column": "recall_number",
+          "field_availability": "NOT_A_PREDICTOR",
+          "historical_availability": "PENDING",
+          "leakage_class": "SAFE",
+          "predictor_approved": false,
+          "role": "IDENTIFIER",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "openfda_enforcement.recalls",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "GROUP_KEY"
+        },
+        {
+          "canonical_name": "recall_initiation_date",
+          "column": "recall_initiation_date",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "REFERENCE_TIME",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "openfda_enforcement.recalls",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "REFERENCE_TIME"
+        },
+        {
+          "canonical_name": "recall_report_date",
+          "column": "report_date",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "REFERENCE_TIME",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "openfda_enforcement.recalls",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "REFERENCE_TIME"
+        }
+      ],
+      "id": "recall_history",
+      "pending_sources": [],
+      "purpose": "Prior unique available recall events for a verified entity; no current status backfill.",
+      "reason_codes": [
+        "EXPERIMENT_DEFINITION_PENDING",
+        "HISTORICAL_RECALL_FIELD_VERSIONS_ABSENT",
+        "HISTORY_WINDOW_POLICY_UNDEFINED",
+        "PREDICTION_CUTOFF_UNDEFINED",
+        "PREDICTION_TIME_AVAILABILITY_UNVERIFIED",
+        "VERIFIED_RECALL_ENTITY_LINKAGE_ABSENT"
+      ],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "BLOCKED"
+    },
+    {
+      "features_emitted": 0,
+      "field_assessments": [],
+      "id": "inspection_history",
+      "pending_sources": [
+        "fda_inspections"
+      ],
+      "purpose": "Facility inspection history requires actual official records, identities, availability and classification policy.",
+      "reason_codes": [
+        "EXPERIMENT_DEFINITION_PENDING",
+        "INSPECTION_FAILURE_POLICY_UNDEFINED",
+        "NO_ELIGIBLE_SOURCE_INPUTS",
+        "PREDICTION_CUTOFF_UNDEFINED",
+        "PREDICTION_TIME_AVAILABILITY_UNVERIFIED",
+        "SOURCE_NOT_ACQUIRED",
+        "VERIFIED_SUPPLIER_FACILITY_ID_ABSENT"
+      ],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "BLOCKED"
+    },
+    {
+      "features_emitted": 0,
+      "field_assessments": [
+        {
+          "canonical_name": "ghcn_station_id",
+          "column": "station_id",
+          "field_availability": "NOT_A_PREDICTOR",
+          "historical_availability": "PENDING",
+          "leakage_class": "SAFE",
+          "predictor_approved": false,
+          "role": "IDENTIFIER",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "noaa_ghcn_daily.daily_observations",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "GROUP_KEY"
+        },
+        {
+          "canonical_name": "ghcn_element_code",
+          "column": "element",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "CONTEXT",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "noaa_ghcn_daily.daily_observations",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "GROUP_KEY"
+        },
+        {
+          "canonical_name": "ghcn_reporting_date",
+          "column": "observation_date",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "REFERENCE_TIME",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "noaa_ghcn_daily.daily_observations",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "REFERENCE_TIME"
+        },
+        {
+          "canonical_name": "ghcn_measurement_value",
+          "column": "value",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "MEASUREMENT",
+          "source_unit_status": "SOURCE_CODED",
+          "table": "noaa_ghcn_daily.daily_observations",
+          "unit_readiness": "CONFIRMED_SOURCE_CODED",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "ghcn_measurement_unit",
+          "column": "unit",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "QUALITY_METADATA",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "noaa_ghcn_daily.daily_observations",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "QUALITY"
+        },
+        {
+          "canonical_name": "ghcn_measurement_flag",
+          "column": "measurement_flag",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "QUALITY_METADATA",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "noaa_ghcn_daily.daily_observations",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "QUALITY"
+        },
+        {
+          "canonical_name": "ghcn_quality_flag",
+          "column": "quality_flag",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "QUALITY_METADATA",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "noaa_ghcn_daily.daily_observations",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "QUALITY"
+        },
+        {
+          "canonical_name": "ghcn_source_flag",
+          "column": "source_flag",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "QUALITY_METADATA",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "noaa_ghcn_daily.daily_observations",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "QUALITY"
+        },
+        {
+          "canonical_name": "ghcn_observation_status",
+          "column": "observation_status",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "QUALITY_METADATA",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "noaa_ghcn_daily.daily_observations",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "QUALITY"
+        }
+      ],
+      "id": "weather_environment",
+      "pending_sources": [],
+      "purpose": "Standalone station-window weather summaries; any later location/batch attachment belongs to separately authorized enrichment.",
+      "reason_codes": [
+        "EXPERIMENT_DEFINITION_PENDING",
+        "PREDICTION_CUTOFF_UNDEFINED",
+        "PREDICTION_TIME_AVAILABILITY_UNVERIFIED",
+        "PREDICTOR_APPROVAL_PENDING",
+        "WEATHER_DAY_BOUNDARIES_UNVERIFIED",
+        "WEATHER_QA_COVERAGE_POLICY_UNDEFINED",
+        "WEATHER_WINDOW_POLICY_UNDEFINED"
+      ],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "BLOCKED"
+    },
+    {
+      "features_emitted": 0,
+      "field_assessments": [
+        {
+          "canonical_name": "dosm_planted_area_ha",
+          "column": "planted_area",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "MEASUREMENT",
+          "source_unit_status": "VERIFIED",
+          "table": "opendosm_crops_state.crops_state",
+          "unit_readiness": "CONFIRMED",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "dosm_planted_area_ha",
+          "column": "planted_area",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "MEASUREMENT",
+          "source_unit_status": "VERIFIED",
+          "table": "opendosm_crops_district_area.crops_district_area",
+          "unit_readiness": "CONFIRMED",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "dosm_annual_reference_date",
+          "column": "reference_date",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "REFERENCE_TIME",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "opendosm_crops_state.crops_state",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "REFERENCE_TIME"
+        },
+        {
+          "canonical_name": "dosm_annual_reference_date",
+          "column": "reference_date",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "REFERENCE_TIME",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "opendosm_crops_district_area.crops_district_area",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "REFERENCE_TIME"
+        }
+      ],
+      "id": "agricultural_area_context",
+      "pending_sources": [],
+      "purpose": "Source-specific area context from independently retained annual tables; no aggregation across geographical levels.",
+      "reason_codes": [
+        "AGRICULTURAL_RELEASE_AVAILABILITY_ABSENT",
+        "EXPERIMENT_DEFINITION_PENDING",
+        "GEOGRAPHICAL_LEVEL_POLICY_UNDEFINED",
+        "PREDICTION_CUTOFF_UNDEFINED",
+        "PREDICTION_TIME_AVAILABILITY_UNVERIFIED",
+        "PREDICTOR_APPROVAL_PENDING"
+      ],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "BLOCKED"
+    },
+    {
+      "features_emitted": 0,
+      "field_assessments": [
+        {
+          "canonical_name": "dosm_production_value",
+          "column": "production",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "MEASUREMENT",
+          "source_unit_status": "PENDING",
+          "table": "opendosm_crops_state.crops_state",
+          "unit_readiness": "PENDING",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "dosm_production_value",
+          "column": "production",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "MEASUREMENT",
+          "source_unit_status": "PENDING",
+          "table": "opendosm_crops_district_production.crops_district_production",
+          "unit_readiness": "PENDING",
+          "use": "INPUT"
+        },
+        {
+          "canonical_name": "dosm_annual_reference_date",
+          "column": "reference_date",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "REFERENCE_TIME",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "opendosm_crops_state.crops_state",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "REFERENCE_TIME"
+        },
+        {
+          "canonical_name": "dosm_annual_reference_date",
+          "column": "reference_date",
+          "field_availability": "PENDING",
+          "historical_availability": "PENDING",
+          "leakage_class": "QUESTIONABLE",
+          "predictor_approved": false,
+          "role": "REFERENCE_TIME",
+          "source_unit_status": "NOT_APPLICABLE",
+          "table": "opendosm_crops_district_production.crops_district_production",
+          "unit_readiness": "NOT_APPLICABLE",
+          "use": "REFERENCE_TIME"
+        }
+      ],
+      "id": "agricultural_production_context",
+      "pending_sources": [],
+      "purpose": "Production context remains pending crop-specific physical-unit confirmation in each source table.",
+      "reason_codes": [
+        "AGRICULTURAL_RELEASE_AVAILABILITY_ABSENT",
+        "EXPERIMENT_DEFINITION_PENDING",
+        "GEOGRAPHICAL_LEVEL_POLICY_UNDEFINED",
+        "PREDICTION_CUTOFF_UNDEFINED",
+        "PREDICTION_TIME_AVAILABILITY_UNVERIFIED",
+        "PREDICTOR_APPROVAL_PENDING",
+        "UNIT_VERIFICATION_PENDING"
+      ],
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "status": "BLOCKED"
+    }
+  ],
+  "family_status_counts": {
+    "BLOCKED": 9,
+    "REQUIRES_IMPLEMENTATION_REVIEW": 2
+  },
+  "feature_tables_written": 0,
+  "features_emitted": 0,
+  "implementation_status": "2 family(ies) cleared evidence review for implementation (pdp_collection_calendar, pdp_product_context); materialization happens in a separate module (pdp_sample_context_features), not this assessor. All other families remain unresolved.",
+  "joins_performed": 0,
+  "labels_created": 0,
+  "m5_evidence_sha256": {
+    "pdp_2024_archive_posting": "4a12e9514b603819ddf03e9339244ca7738a3d9777a92db40e097227b155f423"
+  },
+  "milestone": "M5",
+  "pending_sources": {
+    "fda_inspections": {
+      "mappings": {},
+      "status": "raw inspection records not yet acquired"
+    },
+    "fsis_raw_poultry": {
+      "mappings": {},
+      "status": "official source confirmed, raw file not yet acquired"
+    }
+  },
+  "runtime_dependencies_added": [],
+  "s390x_executed": false,
+  "scope_sha256": "caf77e535684747105ebdf5840b3f2e90a40019cd72728c2b263c9adbc7530d5",
+  "status": "PARTIAL",
+  "unmet_requirement_definitions": {
+    "AGRICULTURAL_RELEASE_AVAILABILITY_ABSENT": "Annual reference years (district 2017; state 2014\u20132024) are not release dates; no as-of publication/version evidence.",
+    "BATCH_SENSOR_SERIES_ABSENT": "No acquired eligible table has a genuine batch-linked storage/transport temperature/humidity series with sensor timestamps.",
+    "COMPARABLE_TEST_POLICY_UNDEFINED": "No approved source/analyte/program/re-extraction comparability and tested denominator policy for history.",
+    "EXPIRY_SHELF_METADATA_ABSENT": "No verified expiry date, retail arrival or shelf-life record is present.",
+    "FOCAL_SAMPLE_EXCLUSION_POLICY_UNDEFINED": "History must exclude the focal sample and related duplicate/re-extraction records using explicit identity and timing rules.",
+    "GEOGRAPHICAL_LEVEL_POLICY_UNDEFINED": "National/state totals overlap; district keys/conflicts and future geographical applicability require explicit policy.",
+    "HISTORICAL_RECALL_FIELD_VERSIONS_ABSENT": "Current snapshot dates and classification/status do not prove historical field versions; original download provenance remains incomplete.",
+    "HISTORY_WINDOW_POLICY_UNDEFINED": "History event grain, strict event+availability cutoffs and window boundaries remain undefined.",
+    "INSPECTION_FAILURE_POLICY_UNDEFINED": "No approved NAI/VAI/OAI failure interpretation, project-area deduplication and public-availability policy.",
+    "MISSINGNESS_SEMANTICS_POLICY_UNDEFINED": "Decide unknown/not-applicable/not-measured separately using pre-cutoff evidence; do not encode analytical ND/NP censoring as a predictor.",
+    "PRODUCT_STAGE_TEMPERATURE_POLICY_ABSENT": "No approved product/category/stage thresholds or their effective dates; no universal safe temperature may be substituted.",
+    "SENSOR_QA_GAP_POLICY_UNDEFINED": "Sensor validation, interpolation, coverage and maximum-gap rules are not defined.",
+    "SUPPLY_CHAIN_ENDPOINTS_ABSENT": "Harvest/processing/dispatch/arrival timestamps and verified batch/shipment identities are absent from the observed tables.",
+    "TEST_RESULT_AVAILABILITY_ABSENT": "Collection dates do not establish when each test result was available; FSIS samples are also not acquired.",
+    "VERIFIED_RECALL_ENTITY_LINKAGE_ABSENT": "Recalling-firm text is not a verified supplier/facility entity; no name-based cross-source matching allowed.",
+    "VERIFIED_SUPPLIER_FACILITY_ID_ABSENT": "M4 explicitly has no supplier/farm/factory crosswalk; PDP SOURCE_ID is a suffix and LAB is an analytical laboratory.",
+    "WEATHER_DAY_BOUNDARIES_UNVERIFIED": "Daily reporting date is not a proven prediction-time measurement interval/timezone or first-publication time.",
+    "WEATHER_QA_COVERAGE_POLICY_UNDEFINED": "No approved treatment for QFLAG, MFLAG, source semantics, absent dates or -9999 gaps; missing must not become zero.",
+    "WEATHER_WINDOW_POLICY_UNDEFINED": "No approved station-window endpoint, period, completed-day rules or heat/rain threshold policy."
+  }
+}

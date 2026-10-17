@@ -1,0 +1,383 @@
+{
+  "milestone": "M5",
+  "scope": "Feature readiness assessment only; no row-level feature materialization authorized by this config.",
+  "source_contract_sha256": "d7fce7156f82a1dbded326f672c9fd678a95f2c37b918d423c73bed714de29a1",
+  "decision_contract": {
+    "experiment_definition": "pdp_2024_sample_context_retrospective: Evaluate 2024 PDP sample-record context fields (native commodity/category/origin/variety/claim codes, sample-unit count and collection-calendar date) as retrospective study inputs for the publicly released 2024 cohort. No chemical-outcome, recall or inspection target is defined or created by this experiment; usda_pdp.results analytical fields remain excluded as label evidence under their existing M4 OUTCOME_EVIDENCE/LABEL classification, independent of this cutoff.",
+    "prediction_cutoff": "2025-12-23",
+    "prediction_cutoff_precision": "DATE (calendar day; the official posting record states a date only, no time-of-day)",
+    "applies_to_families": ["pdp_product_context", "pdp_collection_calendar", "pdp_input_missingness"],
+    "availability_evidence": {
+      "source": "USDA Agricultural Marketing Service, official dataset page 'PDP Databases and Annual Summaries'",
+      "url": "https://www.ams.usda.gov/datasets/pdp/pdpdata",
+      "quoted_text": "2024 Data ZIP File - 10.1MB - Posted on 12/23/2025",
+      "fetched_at_utc": "2026-10-17T07:37:00+00:00",
+      "evidence_path": "reports/m5_evidence/usda_ams_pdp_databases_page.md",
+      "evidence_sha256": "4a12e9514b603819ddf03e9339244ca7738a3d9777a92db40e097227b155f423",
+      "interpretation": "PDP24Samples.txt and PDP24Results.txt are both members of the single pinned 2024PDPDatabase.zip archive (see configs/source_contracts.json usda_pdp.samples/results source.artifacts). AMS records exactly one public posting date for that whole archive, 2025-12-23, with no earlier publication evidence for either member. This establishes a verified upper bound: every usda_pdp.samples field became publicly available no earlier than 2025-12-23, which is at/before the documented prediction_cutoff. It does not show sample-context fields were available earlier than analytical result fields, so it cannot and does not justify treating any usda_pdp.results field as a predictor."
+    }
+  },
+  "materialize_features": false,
+  "joins_authorized": false,
+  "labels_authorized": false,
+  "m5_evidence": {
+    "pdp_2024_archive_posting": {
+      "source": "USDA Agricultural Marketing Service, official dataset page 'PDP Databases and Annual Summaries'",
+      "url": "https://www.ams.usda.gov/datasets/pdp/pdpdata",
+      "quoted_text": "2024 Data ZIP File - 10.1MB - Posted on 12/23/2025",
+      "fetched_at_utc": "2026-10-17T07:37:00+00:00",
+      "evidence_path": "reports/m5_evidence/usda_ams_pdp_databases_page.md",
+      "evidence_sha256": "4a12e9514b603819ddf03e9339244ca7738a3d9777a92db40e097227b155f423"
+    }
+  },
+  "m5_verified_tables": [
+    {
+      "table": "usda_pdp.samples",
+      "available_at": "2025-12-23",
+      "evidence_ref": "pdp_2024_archive_posting",
+      "reason": "Every usda_pdp.samples field ships inside the single archive posted on this date; no earlier public posting is evidenced."
+    }
+  ],
+  "m5_verified_inputs": [
+    {"table": "usda_pdp.samples", "column": "commod", "available_at": "2025-12-23", "evidence_ref": "pdp_2024_archive_posting", "predictor_justification": "Native commodity code; M4 role=CONTEXT, not OUTCOME_EVIDENCE/RETROSPECTIVE_CONTEXT/IDENTIFIER/LINEAGE."},
+    {"table": "usda_pdp.samples", "column": "commtype", "available_at": "2025-12-23", "evidence_ref": "pdp_2024_archive_posting", "predictor_justification": "Native commodity-form code; M4 role=CONTEXT."},
+    {"table": "usda_pdp.samples", "column": "origin", "available_at": "2025-12-23", "evidence_ref": "pdp_2024_archive_posting", "predictor_justification": "Domestic/import/unknown origin code; M4 role=CONTEXT."},
+    {"table": "usda_pdp.samples", "column": "country", "available_at": "2025-12-23", "evidence_ref": "pdp_2024_archive_posting", "predictor_justification": "Import-origin country code; M4 role=CONTEXT; null remains null, not imputed."},
+    {"table": "usda_pdp.samples", "column": "variety", "available_at": "2025-12-23", "evidence_ref": "pdp_2024_archive_posting", "predictor_justification": "Publisher free-text variety description; M4 role=CONTEXT."},
+    {"table": "usda_pdp.samples", "column": "claim", "available_at": "2025-12-23", "evidence_ref": "pdp_2024_archive_posting", "predictor_justification": "Label claim code, not a laboratory finding; M4 role=CONTEXT."},
+    {"table": "usda_pdp.samples", "column": "quantity", "available_at": "2025-12-23", "evidence_ref": "pdp_2024_archive_posting", "predictor_justification": "Sample unit count; M4 role=CONTEXT; unit already VERIFIED (count_individual_sample_units)."},
+    {"table": "usda_pdp.samples", "column": "collection_date", "available_at": "2025-12-23", "evidence_ref": "pdp_2024_archive_posting", "predictor_justification": "Validated collection calendar date; M4 role=REFERENCE_TIME, used only to derive deterministic calendar-context features, not assay timing."}
+  ],
+  "unmet_requirement_definitions": {
+    "MISSINGNESS_SEMANTICS_POLICY_UNDEFINED": "Decide unknown/not-applicable/not-measured separately using pre-cutoff evidence; do not encode analytical ND/NP censoring as a predictor.",
+    "BATCH_SENSOR_SERIES_ABSENT": "No acquired eligible table has a genuine batch-linked storage/transport temperature/humidity series with sensor timestamps.",
+    "PRODUCT_STAGE_TEMPERATURE_POLICY_ABSENT": "No approved product/category/stage thresholds or their effective dates; no universal safe temperature may be substituted.",
+    "SENSOR_QA_GAP_POLICY_UNDEFINED": "Sensor validation, interpolation, coverage and maximum-gap rules are not defined.",
+    "SUPPLY_CHAIN_ENDPOINTS_ABSENT": "Harvest/processing/dispatch/arrival timestamps and verified batch/shipment identities are absent from the observed tables.",
+    "EXPIRY_SHELF_METADATA_ABSENT": "No verified expiry date, retail arrival or shelf-life record is present.",
+    "VERIFIED_SUPPLIER_FACILITY_ID_ABSENT": "M4 explicitly has no supplier/farm/factory crosswalk; PDP SOURCE_ID is a suffix and LAB is an analytical laboratory.",
+    "TEST_RESULT_AVAILABILITY_ABSENT": "Collection dates do not establish when each test result was available; FSIS samples are also not acquired.",
+    "COMPARABLE_TEST_POLICY_UNDEFINED": "No approved source/analyte/program/re-extraction comparability and tested denominator policy for history.",
+    "FOCAL_SAMPLE_EXCLUSION_POLICY_UNDEFINED": "History must exclude the focal sample and related duplicate/re-extraction records using explicit identity and timing rules.",
+    "VERIFIED_RECALL_ENTITY_LINKAGE_ABSENT": "Recalling-firm text is not a verified supplier/facility entity; no name-based cross-source matching allowed.",
+    "HISTORICAL_RECALL_FIELD_VERSIONS_ABSENT": "Current snapshot dates and classification/status do not prove historical field versions; original download provenance remains incomplete.",
+    "HISTORY_WINDOW_POLICY_UNDEFINED": "History event grain, strict event+availability cutoffs and window boundaries remain undefined.",
+    "INSPECTION_FAILURE_POLICY_UNDEFINED": "No approved NAI/VAI/OAI failure interpretation, project-area deduplication and public-availability policy.",
+    "WEATHER_WINDOW_POLICY_UNDEFINED": "No approved station-window endpoint, period, completed-day rules or heat/rain threshold policy.",
+    "WEATHER_DAY_BOUNDARIES_UNVERIFIED": "Daily reporting date is not a proven prediction-time measurement interval/timezone or first-publication time.",
+    "WEATHER_QA_COVERAGE_POLICY_UNDEFINED": "No approved treatment for QFLAG, MFLAG, source semantics, absent dates or -9999 gaps; missing must not become zero.",
+    "AGRICULTURAL_RELEASE_AVAILABILITY_ABSENT": "Annual reference years (district 2017; state 2014\u20132024) are not release dates; no as-of publication/version evidence.",
+    "GEOGRAPHICAL_LEVEL_POLICY_UNDEFINED": "National/state totals overlap; district keys/conflicts and future geographical applicability require explicit policy."
+  },
+  "families": [
+    {
+      "id": "pdp_product_context",
+      "purpose": "Potential product/category/origin/sample-unit predictors from the sample table, preserving native codes.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [
+        {
+          "table": "usda_pdp.samples",
+          "column": "commod",
+          "use": "INPUT"
+        },
+        {
+          "table": "usda_pdp.samples",
+          "column": "commtype",
+          "use": "INPUT"
+        },
+        {
+          "table": "usda_pdp.samples",
+          "column": "origin",
+          "use": "INPUT"
+        },
+        {
+          "table": "usda_pdp.samples",
+          "column": "country",
+          "use": "INPUT"
+        },
+        {
+          "table": "usda_pdp.samples",
+          "column": "variety",
+          "use": "INPUT"
+        },
+        {
+          "table": "usda_pdp.samples",
+          "column": "claim",
+          "use": "INPUT"
+        },
+        {
+          "table": "usda_pdp.samples",
+          "column": "quantity",
+          "use": "INPUT"
+        }
+      ],
+      "unmet_requirements": [],
+      "pending_sources": []
+    },
+    {
+      "id": "pdp_collection_calendar",
+      "purpose": "Assess collection-date context only; existing M2 year/month/day fields are not new M5 features.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [
+        {
+          "table": "usda_pdp.samples",
+          "column": "collection_date",
+          "use": "INPUT"
+        }
+      ],
+      "unmet_requirements": [],
+      "pending_sources": []
+    },
+    {
+      "id": "pdp_input_missingness",
+      "purpose": "Potential missingness indicators only for genuine pre-cutoff sample inputs; no assay-censoring proxy.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [
+        {
+          "table": "usda_pdp.samples",
+          "column": "country",
+          "use": "INPUT"
+        },
+        {
+          "table": "usda_pdp.samples",
+          "column": "quantity",
+          "use": "INPUT"
+        },
+        {
+          "table": "usda_pdp.samples",
+          "column": "growst",
+          "use": "INPUT"
+        },
+        {
+          "table": "usda_pdp.samples",
+          "column": "packst",
+          "use": "INPUT"
+        }
+      ],
+      "unmet_requirements": [
+        "MISSINGNESS_SEMANTICS_POLICY_UNDEFINED"
+      ],
+      "pending_sources": []
+    },
+    {
+      "id": "cold_chain_temperature",
+      "purpose": "Temperature exposure/statistics/excursions for a real batch-linked product/stage series. NOAA weather is not this series.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [],
+      "unmet_requirements": [
+        "BATCH_SENSOR_SERIES_ABSENT",
+        "PRODUCT_STAGE_TEMPERATURE_POLICY_ABSENT",
+        "SENSOR_QA_GAP_POLICY_UNDEFINED"
+      ],
+      "pending_sources": []
+    },
+    {
+      "id": "supply_chain_timing",
+      "purpose": "Elapsed-stage, shelf and expiry durations require real, pre-cutoff endpoints.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [],
+      "unmet_requirements": [
+        "SUPPLY_CHAIN_ENDPOINTS_ABSENT",
+        "EXPIRY_SHELF_METADATA_ABSENT"
+      ],
+      "pending_sources": []
+    },
+    {
+      "id": "supplier_facility_test_history",
+      "purpose": "Prior comparable tests for a verified supplier/facility. Sample IDs, collection sites and labs are not those entities.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [
+        {
+          "table": "usda_pdp.results",
+          "column": "sample_pk",
+          "use": "GROUP_KEY"
+        },
+        {
+          "table": "usda_pdp.results",
+          "column": "mean",
+          "use": "PRIOR_OUTCOME"
+        }
+      ],
+      "unmet_requirements": [
+        "VERIFIED_SUPPLIER_FACILITY_ID_ABSENT",
+        "TEST_RESULT_AVAILABILITY_ABSENT",
+        "COMPARABLE_TEST_POLICY_UNDEFINED",
+        "FOCAL_SAMPLE_EXCLUSION_POLICY_UNDEFINED"
+      ],
+      "pending_sources": []
+    },
+    {
+      "id": "recall_history",
+      "purpose": "Prior unique available recall events for a verified entity; no current status backfill.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [
+        {
+          "table": "openfda_enforcement.recalls",
+          "column": "recalling_firm",
+          "use": "GROUP_KEY"
+        },
+        {
+          "table": "openfda_enforcement.recalls",
+          "column": "event_id",
+          "use": "GROUP_KEY"
+        },
+        {
+          "table": "openfda_enforcement.recalls",
+          "column": "recall_number",
+          "use": "GROUP_KEY"
+        },
+        {
+          "table": "openfda_enforcement.recalls",
+          "column": "recall_initiation_date",
+          "use": "REFERENCE_TIME"
+        },
+        {
+          "table": "openfda_enforcement.recalls",
+          "column": "report_date",
+          "use": "REFERENCE_TIME"
+        }
+      ],
+      "unmet_requirements": [
+        "VERIFIED_RECALL_ENTITY_LINKAGE_ABSENT",
+        "HISTORICAL_RECALL_FIELD_VERSIONS_ABSENT",
+        "HISTORY_WINDOW_POLICY_UNDEFINED"
+      ],
+      "pending_sources": []
+    },
+    {
+      "id": "inspection_history",
+      "purpose": "Facility inspection history requires actual official records, identities, availability and classification policy.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [],
+      "unmet_requirements": [
+        "VERIFIED_SUPPLIER_FACILITY_ID_ABSENT",
+        "INSPECTION_FAILURE_POLICY_UNDEFINED"
+      ],
+      "pending_sources": [
+        "fda_inspections"
+      ]
+    },
+    {
+      "id": "weather_environment",
+      "purpose": "Standalone station-window weather summaries; any later location/batch attachment belongs to separately authorized enrichment.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [
+        {
+          "table": "noaa_ghcn_daily.daily_observations",
+          "column": "station_id",
+          "use": "GROUP_KEY"
+        },
+        {
+          "table": "noaa_ghcn_daily.daily_observations",
+          "column": "element",
+          "use": "GROUP_KEY"
+        },
+        {
+          "table": "noaa_ghcn_daily.daily_observations",
+          "column": "observation_date",
+          "use": "REFERENCE_TIME"
+        },
+        {
+          "table": "noaa_ghcn_daily.daily_observations",
+          "column": "value",
+          "use": "INPUT"
+        },
+        {
+          "table": "noaa_ghcn_daily.daily_observations",
+          "column": "unit",
+          "use": "QUALITY"
+        },
+        {
+          "table": "noaa_ghcn_daily.daily_observations",
+          "column": "measurement_flag",
+          "use": "QUALITY"
+        },
+        {
+          "table": "noaa_ghcn_daily.daily_observations",
+          "column": "quality_flag",
+          "use": "QUALITY"
+        },
+        {
+          "table": "noaa_ghcn_daily.daily_observations",
+          "column": "source_flag",
+          "use": "QUALITY"
+        },
+        {
+          "table": "noaa_ghcn_daily.daily_observations",
+          "column": "observation_status",
+          "use": "QUALITY"
+        }
+      ],
+      "unmet_requirements": [
+        "WEATHER_WINDOW_POLICY_UNDEFINED",
+        "WEATHER_DAY_BOUNDARIES_UNVERIFIED",
+        "WEATHER_QA_COVERAGE_POLICY_UNDEFINED"
+      ],
+      "pending_sources": []
+    },
+    {
+      "id": "agricultural_area_context",
+      "purpose": "Source-specific area context from independently retained annual tables; no aggregation across geographical levels.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [
+        {
+          "table": "opendosm_crops_state.crops_state",
+          "column": "planted_area",
+          "use": "INPUT"
+        },
+        {
+          "table": "opendosm_crops_district_area.crops_district_area",
+          "column": "planted_area",
+          "use": "INPUT"
+        },
+        {
+          "table": "opendosm_crops_state.crops_state",
+          "column": "reference_date",
+          "use": "REFERENCE_TIME"
+        },
+        {
+          "table": "opendosm_crops_district_area.crops_district_area",
+          "column": "reference_date",
+          "use": "REFERENCE_TIME"
+        }
+      ],
+      "unmet_requirements": [
+        "AGRICULTURAL_RELEASE_AVAILABILITY_ABSENT",
+        "GEOGRAPHICAL_LEVEL_POLICY_UNDEFINED"
+      ],
+      "pending_sources": []
+    },
+    {
+      "id": "agricultural_production_context",
+      "purpose": "Production context remains pending crop-specific physical-unit confirmation in each source table.",
+      "scope": "Evaluate each referenced source table independently. No joined feature vector is authorized.",
+      "references": [
+        {
+          "table": "opendosm_crops_state.crops_state",
+          "column": "production",
+          "use": "INPUT"
+        },
+        {
+          "table": "opendosm_crops_district_production.crops_district_production",
+          "column": "production",
+          "use": "INPUT"
+        },
+        {
+          "table": "opendosm_crops_state.crops_state",
+          "column": "reference_date",
+          "use": "REFERENCE_TIME"
+        },
+        {
+          "table": "opendosm_crops_district_production.crops_district_production",
+          "column": "reference_date",
+          "use": "REFERENCE_TIME"
+        }
+      ],
+      "unmet_requirements": [
+        "AGRICULTURAL_RELEASE_AVAILABILITY_ABSENT",
+        "GEOGRAPHICAL_LEVEL_POLICY_UNDEFINED"
+      ],
+      "pending_sources": []
+    }
+  ]
+}

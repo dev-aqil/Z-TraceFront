@@ -40,7 +40,7 @@ Decision engine, ML risk model training, Cytoscape graph visualization (dependen
 
 The data work prepares reproducible source-specific observations for Person B's modeling: ingestion → cleaning → features → validation → training-table handoff. Biological contamination, chemical exceedance and spoilage/quality remain separate prediction tasks. Recalls and inspection classes are contextual signals, not laboratory labels. Raw inputs stay immutable; operational demos and synthetic data do not establish predictive accuracy.
 
-**Current milestone: M2 COMPLETE for the six eligible source entries; outputs are NOT MODEL-READY.** M1 remains partial: FSIS is **official source confirmed, raw file not yet acquired**, and FDA inspection records remain pending. PDP 2024, openFDA, one NOAA station history and three OpenDOSM crop tables have independently cleaned interim tables and rejection/quality evidence. The [M2 report](reports/m2_cleaning_report.md), [summary](reports/m2_cleaning_summary.json) and [validation](reports/m2_validation.json) record actual results. The [M1 inventory](reports/dataset_inventory.md) and [source manifest](reports/m1_source_manifest.json) remain frozen acquisition evidence. No predictive features, enrichment joins, invented contamination labels or model training were performed.
+**Current milestone: M5 PARTIAL — readiness assessment complete; feature implementation remains blocked. Data remains NOT MODEL-READY.** M1 remains partial: FSIS is **official source confirmed, raw file not yet acquired**, and FDA inspection records remain pending. PDP 2024, openFDA, one NOAA station history and three OpenDOSM crop tables have independently cleaned interim tables and rejection/quality evidence. The [M2 report](reports/m2_cleaning_report.md), [summary](reports/m2_cleaning_summary.json) and [validation](reports/m2_validation.json) record cleaning results. The [M3 report](reports/m3_eda_report.md), [profiles](reports/m3_eda_summary.json) and [visuals](reports/m3_eda_visuals.html) audit observed distributions and unresolved quality issues. The [M4 source mappings](configs/source_contracts.json) and [dictionary](reports/m4_data_dictionary.md) document proposed names and semantics without rewriting tables. The [M1 inventory](reports/dataset_inventory.md) and [source manifest](reports/m1_source_manifest.json) remain frozen acquisition evidence. No predictive features, enrichment joins, invented contamination labels or model training were performed.
 
 | Path | Purpose |
 | --- | --- |
@@ -138,6 +138,42 @@ PYTHONPATH=src python -m tracefront_data.public_sources inspect --manifest data/
 
 With the frozen raw store present, `PYTHONPATH=src python -m tracefront_data.public_sources acquire` revalidates captured artifacts and retries pending public downloads, preserving original retrieval clocks. `--source usda_pdp` restricts acquisition to that source. Changing source/version requires deliberate config and dictionary review; the PDP schema is pinned to the reviewed archive hash.
 
-M2 now handles only the eligible acquired cohort; FSIS and FDA inspection records remain excluded until acquired and reviewed. M3 will analyze distributions; M4 freezes verified mappings; M5 builds features; M6 enriches; M7 verifies leakage/quality; M8 produces separate Parquet training tables and a modeling handoff. M3–M8 have not begun.
+M2 handles only the eligible acquired cohort; FSIS and FDA inspection records remain excluded until acquired and reviewed. M3 audits distributions; M4 declares reviewed source mappings and explicit holds; M5 assesses and builds only supported features; M6 enriches; M7 verifies leakage/quality; M8 produces separate Parquet training tables and a modeling handoff. M5 has completed its readiness assessment; M6–M8 have not begun.
+
+### M3 — Source-specific EDA and quality audit
+
+```bash
+PYTHONPATH=src python -m tracefront_data.eda
+PYTHONPATH=src .venv/bin/python -m pytest -q tests
+```
+
+The command verifies frozen M1 artifacts, M2 producer fingerprints, all M2 output checksums and full typed readback before profiling all seven tables. It checks the raw/output bytes again after the audit. It writes only `reports/m3_eda_report.md`, `reports/m3_eda_summary.json` and the standalone `reports/m3_eda_visuals.html`; the HTML opens locally without a server or external assets. No source tables are rewritten. Identical code and verified inputs produce identical reports.
+
+Profiles preserve explicit null/empty/blank-code distinctions and include categorical cardinality, unit-specific numeric distributions, temporal coverage, PDP MEAN/annotation/extraction diagnostics, NOAA flag/gap audits, recall record/event counts and rejected OpenDOSM conflicts. Categories above 10,000 distinct values report a lower bound without biased prefix rankings; numeric distribution caps are explicit. Free-text values are not ranked as categories. These are descriptive record counts, not contamination prevalence or model features. The standard-library runtime adds no native dependency and retains LinuxONE portability; actual s390x execution is still pending.
+
+Read the [M3 scientific quality review](reports/m3_quality_findings.md) alongside the generated profiles. It explains the observed assay/event dependence, historical classification-date concern, NOAA coverage/flags, district conflicts and the unresolved production-unit interpretation for OpenDOSM flowers. Publisher-declared units in the profiles do not establish scientific comparability across crops.
+
+### M4 — Source-specific canonical contracts and dictionaries
+
+```bash
+PYTHONPATH=src python -m tracefront_data.contracts
+PYTHONPATH=src python -m tracefront_data.contracts --check-only
+```
+
+The [source registry](configs/source_contracts.json) covers all 106 columns across seven M2 tables and remains separate from the [future batch design](configs/canonical_schema.json). The command validates upstream fingerprints and actual M2 sidecars, then renders the [dictionary](reports/m4_data_dictionary.md), [CSV](reports/m4_data_dictionary.csv) and [schema summary](reports/m4_schema_summary.json). Read the [M4 decisions and remaining holds](reports/m4_schema_report.md) before using proposed names. It performs no data renames, source joins, feature generation or label materialization.
+
+Exact decimals, date precision, native code vocabularies, scoped identifiers and missingness semantics remain explicit. Historical availability stays pending for every source; both OpenDOSM production fields have pending physical units. Predictor allowlists are empty. Source mappings do not establish verified supplier/farm/factory relationships. Python 3.11+ standard library only; no new native dependency. Outputs remain **NOT MODEL-READY**.
+
+### M5 — Feature readiness assessment and cleared source-specific features
+
+```bash
+PYTHONPATH=src python -m tracefront_data.feature_readiness
+PYTHONPATH=src python -m tracefront_data.pdp_sample_context_features
+PYTHONPATH=src python -m tracefront_data.pdp_sample_context_features --verify-only
+```
+
+The [M5 report](reports/m5_feature_report.md) and [machine-readable assessment](reports/m5_feature_readiness.json) assess 11 feature families against the pinned M4 contract. The [scope file](configs/m5_feature_scope.json) records the one documented experiment (`pdp_2024_sample_context_retrospective`), its prediction cutoff (2025-12-23, DATE precision) and the official availability evidence (USDA AMS posting record for the pinned 2024 PDP Database ZIP; reproduced in [reports/m5_evidence/](reports/m5_evidence/)). Exactly two families — `pdp_product_context` and `pdp_collection_calendar` — clear all prerequisites; the other nine stay blocked, with `pdp_input_missingness` still pending its missingness-semantics policy and `growst`/`packst` availability evidence, and the `usda_pdp.results` analytical fields excluded outright as label evidence.
+
+The assessor writes reports only. The separate materialization command re-checks the assessment, re-verifies the pinned M2 `usda_pdp.samples` bytes against `reports/m2_cleaning_summary.json`, then writes one un-joined, unlabeled, source-specific feature table (10 features plus lineage columns) under [data/interim/m5_v1/](data/interim/m5_v1/) with what was written described in [its own report](reports/m5_pdp_sample_context_features_report.md). Native codes pass through verbatim, nulls remain null (no imputation), the three calendar features are deterministic derivations of `pdp_collection_date` only, and no cross-source join, label, missingness indicator or model output is produced. The [validation record](reports/m5_validation.json) documents tests and upstream preservation. Continue M5 only after further real cutoff/availability and source-policy evidence; all outputs remain **NOT MODEL-READY**.
 
 No public dataset currently supplies a verified complete farm-to-retail batch trajectory. Keep unknowns explicit, avoid future/publication-time leakage, report sampling/domain limitations and avoid interpreting an uncalibrated score as the probability that a batch is safe or contaminated.

@@ -1,0 +1,144 @@
+{
+  "artifacts": {
+    "m2_samples_input": {
+      "path": "data/interim/m2_v1/usda_pdp/samples.csv",
+      "sha256": "0d3d5bca6390f4cec5aed0fb35c953a10f996e56546ad2fe36dc1a6c138b979c"
+    },
+    "output_directory": "data/interim/m5_v1",
+    "outputs": {
+      "pdp_sample_context_features.csv": {
+        "sha256": "23e7e6db133baf2a9097ff839044c7bcf6df73814749a784ec423800d942b51a",
+        "size_bytes": 419329
+      },
+      "pdp_sample_context_features.schema.json": {
+        "sha256": "7b9d06e67f829e1eeef7cee62ed58e814029baca837492f5ad4018395631493a",
+        "size_bytes": 6255
+      }
+    }
+  },
+  "clean_rows": 9872,
+  "data_status": "NOT MODEL-READY",
+  "experiment_definition": "pdp_2024_sample_context_retrospective: Evaluate 2024 PDP sample-record context fields (native commodity/category/origin/variety/claim codes, sample-unit count and collection-calendar date) as retrospective study inputs for the publicly released 2024 cohort. No chemical-outcome, recall or inspection target is defined or created by this experiment; usda_pdp.results analytical fields remain excluded as label evidence under their existing M4 OUTCOME_EVIDENCE/LABEL classification, independent of this cutoff.",
+  "feature_null_counts": {
+    "pdp_import_origin_country_code": 6028,
+    "pdp_sample_unit_count": 2046
+  },
+  "feature_tables_written": 1,
+  "features": [
+    {
+      "datatype": "string",
+      "derivation": "verbatim native PDP commodity code",
+      "family": "pdp_product_context",
+      "feature": "pdp_commodity_code",
+      "source_column": "commod",
+      "unit": "not_applicable"
+    },
+    {
+      "datatype": "string",
+      "derivation": "verbatim native PDP commodity-form code",
+      "family": "pdp_product_context",
+      "feature": "pdp_commodity_type_code",
+      "source_column": "commtype",
+      "unit": "not_applicable"
+    },
+    {
+      "datatype": "string",
+      "derivation": "verbatim native PDP origin code",
+      "family": "pdp_product_context",
+      "feature": "pdp_origin_code",
+      "source_column": "origin",
+      "unit": "not_applicable"
+    },
+    {
+      "datatype": "string",
+      "derivation": "verbatim native PDP import-origin country code; null is not imputed",
+      "family": "pdp_product_context",
+      "feature": "pdp_import_origin_country_code",
+      "source_column": "country",
+      "unit": "not_applicable"
+    },
+    {
+      "datatype": "string",
+      "derivation": "verbatim publisher free-text variety description",
+      "family": "pdp_product_context",
+      "feature": "pdp_variety_text",
+      "source_column": "variety",
+      "unit": "not_applicable"
+    },
+    {
+      "datatype": "string",
+      "derivation": "verbatim native PDP label-claim code",
+      "family": "pdp_product_context",
+      "feature": "pdp_product_claim_code",
+      "source_column": "claim",
+      "unit": "not_applicable"
+    },
+    {
+      "datatype": "integer",
+      "derivation": "verbatim nonnegative integer sample-unit count; null is not zero",
+      "family": "pdp_product_context",
+      "feature": "pdp_sample_unit_count",
+      "source_column": "quantity",
+      "unit": "count_individual_sample_units"
+    },
+    {
+      "datatype": "integer",
+      "derivation": "ISO weekday (1=Monday..7=Sunday) of the validated collection date",
+      "family": "pdp_collection_calendar",
+      "feature": "pdp_collection_dow_iso",
+      "source_column": "collection_date",
+      "unit": "iso_weekday_1_monday_7_sunday"
+    },
+    {
+      "datatype": "integer",
+      "derivation": "day of year (1..366) of the validated collection date",
+      "family": "pdp_collection_calendar",
+      "feature": "pdp_collection_doy",
+      "source_column": "collection_date",
+      "unit": "day_of_year_1_366"
+    },
+    {
+      "datatype": "integer",
+      "derivation": "ISO week number (1..53) of the validated collection date",
+      "family": "pdp_collection_calendar",
+      "feature": "pdp_collection_isoweek",
+      "source_column": "collection_date",
+      "unit": "iso_week_number_1_53"
+    }
+  ],
+  "features_emitted": 10,
+  "joins_performed": 0,
+  "labels_created": 0,
+  "lineage_columns": [
+    "pdp_source_row_number",
+    "pdp_sample_id"
+  ],
+  "m2_samples_clean_rows": 9872,
+  "m5_evidence": {
+    "pdp_2024_archive_posting": {
+      "evidence_path": "reports/m5_evidence/usda_ams_pdp_databases_page.md",
+      "evidence_sha256": "4a12e9514b603819ddf03e9339244ca7738a3d9777a92db40e097227b155f423",
+      "fetched_at_utc": "2026-10-17T07:37:00+00:00",
+      "quoted_text": "2024 Data ZIP File - 10.1MB - Posted on 12/23/2025",
+      "source": "USDA Agricultural Marketing Service, official dataset page 'PDP Databases and Annual Summaries'",
+      "url": "https://www.ams.usda.gov/datasets/pdp/pdpdata"
+    }
+  },
+  "materialized_families": [
+    "pdp_collection_calendar",
+    "pdp_product_context"
+  ],
+  "milestone": "M5",
+  "not_performed": [
+    "cross-source joins",
+    "label creation",
+    "missingness-indicator features",
+    "model training",
+    "M6 enrichment",
+    "M7 leakage audit",
+    "M8 modeling handoff"
+  ],
+  "prediction_cutoff": "2025-12-23",
+  "prediction_cutoff_precision": "DATE (calendar day; the official posting record states a date only, no time-of-day)",
+  "status": "PARTIAL"
+}

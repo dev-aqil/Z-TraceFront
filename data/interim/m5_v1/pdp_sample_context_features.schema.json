@@ -1,0 +1,152 @@
+{
+  "status": "NOT MODEL-READY",
+  "milestone": "M5",
+  "table": "pdp_sample_context_features",
+  "row_granularity": "one feature row per accepted M2 PDP 2024 sample record",
+  "source": {
+    "source_entry": "usda_pdp",
+    "publisher": "USDA Agricultural Marketing Service",
+    "canonical_source_url": "https://www.ams.usda.gov/datasets/pdp/pdpdata",
+    "license": "US public domain under USDA Digital Rights and Copyright policy, except marked third-party material; attribution requested",
+    "intended_ml_role": "DIRECT_LABEL_SOURCE",
+    "contamination_domain": "CHEMICAL",
+    "artifacts": [
+      {
+        "path": "data/raw/usda_pdp/sha256/de916ba119f8d6dd5a4d5596c69b00c476fceeb31a96b1389dd005031c9c4d79/2024PDPDatabase.zip",
+        "sha256": "de916ba119f8d6dd5a4d5596c69b00c476fceeb31a96b1389dd005031c9c4d79",
+        "source_url": "https://www.ams.usda.gov/sites/default/files/media/2024PDPDatabase.zip",
+        "retrieved_at": "2026-10-17T05:55:45.335571+00:00"
+      }
+    ],
+    "archive_member": "PDP24Samples.txt",
+    "source_table": "samples"
+  },
+  "columns": {
+    "pdp_source_row_number": {
+      "datatype": "integer",
+      "role": "lineage",
+      "source_column": "source_row_number",
+      "note": "M2 lineage; not a predictor"
+    },
+    "pdp_sample_id": {
+      "datatype": "string",
+      "role": "lineage",
+      "source_column": "sample_pk",
+      "note": "Release-local grouping key; a lineage column, never a predictor"
+    },
+    "pdp_commodity_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "commod",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP commodity code",
+      "canonical_source_field": "pdp_commodity_code"
+    },
+    "pdp_commodity_type_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "commtype",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP commodity-form code",
+      "canonical_source_field": "pdp_commodity_type_code"
+    },
+    "pdp_origin_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "origin",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP origin code",
+      "canonical_source_field": "pdp_origin_code"
+    },
+    "pdp_import_origin_country_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "country",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP import-origin country code; null is not imputed",
+      "canonical_source_field": "pdp_import_origin_country_code"
+    },
+    "pdp_variety_text": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "variety",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim publisher free-text variety description",
+      "canonical_source_field": "pdp_variety_text"
+    },
+    "pdp_product_claim_code": {
+      "datatype": "string",
+      "role": "feature",
+      "source_column": "claim",
+      "family": "pdp_product_context",
+      "unit": "not_applicable",
+      "derivation": "verbatim native PDP label-claim code",
+      "canonical_source_field": "pdp_product_claim_code"
+    },
+    "pdp_sample_unit_count": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "quantity",
+      "family": "pdp_product_context",
+      "unit": "count_individual_sample_units",
+      "derivation": "verbatim nonnegative integer sample-unit count; null is not zero",
+      "canonical_source_field": "pdp_sample_unit_count"
+    },
+    "pdp_collection_dow_iso": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "collection_date",
+      "family": "pdp_collection_calendar",
+      "unit": "iso_weekday_1_monday_7_sunday",
+      "derivation": "ISO weekday (1=Monday..7=Sunday) of the validated collection date"
+    },
+    "pdp_collection_doy": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "collection_date",
+      "family": "pdp_collection_calendar",
+      "unit": "day_of_year_1_366",
+      "derivation": "day of year (1..366) of the validated collection date"
+    },
+    "pdp_collection_isoweek": {
+      "datatype": "integer",
+      "role": "feature",
+      "source_column": "collection_date",
+      "family": "pdp_collection_calendar",
+      "unit": "iso_week_number_1_53",
+      "derivation": "ISO week number (1..53) of the validated collection date"
+    }
+  },
+  "null_encoding": {
+    "null": "\\N",
+    "empty_string": "non-null empty string",
+    "escape": "Prefix an extra backslash to every non-null value starting with a backslash"
+  },
+  "prediction_context": {
+    "experiment_definition": "pdp_2024_sample_context_retrospective: Evaluate 2024 PDP sample-record context fields (native commodity/category/origin/variety/claim codes, sample-unit count and collection-calendar date) as retrospective study inputs for the publicly released 2024 cohort. No chemical-outcome, recall or inspection target is defined or created by this experiment; usda_pdp.results analytical fields remain excluded as label evidence under their existing M4 OUTCOME_EVIDENCE/LABEL classification, independent of this cutoff.",
+    "prediction_cutoff": "2025-12-23",
+    "prediction_cutoff_precision": "DATE (calendar day; the official posting record states a date only, no time-of-day)",
+    "availability_evidence": {
+      "source": "USDA Agricultural Marketing Service, official dataset page 'PDP Databases and Annual Summaries'",
+      "url": "https://www.ams.usda.gov/datasets/pdp/pdpdata",
+      "quoted_text": "2024 Data ZIP File - 10.1MB - Posted on 12/23/2025",
+      "fetched_at_utc": "2026-10-17T07:37:00+00:00",
+      "evidence_path": "reports/m5_evidence/usda_ams_pdp_databases_page.md",
+      "evidence_sha256": "4a12e9514b603819ddf03e9339244ca7738a3d9777a92db40e097227b155f423"
+    }
+  },
+  "not_performed": [
+    "cross-source joins",
+    "label creation",
+    "missingness-indicator features",
+    "model training",
+    "M6 enrichment",
+    "M7 leakage audit",
+    "M8 modeling handoff"
+  ]
+}

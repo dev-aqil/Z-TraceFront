@@ -1,9 +1,10 @@
 {
-  "schema_version": "0.1.0-draft",
-  "status": "M0 design only; no source adapters or training table exist",
-  "column_definition": "Each column maps to a logical dtype. All source mappings are UNVERIFIED until source dictionaries are inspected. See reports/data_dictionary.md for units, roles and availability.",
+  "schema_version": "0.2.0-design",
+  "status": "Future batch-level design retained; reviewed M4 source-table contracts are separate. No training or mapped source tables materialized.",
+  "column_definition": "Tables below remain future batch/sensor/label/feature proposals. Current acquired fields are mapped only in configs/source_contracts.json and reports/m4_data_dictionary.md; they are not forced into these tables.",
   "null_policy": "Only required columns must be nonnull. Other columns may be unknown, unmeasured or inapplicable; never manufacture values to complete the schema. Preserve missingness reasons in source-specific quality metadata.",
   "time_policy": "Store genuine instants in UTC with original timezone and precision retained. Date-only records remain dates and need conservative availability boundaries. No fabricated intraday precision.",
+  "source_contract_registry": {"path": "configs/source_contracts.json", "version": "1.0.0", "status": "SOURCE_SPECIFIC_DESIGN_ONLY", "predictor_approval": "NONE", "materialization_enabled": false},
   "predictor_allowlist": [],
   "tables": {
     "observations": {
