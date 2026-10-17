@@ -2,7 +2,7 @@
 export type DemoFinding = {
   id: string;
   type: string;
-  severity: "High" | "Medium" | "Low";
+  severity: "High" | "Medium" | "Low" | "Unknown";
   title: string;
   batchId: string;
   shipmentId: string;

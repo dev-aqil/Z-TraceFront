@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getFindings, useAnalysis, withAnalysis } from "@/lib/api";
 import { demoFindings } from "./demo-findings";
+import PredictionResult from "./PredictionResult";
 
 type RevealStage = "dash" | "zero" | "count" | "results";
 
@@ -41,7 +43,14 @@ function FindingIcon({ type }: { type: string }) {
   );
 }
 
+// ?prediction=1 shows a spin-a-sample model run; otherwise the shipment findings of ?analysis=<id> (or the demo).
 export default function AnalysisResultsPage() {
+  const [mode, setMode] = useState<"findings" | "prediction" | null>(null);
+  useEffect(() => setMode(new URLSearchParams(window.location.search).has("prediction") ? "prediction" : "findings"), []);
+  return mode === "prediction" ? <PredictionResult /> : mode === "findings" ? <FindingsResults /> : null;
+}
+
+function FindingsResults() {
   const router = useRouter();
   const leavingRef = useRef(false);
   const [leaving, setLeaving] = useState(false);
@@ -50,6 +59,14 @@ export default function AnalysisResultsPage() {
   const [atBottom, setAtBottom] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [viewport, setViewport] = useState({ width: 1280, height: 800 });
+  const { id: analysisId, data: loaded, error: loadError } = useAnalysis(getFindings, demoFindings);
+  const findings = loaded ?? [];
+  const total = findings.length;
+  const severityCounts = (["High", "Medium", "Low", "Unknown"] as const)
+    .map((level) => [level, findings.filter((finding) => finding.severity === level).length] as const)
+    .filter(([, n]) => n > 0)
+    .map(([level, n]) => `${n} ${level.toLowerCase()}`)
+    .join(" · ");
 
   useEffect(() => {
     const updateViewport = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
@@ -59,8 +76,9 @@ export default function AnalysisResultsPage() {
   }, []);
 
   useEffect(() => {
+    if (!loaded) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setCount(demoFindings.length);
+      setCount(loaded.length);
       setStage("results");
       return;
     }
@@ -70,13 +88,13 @@ export default function AnalysisResultsPage() {
     const tick = (now: number) => {
       const elapsed = now - start;
       if (elapsed >= 2900) {
-        setCount(demoFindings.length);
+        setCount(loaded.length);
         setStage("results");
         return;
       }
       if (elapsed >= 1400) {
         setStage("count");
-        setCount(Math.min(demoFindings.length, Math.floor(((elapsed - 1400) / 1200) * (demoFindings.length + 1))));
+        setCount(Math.min(loaded.length, Math.floor(((elapsed - 1400) / 1200) * (loaded.length + 1))));
       } else if (elapsed >= 400) {
         setStage("zero");
       }
@@ -84,7 +102,7 @@ export default function AnalysisResultsPage() {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [loaded]);
 
   useEffect(() => {
     if (stage !== "results") return;
@@ -122,11 +140,11 @@ export default function AnalysisResultsPage() {
     if (leavingRef.current || stage !== "results") return;
     leavingRef.current = true;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      router.push("/distribution");
+      router.push(withAnalysis("/distribution", analysisId));
       return;
     }
     setLeaving(true);
-  }, [router, stage]);
+  }, [analysisId, router, stage]);
 
   useEffect(() => {
     if (stage !== "results") return;
@@ -209,9 +227,19 @@ export default function AnalysisResultsPage() {
     return { transform: `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0)` };
   }
 
+  if (loadError) {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-white px-6 text-center text-[#0d293b]">
+        <h1 className="text-2xl font-semibold tracking-tight">Findings could not be loaded</h1>
+        <p role="alert" className="max-w-md text-sm leading-6 text-slate-600">{loadError}</p>
+        <Link href="/" className="rounded-lg bg-rose-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700">Upload a file</Link>
+      </main>
+    );
+  }
+
   return (
     <main className={`min-h-dvh bg-white text-[#0d293b] ${leaving ? "analysis-exit-up" : ""}`} onAnimationEnd={(event) => {
-      if (leaving && event.target === event.currentTarget) router.push("/distribution");
+      if (leaving && event.target === event.currentTarget) router.push(withAnalysis("/distribution", analysisId));
     }}>
       {headerVisible && (
         <header aria-hidden={!headerInteractive} className="fixed inset-x-0 top-0 z-20 h-12 border-b border-slate-200 bg-white/95 backdrop-blur-sm" style={{ opacity: progress, pointerEvents: headerInteractive ? "auto" : "none" }}>
@@ -231,11 +259,11 @@ export default function AnalysisResultsPage() {
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-30">
           <div className={`findings-zero ${stage === "dash" ? "findings-zero--dash" : "findings-zero--outline"} ${counting ? "findings-zero--hide" : ""}`} />
           <span className={`findings-count ${counting ? "findings-count--visible" : ""}`} style={{ opacity: counting ? Math.max(0, 1 - progress / 0.6) : 0, transform: `translate(-50%, -50%) translateY(-${offset}px) scale(${1 - progress * 0.6})` }}>{count}</span>
-          <span className={`findings-label ${count === demoFindings.length && counting ? "findings-label--visible" : ""}`} style={{ opacity: count === demoFindings.length && counting ? Math.max(0, 1 - progress / 0.6) : 0, transform: `translate(-50%, -50%) translateY(${110 - offset - progress * 66}px)` }}>Anomalies Found</span>
+          <span className={`findings-label ${count === total && counting ? "findings-label--visible" : ""}`} style={{ opacity: count === total && counting ? Math.max(0, 1 - progress / 0.6) : 0, transform: `translate(-50%, -50%) translateY(${110 - offset - progress * 66}px)` }}>Anomalies Found</span>
       </div>
 
       <nav aria-label="Anomaly icons" aria-hidden={stage !== "results" || progress > 0.35} className="pointer-events-none fixed inset-0 z-30" style={{ opacity: Math.max(0, 1 - progress / 0.35) }}>
-        {demoFindings.map((finding, index) => (
+        {findings.slice(0, bubbleOffsets.length).map((finding, index) => (
           <a key={finding.id} href={`#finding-${finding.id}`} aria-label={finding.type} tabIndex={stage === "results" && progress <= 0.35 ? 0 : -1} className={`absolute left-1/2 top-1/2 ${stage === "results" && progress <= 0.35 ? "pointer-events-auto" : ""}`} style={tilePosition(index)}>
             <span className={`finding-tile ${count > index ? "finding-tile--visible" : ""}`}>
               <FindingIcon type={finding.type} />
@@ -245,7 +273,7 @@ export default function AnalysisResultsPage() {
       </nav>
 
       <section className="relative h-dvh min-h-[560px] bg-white" aria-label="Analysis result">
-        {stage === "results" && <p role="status" className="sr-only">Six anomalies found. Scroll to review the findings.</p>}
+        {stage === "results" && <p role="status" className="sr-only">{total} {total === 1 ? "anomaly" : "anomalies"} found. Scroll to review the findings.</p>}
       </section>
 
       {stage === "results" && progress < 0.25 && (
@@ -260,10 +288,11 @@ export default function AnalysisResultsPage() {
           <div className="mx-auto max-w-6xl px-6 pb-16 pt-5">
             <div data-analysis-reveal className="analysis-content-reveal mb-8 flex flex-wrap items-center justify-between gap-4">
               <h1 id="findings-heading" className="text-3xl font-semibold tracking-tight">Findings to review</h1>
-              <p className="ml-auto whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm">2 high · 3 medium · 1 low</p>
+              {severityCounts && <p className="ml-auto whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm">{severityCounts}</p>}
             </div>
             <div className="space-y-3">
-              {demoFindings.map((finding) => (
+              {total === 0 && <p data-analysis-reveal className="analysis-content-reveal rounded-xl border border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-600">No anomalies were found in this file.</p>}
+              {findings.map((finding) => (
                 <details key={finding.id} id={`finding-${finding.id}`} data-analysis-reveal className="analysis-content-reveal finding-card group scroll-mt-14 rounded-xl border border-slate-200 bg-white">
                   <summary className="finding-summary flex min-h-28 cursor-pointer items-center gap-5 px-5 py-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
                     <span className="w-14 shrink-0 self-center font-mono text-5xl font-light leading-none tracking-tighter text-slate-400">{finding.id}</span>

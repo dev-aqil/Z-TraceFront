@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { finishAnalysis } from "@/lib/api";
 
 const CONNECT_START = 1800;
 const PROGRESS_START = 2000;
@@ -260,7 +261,7 @@ export default function MlProcess() {
   }, []);
 
   useEffect(() => {
-    if (reducedMotion) router.push("/analysis-results");
+    if (reducedMotion) finishAnalysis((href) => router.push(href));
   }, [reducedMotion, router]);
 
   useEffect(() => {
@@ -301,7 +302,7 @@ export default function MlProcess() {
       if (elapsedRef.current < DURATION + COMPLETE_HOLD) {
         frameId = requestAnimationFrame(tick);
       } else {
-        router.push("/analysis-results");
+        finishAnalysis((href) => router.push(href));
       }
     };
 

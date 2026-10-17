@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { startUpload } from "@/lib/api";
+import SpinPanel from "./SpinPanel";
 
 const acceptedTypes = ["csv", "xlsx", "json"];
 const exampleFileName = "supplier_shipments.csv";
@@ -27,6 +29,11 @@ export default function UploadPage() {
   }, [dialogStage]);
 
   useEffect(() => () => pickerTimersRef.current.forEach(clearTimeout), []);
+
+  useEffect(() => {
+    const uploadError = new URLSearchParams(window.location.search).get("error");
+    if (uploadError) setError(`Analysis failed: ${uploadError}`);
+  }, []);
 
   function clearPickerTimers() {
     pickerTimersRef.current.forEach(clearTimeout);
@@ -79,7 +86,15 @@ export default function UploadPage() {
   }
 
   function startAnalysis() {
+    startUpload(file ?? fetch(`/${exampleFileName}`).then((response) => {
+      if (!response.ok) throw new Error("The example file is missing.");
+      return response.blob();
+    }).then((blob) => new File([blob], exampleFileName, { type: "text/csv" })));
     dialogRef.current?.close();
+    goToProcessing();
+  }
+
+  function goToProcessing() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       router.push("/ml-process");
       return;
@@ -142,6 +157,8 @@ export default function UploadPage() {
             <span>Temperature</span>
             <span>Destination</span>
           </div>
+
+          <SpinPanel onRun={goToProcessing} />
 
           {error && <p role="alert" className="mt-4 text-sm font-medium text-red-700">{error}</p>}
         </section>

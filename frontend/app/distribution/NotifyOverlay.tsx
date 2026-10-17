@@ -8,7 +8,6 @@ const contacts = [
     label: "Supplier dispatch",
     name: "Dispatch team",
     role: "Supplier logistics",
-    organization: "Food Processing Facility",
     contactStatus: "Contact details not connected",
   },
   {
@@ -16,20 +15,20 @@ const contacts = [
     label: "Receiving kitchen",
     name: "Receiving team",
     role: "Kitchen operations",
-    organization: "Central Kitchen, QSR Group A",
     contactStatus: "Contact details not connected",
   },
 ] as const;
 
-const defaultMessage = "Please review shipment SHIP-017 from batch RM-402. The temperature record shows 8.4°C against a 7°C review limit. Confirm the shipment record and product status before taking action.";
+export type NotifyTarget = { shipmentId: string; batchId: string; reason: string; supplier: string; recipient: string };
 
-export default function NotifyOverlay() {
+export default function NotifyOverlay({ target }: { target: NotifyTarget }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [selectedId, setSelectedId] = useState<(typeof contacts)[number]["id"]>("dispatcher");
-  const [message, setMessage] = useState(defaultMessage);
+  const [message, setMessage] = useState(`Please review shipment ${target.shipmentId} from batch ${target.batchId}. ${target.reason} Confirm the shipment record and product status before taking action.`);
   const [notice, setNotice] = useState<"idle" | "previewed">("idle");
   const [callPreview, setCallPreview] = useState(false);
   const selected = contacts.find((contact) => contact.id === selectedId) ?? contacts[0];
+  const organization = selected.id === "dispatcher" ? target.supplier : target.recipient;
 
   const close = () => {
     dialogRef.current?.close();
@@ -85,7 +84,7 @@ export default function NotifyOverlay() {
               </fieldset>
 
               <div className="mt-4 grid gap-3 rounded-xl bg-slate-50 p-4 text-sm sm:grid-cols-2 lg:mt-3 lg:grid-cols-[1fr_1.3fr] lg:p-3">
-                <div><p className="text-xs font-bold uppercase tracking-wide text-slate-500">Organization</p><p className="mt-1 font-medium">{selected.organization}</p></div>
+                <div><p className="text-xs font-bold uppercase tracking-wide text-slate-500">Organization</p><p className="mt-1 font-medium">{organization}</p></div>
                 <div><p className="text-xs font-bold uppercase tracking-wide text-slate-500">Contact status</p><p className="mt-1 break-words text-xs font-medium">{selected.contactStatus}</p></div>
               </div>
 
@@ -100,7 +99,7 @@ export default function NotifyOverlay() {
                 <p className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-rose-50">Urgent call</p>
                 <div aria-hidden="true" className="mt-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-3xl lg:mt-4 lg:h-12 lg:w-12">☎</div>
                 <h3 id="urgent-call-heading" className="mt-4 text-2xl font-semibold tracking-tight">Call {selected.label.toLowerCase()}</h3>
-                <p className="mt-2 text-sm leading-6 text-rose-50 lg:leading-5">SHIP-017 · RM-402. Verify the recipient and product status before making contact.</p>
+                <p className="mt-2 text-sm leading-6 text-rose-50 lg:leading-5">{target.shipmentId} · {target.batchId}. Verify the recipient and product status before making contact.</p>
                 <div className="mt-4 rounded-xl border border-white/20 bg-black/10 p-4 lg:p-3">
                   <p className="text-xs font-bold uppercase tracking-wide text-rose-100">Selected contact</p>
                   <p className="mt-2 font-semibold">{selected.name}</p>
