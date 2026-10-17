@@ -25,14 +25,31 @@ export type TraceDocument = {
   source_ranking: { batch_id: number; matched_batch_ids: number[]; flagged_product_count: number; total_distance: number }[];
   lab_results: { lab_result_id: number; batch_id: number; tested_at: string; contaminant: string | null; result: string }[];
   interpretation: string;
+  containment: {
+    recommended: HoldScope; basis: string; note: string;
+    options: Record<HoldScope, { batch_ids: number[]; shipment_ids: number[] }>;
+  };
+  decisions: Decision[]; // newest first
 };
+export type HoldScope = "targeted" | "extended";
+export type Decision = {
+  decision_id: number; scope: HoldScope; decision: "approved" | "rejected"; batch_ids: number[];
+  shipment_ids: number[]; officer: string; reason: string; decided_at: string;
+};
+export type Check = { check: string; label: string; fields: string[]; shipments_checked: number; shipments_total: number };
+
+const TIMEOUT_MS = 20000;
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  const origin = new URL(url).origin;
+  const service = origin === new URL(ML_URL).origin ? "ML service" : "backend API";
   let response: Response;
   try {
-    response = await fetch(url, init);
-  } catch {
-    throw new Error(`Cannot reach the service at ${new URL(url).origin}.`);
+    response = await fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
+  } catch (e) {
+    throw new Error((e as Error).name === "TimeoutError"
+      ? `The ${service} at ${origin} did not respond within ${TIMEOUT_MS / 1000} seconds. Check the SSH tunnel and try again.`
+      : `Cannot reach the ${service} at ${origin}. Check that the SSH tunnel (backend/demo-tunnel.ps1) is running.`);
   }
   const body = await response.json().catch(() => null);
   if (!response.ok) throw new Error(typeof body?.detail === "string" ? body.detail : `Request failed (${response.status}).`);
@@ -102,6 +119,8 @@ const json = { method: "POST", headers: { "Content-Type": "application/json" } }
 export const getTraceBatches = () => request<TraceBatch[]>(`${API_URL}/api/trace/batches`);
 export const traceLots = (ids: number[]) => request<TraceDocument>(`${API_URL}/api/trace?${ids.map((id) => `batch_ids=${id}`).join("&")}`);
 export const seedTraceDemo = () => request<{ selected_batch_ids: number[]; synthetic: boolean }>(`${API_URL}/api/demo/seed`, { ...json, body: "{}" });
+export const recordDecision = (body: { batch_ids: number[]; scope: HoldScope; decision: Decision["decision"]; officer: string; reason: string }) =>
+  request<Decision>(`${API_URL}/api/decisions`, { ...json, body: JSON.stringify(body) });
 // Display form of a sample field. The models need the raw value (the beef models lower-case their text), so this is
 // for showing only: states in capitals, text fields capitalised, the "__unknown__" placeholder as "not recorded".
 export function displayValue(field: string, value: string) {
@@ -205,10 +224,13 @@ function toUiFinding(f: ApiFinding, index: number): DemoFinding {
   };
 }
 
-export async function getFindings(id: string) {
-  const doc = await request<{ findings: ApiFinding[] }>(`${API_URL}/api/analyses/${encodeURIComponent(id)}/findings`);
-  return doc.findings.map(toUiFinding);
+// checks is null for analyses stored before coverage was recorded.
+export async function getFindingsReport(id: string) {
+  const doc = await request<{ findings: ApiFinding[]; checks?: Check[] }>(`${API_URL}/api/analyses/${encodeURIComponent(id)}/findings`);
+  return { findings: doc.findings.map(toUiFinding), checks: doc.checks ?? null };
 }
+
+export const getFindings = (id: string) => getFindingsReport(id).then((report) => report.findings);
 
 export function getDistribution(id: string) {
   return request<Graph>(`${API_URL}/api/analyses/${encodeURIComponent(id)}/distribution`);

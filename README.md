@@ -20,6 +20,7 @@ Endpoints:
 - `GET/POST /api/organizations`, `/api/shipments`, `/api/batch-relationships`
 - `GET /api/trace?batch_ids=<id>&batch_ids=<id>` — ingredients, related products, shipment locations and shared-ingredient ranking
 - `POST /api/demo/seed` — idempotent synthetic trace scenario; preserves existing records
+- `POST /api/decisions` — record an officer's approve/reject on the trace's containment recommendation (simulated hold)
 - `POST /api/analyses`, `GET /api/analyses/{id}/findings`, `GET /api/analyses/{id}/distribution` — database-backed upload results
 - `POST /api/sensor-readings`, `POST /api/lab-results`
 - `GET /api/batches/{id}/trace` — upstream/downstream via `app/graph.py` (NetworkX)
@@ -60,7 +61,7 @@ The network animation preview is at http://localhost:3000/ml-process. The select
 
 ## Not built yet
 
-Containment decision/approval logging and live event replay remain pending. Five pathogen models and the SVG distribution/lot visualizations are implemented. Model predictions concern FSIS laboratory samples; cold-chain upload findings use transparent rules, not a trained contamination detector.
+Live event replay remains pending. Containment decisions are recorded with officer, reason and time, but the hold itself is simulated. Five pathogen models and the SVG distribution/lot visualizations are implemented. Model predictions concern FSIS laboratory samples; cold-chain upload findings use transparent rules, not a trained contamination detector.
 
 ## Offline data pipeline — Person A
 

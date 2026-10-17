@@ -101,3 +101,18 @@ class SyntheticBatch(Base):
 
     batch_id = Column(Integer, ForeignKey("batches.batch_id"), primary_key=True)
     scenario = Column(String, nullable=False)
+
+
+class ContainmentDecision(Base):
+    """Append-only officer decisions on a trace's containment recommendation. The hold itself is simulated."""
+    __tablename__ = "containment_decisions"
+
+    decision_id = Column(Integer, primary_key=True)
+    selection = Column(String, nullable=False, index=True)  # sorted batch IDs under investigation, comma-separated
+    scope = Column(String, nullable=False)  # targeted | extended
+    decision = Column(String, nullable=False)  # approved | rejected
+    batch_ids = Column(JSON, nullable=False)
+    shipment_ids = Column(JSON, nullable=False)
+    officer = Column(String, nullable=False)
+    reason = Column(String, nullable=False)
+    decided_at = Column(DateTime(timezone=True), nullable=False)

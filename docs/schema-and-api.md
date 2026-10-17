@@ -264,6 +264,7 @@ Returns `200`, following `contracts/ml-findings.schema.json`:
 - **`anomaly_type`:** `temperature_excursion` · `sensor_gap` (a reading gap over 15 min) · `humidity_excursion` (over 75 %) · `shipment_delay` (over 30 min late) · `quantity_mismatch` · `destination_mismatch` (the contract also allows `other`).
 - **`severity`:** `high` (time in the temperature danger zone exceeded) · `medium` · `low`. The list is sorted with high first.
 - **`priority_score`:** always `null`, because these are rules, not a model.
+- **`checks`:** one row per check (`temperature`, `humidity`, `delay`, `quantity`, `destination`) with `label`, the `fields` it needs, `shipments_checked` and `shipments_total`. A check with `shipments_checked: 0` did not run, so zero findings from it is not a clearance. Analyses stored before this field existed omit it.
 
 An unknown ID returns `404` `{"detail": "analysis not found"}`.
 
@@ -427,7 +428,7 @@ Returns `200` in the same shape as 3.4, with `sample_id: null` and `actual: null
 2. One batch per shipment remains the MVP contract. Legacy shipment rows have no unit until a manifest is provided; new shipments require an explicit unit. Ingredient `quantity_used` retains its legacy unspecified unit and is not used for inventory arithmetic.
 3. `/risk` retains the legacy flat 7 °C rule; uploads use per-product profiles. It is not used to rank shared ingredients.
 4. The models predict FSIS sample positivity; they do not predict an uploaded batch's contamination probability. Predictions are not stored, and the chemical model has no endpoint.
-5. Containment decisions, human approval logging and live replay are still pending. Trace selection is an investigation input, not laboratory confirmation.
+5. Containment decisions are recorded, but the hold itself is simulated: no shipment status changes and nothing is sent to a site. Live replay is still pending. Trace selection is an investigation input, not laboratory confirmation.
 
 ## 5. Stored traceability API
 
@@ -441,6 +442,7 @@ Returns `200` in the same shape as 3.4, with `sample_id: null` and `actual: null
 | GET | `/api/lots/resolve?lot_code=RM-402` | Optional `organization_id`. Returns a batch; unknown 404, ambiguous 409. No route-name inference. |
 | GET | `/api/trace?batch_ids=910042&batch_ids=910091` | Investigate 1–20 selected batch IDs. See response below. Unknown batch 404; empty/oversize input 422. |
 | GET | `/api/batches/{id}/trace` | Same rich response plus `batch_id`. Keeps legacy `upstream` and `downstream` arrays. |
+| POST | `/api/decisions` | Body: `batch_ids` (1–20, the selection under investigation), `scope` (`targeted`/`extended`), `decision` (`approved`/`rejected`), `officer`, `reason` (both non-blank). The server recomputes the held lots and shipments from stored records; the client never sends them. Returns 201 with `decision_id`, `scope`, `decision`, `batch_ids`, `shipment_ids`, `officer`, `reason`, `decided_at`. Unknown batch 404, invalid input 422. Append-only: nothing is updated or deleted. |
 | POST | `/api/demo/seed` | No body required. Adds fixed synthetic rows idempotently, refusing conflicting reserved IDs with 409 and rolling back the whole seed. Returns `synthetic`, `selected_batch_ids`, `second_batch_id`, `shared_ingredient_id`, `message`. Never resets or deletes data. |
 
 Trace response fields:
@@ -454,6 +456,8 @@ Trace response fields:
 - `source_ranking`: upstream lots ordered by count of selected descendants, then summed shortest-path distance, then ID. Each row includes `batch_id`, `matched_batch_ids`, `flagged_product_count`, `total_distance`. A count is not a probability or causal conclusion.
 - `lab_results`: recorded laboratory evidence, independently of manual selection.
 - `interpretation`: explicit scope of the investigation leads.
+- `containment`: `recommended` scope, a `basis` sentence, a `note` that the action is simulated, and `options.targeted` / `options.extended`, each with `batch_ids` and `shipment_ids`. Targeted = the selection and products made from it; extended = every lot in the trace. Extended is recommended only when the top-ranked ingredient is shared by more than one selected product.
+- `decisions`: recorded decisions for exactly this selection, newest first.
 
 The synthetic seed uses 910xxx IDs. CW-42 (`910042`) and CS-91 (`910091`) share L-102 (`910102`). VW-17 is another product using L-102 at the second factory. RM-402 is a separate chicken ingredient of CW-42. Selecting both finished products ranks L-102 first with `flagged_product_count: 2`. The stored CW-42 laboratory result says `Salmonella (simulated)`; selecting CS-91 does not create a second lab result.
 

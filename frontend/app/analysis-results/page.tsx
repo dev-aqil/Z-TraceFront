@@ -4,9 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getFindings, useAnalysis, withAnalysis } from "@/lib/api";
+import { getFindingsReport, useAnalysis, withAnalysis } from "@/lib/api";
 import { demoFindings } from "./demo-findings";
 import PredictionResult from "./PredictionResult";
+
+const DEMO_REPORT = { findings: demoFindings, checks: null };
 
 type RevealStage = "dash" | "zero" | "count" | "results";
 
@@ -59,8 +61,12 @@ function FindingsResults() {
   const [atBottom, setAtBottom] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [viewport, setViewport] = useState({ width: 1280, height: 800 });
-  const { id: analysisId, data: loaded, error: loadError } = useAnalysis(getFindings, demoFindings);
+  const { id: analysisId, data: report, error: loadError } = useAnalysis(getFindingsReport, DEMO_REPORT);
+  const loaded = report?.findings ?? null;
   const findings = loaded ?? [];
+  // A check with no data is "not checked", never "passed": zero findings must not read as a clearance.
+  const unchecked = report?.checks?.filter((check) => check.shipments_checked === 0) ?? [];
+  const noneRan = !!report?.checks && unchecked.length === report.checks.length;
   const total = findings.length;
   const severityCounts = (["High", "Medium", "Low", "Unknown"] as const)
     .map((level) => [level, findings.filter((finding) => finding.severity === level).length] as const)
@@ -291,7 +297,16 @@ function FindingsResults() {
               {severityCounts && <p className="ml-auto whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm">{severityCounts}</p>}
             </div>
             <div className="space-y-3">
-              {total === 0 && <p data-analysis-reveal className="analysis-content-reveal rounded-xl border border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-600">No anomalies were found in this file.</p>}
+              {report?.checks && <div data-analysis-reveal aria-label="Checks run on this file" className="analysis-content-reveal flex flex-wrap gap-2 pb-2">
+                {report.checks.map((check) => <span key={check.check} className={`rounded-full border px-3 py-1 text-xs ${check.shipments_checked ? "border-slate-200 bg-white text-slate-700" : "border-amber-300 bg-amber-50 text-amber-900"}`}>
+                  {check.label}: {check.shipments_checked ? `${check.shipments_checked}/${check.shipments_total} shipments checked` : `not checked (needs ${check.fields.join(" + ")})`}
+                </span>)}
+              </div>}
+              {total === 0 && <p data-analysis-reveal className={`analysis-content-reveal rounded-xl border px-5 py-8 text-center text-sm ${unchecked.length ? "border-amber-300 bg-amber-50 text-amber-900" : "border-slate-200 bg-white text-slate-600"}`}>
+                {noneRan ? "No checks could run: the file has no temperature, humidity, arrival, quantity or destination data. This is not a safety clearance."
+                  : unchecked.length ? `No anomalies in the checks that ran. ${unchecked.length} of ${report!.checks!.length} checks had no data, so this is not a full clearance.`
+                  : "No anomalies were found in the checks that ran on this file."}
+              </p>}
               {findings.map((finding) => (
                 <details key={finding.id} id={`finding-${finding.id}`} data-analysis-reveal className="analysis-content-reveal finding-card group scroll-mt-14 rounded-xl border border-slate-200 bg-white">
                   <summary className="finding-summary flex min-h-28 cursor-pointer items-center gap-5 px-5 py-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">

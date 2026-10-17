@@ -12,6 +12,22 @@
     "dataset_id": { "type": "string", "minLength": 1 },
     "generated_at": { "type": "string", "format": "date-time" },
     "model_version": { "type": "string", "minLength": 1 },
+    "checks": {
+      "type": "array",
+      "description": "Which checks had data to run. Zero findings from a check that covered no shipments is not a clearance.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["check", "label", "fields", "shipments_checked", "shipments_total"],
+        "properties": {
+          "check": { "enum": ["temperature", "humidity", "delay", "quantity", "destination"] },
+          "label": { "type": "string", "minLength": 1 },
+          "fields": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "shipments_checked": { "type": "integer", "minimum": 0 },
+          "shipments_total": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
     "findings": {
       "type": "array",
       "items": {

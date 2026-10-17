@@ -81,3 +81,11 @@ class RelationshipCreate(BaseModel):
     parent_batch_id: int
     child_batch_id: int
     quantity_used: float = Field(gt=0, allow_inf_nan=False)
+
+
+class DecisionCreate(BaseModel):
+    batch_ids: list[int] = Field(min_length=1, max_length=20)
+    scope: Literal["targeted", "extended"]
+    decision: Literal["approved", "rejected"]
+    officer: str = Field(min_length=1, max_length=100, pattern=r"\S")
+    reason: str = Field(min_length=1, max_length=500, pattern=r"\S")

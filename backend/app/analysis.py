@@ -46,6 +46,12 @@ ALIASES = {"temperature": "temperature_c", "shipment_time": "reading_time", "hum
 NUMBERS = ("temperature_c", "humidity_pct", "dispatched_qty", "received_qty")
 TIMES = ("reading_time", "planned_arrival", "actual_arrival")
 SEVERITY_ORDER = {"high": 0, "medium": 1, "low": 2}
+# The data each rule needs. A shipment without it is not checked, which is not the same as passing the check.
+CHECKS = {"temperature": ("Temperature and sensor gaps", ("temperature_c",)),
+          "humidity": ("Humidity", ("humidity_pct",)),
+          "delay": ("Arrival delay", ("planned_arrival", "actual_arrival")),
+          "quantity": ("Received quantity", ("dispatched_qty", "received_qty")),
+          "destination": ("Destination", ("destination", "delivered_to"))}
 
 
 def text(v):
@@ -207,6 +213,17 @@ def analyse(filename: str, raw: bytes) -> tuple[pd.DataFrame, list[dict]]:
     return df, findings
 
 
+def coverage(df: pd.DataFrame) -> list[dict]:
+    """How many shipments had the data each check needs."""
+    groups = df.groupby("shipment_id", sort=False)
+    out = []
+    for check, (label, cols) in CHECKS.items():
+        checked = int((groups[list(cols)].count() > 0).all(axis=1).sum()) if all(c in df for c in cols) else 0
+        out.append({"check": check, "label": label, "fields": list(cols),
+                    "shipments_checked": checked, "shipments_total": groups.ngroups})
+    return out
+
+
 def distribution(df: pd.DataFrame, findings: list[dict]) -> dict:
     """Distributor -> route -> batch -> shipment (recipient). Batches and shipments with findings are flagged."""
     flagged = {f["shipment_id"] for f in findings}
@@ -249,7 +266,7 @@ def create_analysis(file: UploadFile, db: Session = Depends(get_db)):
     db.add(Analysis(analysis_id=analysis_id, dataset_id=dataset_id, generated_at=generated_at,
                     findings={"schema_version": "1.0", "analysis_id": analysis_id, "dataset_id": dataset_id,
                               "generated_at": generated_at.isoformat(), "model_version": MODEL_VERSION,
-                              "findings": findings},
+                              "findings": findings, "checks": coverage(df)},
                     distribution={"analysis_id": analysis_id, **distribution(df, findings)}))
     db.commit()
     return {"analysis_id": analysis_id, "dataset_id": dataset_id, "rows": len(df),

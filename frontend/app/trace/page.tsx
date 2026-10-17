@@ -3,12 +3,75 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getTraceBatches, seedTraceDemo, traceLots } from "@/lib/api";
-import type { TraceBatch, TraceDocument } from "@/lib/api";
+import { getTraceBatches, recordDecision, seedTraceDemo, traceLots } from "@/lib/api";
+import type { Decision, HoldScope, TraceBatch, TraceDocument } from "@/lib/api";
 
 const code = (batch: TraceBatch) => batch.lot_code ?? `Batch ${batch.batch_id}`;
+const SCOPES: Record<HoldScope, [title: string, description: string]> = {
+  targeted: ["Targeted hold", "The lots under investigation and anything made from them."],
+  extended: ["Extended hold", "Everything in this trace, including shared ingredients and other products made from them."],
+};
+
+// Shipments covered by the latest decision for this selection, if it approved a hold.
+const heldBy = (trace: TraceDocument) => new Set(trace.decisions[0]?.decision === "approved" ? trace.decisions[0].shipment_ids : []);
+
+function DecisionPanel({ trace, label, onRecorded }: { trace: TraceDocument; label: (id: number) => string; onRecorded: (d: Decision) => void }) {
+  const { recommended, basis, note, options } = trace.containment;
+  const [scope, setScope] = useState<HoldScope>(recommended);
+  const [officer, setOfficer] = useState("");
+  const [reason, setReason] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const codeOf = (id: number) => trace.shipments.find((s) => s.shipment_id === id)?.shipment_code ?? String(id);
+
+  async function decide(decision: Decision["decision"]) {
+    if (!officer.trim() || !reason.trim()) return setError("Enter the officer name and a reason before recording a decision.");
+    setSaving(true); setError("");
+    try {
+      onRecorded(await recordDecision({ batch_ids: trace.selected_batch_ids, scope, decision, officer: officer.trim(), reason: reason.trim() }));
+      setReason("");
+    } catch (e) { setError((e as Error).message); }
+    finally { setSaving(false); }
+  }
+
+  return <section aria-labelledby="decision-heading" className="mt-5 rounded-2xl border border-slate-900 bg-white p-5">
+    <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 id="decision-heading" className="text-lg font-semibold">Containment decision</h2><p className="text-xs font-semibold text-amber-800">{note}</p></div>
+    <p className="mt-2 text-sm leading-6 text-slate-700"><strong>Recommended: {SCOPES[recommended][0].toLowerCase()}.</strong> {basis}</p>
+    <form onSubmit={(e) => { e.preventDefault(); decide(((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value === "rejected" ? "rejected" : "approved"); }}>
+      <fieldset className="mt-4 grid gap-3 sm:grid-cols-2"><legend className="sr-only">Hold scope</legend>
+        {(Object.keys(SCOPES) as HoldScope[]).map((key) => {
+          const ships = trace.shipments.filter((s) => options[key].shipment_ids.includes(s.shipment_id));
+          const moving = ships.filter((s) => s.status === "pending" || s.status === "in_transit").length;
+          return <label key={key} className={`cursor-pointer rounded-xl border p-4 ${scope === key ? "border-rose-500 bg-rose-50" : "border-slate-200 hover:border-slate-400"}`}>
+            <span className="flex items-center gap-2"><input type="radio" name="scope" checked={scope === key} onChange={() => setScope(key)} className="accent-rose-600" /><strong className="text-sm">{SCOPES[key][0]}</strong>{key === recommended && <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white">Recommended</span>}</span>
+            <span className="mt-1 block text-xs text-slate-600">{SCOPES[key][1]}</span>
+            <span className="mt-3 block text-xs"><strong>{options[key].batch_ids.length}</strong> lots · <strong>{ships.length}</strong> shipments · <strong>{new Set(ships.map((s) => s.to_org_id)).size}</strong> receiving sites</span>
+            <span className="mt-1 block text-[11px] text-slate-500">{moving} pending or in transit can be stopped · {ships.length - moving} delivered need a hold at the site</span>
+            <span className="mt-2 block text-[11px] text-slate-500">{options[key].batch_ids.map(label).join(", ")}</span>
+          </label>;
+        })}
+      </fieldset>
+      <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        <label className="text-xs font-semibold">Officer<input value={officer} onChange={(e) => setOfficer(e.target.value)} required maxLength={100} autoComplete="name" className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal" /></label>
+        <label className="text-xs font-semibold">Reason<textarea value={reason} onChange={(e) => setReason(e.target.value)} required maxLength={500} rows={2} className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal" /></label>
+      </div>
+      {error && <p role="alert" className="mt-3 text-sm text-rose-800">{error}</p>}
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button type="submit" value="approved" disabled={saving} className="rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50">Approve {SCOPES[scope][0].toLowerCase()}</button>
+        <button type="submit" value="rejected" disabled={saving} className="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold hover:border-slate-900 disabled:opacity-50">Reject recommendation</button>
+      </div>
+    </form>
+    <h3 className="mt-6 text-sm font-semibold">Decision history</h3>
+    {!trace.decisions.length ? <p className="mt-2 text-xs text-slate-500">No decision has been recorded for this selection.</p> : <ol className="mt-2 space-y-2">{trace.decisions.map((d) => <li key={d.decision_id} className="rounded-xl border border-slate-200 px-4 py-3 text-xs">
+      <p><strong className={d.decision === "approved" ? "text-rose-700" : "text-slate-700"}>{d.decision === "approved" ? "Approved" : "Rejected"} {SCOPES[d.scope][0].toLowerCase()}</strong> · {d.officer} · {new Date(d.decided_at).toLocaleString()}</p>
+      <p className="mt-1 text-slate-600">{d.reason}</p>
+      <p className="mt-1 text-[11px] text-slate-500">{d.shipment_ids.length} shipments: {d.shipment_ids.map(codeOf).join(", ") || "none recorded"}</p>
+    </li>)}</ol>}
+  </section>;
+}
 
 function LotNetwork({ trace }: { trace: TraceDocument }) {
+  const held = heldBy(trace);
   const selected = new Set(trace.selected_batch_ids);
   const upstream = new Set(trace.upstream);
   const columns = [trace.batches.filter((b) => upstream.has(b.batch_id)),
@@ -42,9 +105,9 @@ function LotNetwork({ trace }: { trace: TraceDocument }) {
             <p className="mt-0.5 truncate text-[10px] text-slate-600">{batch.organization_name}{selected.has(batch.batch_id) ? " · selected" : ""}</p>
           </div>;
         })}
-        {trace.shipments.map((ship, i) => <div key={ship.shipment_id} style={{ left: 704, top: 58 + i * 66 }} className="absolute w-[310px] rounded-xl border border-sky-200 bg-sky-50 px-3 py-2">
+        {trace.shipments.map((ship, i) => <div key={ship.shipment_id} style={{ left: 704, top: 58 + i * 66 }} className={`absolute w-[310px] rounded-xl border px-3 py-2 ${held.has(ship.shipment_id) ? "border-rose-400 bg-rose-50" : "border-sky-200 bg-sky-50"}`}>
           <p className="truncate text-xs font-semibold">{ship.to_name} <span className="font-normal text-slate-500">· {ship.shipment_code}</span></p>
-          <p className="mt-0.5 truncate text-[10px] text-slate-600">From {ship.from_name} · {ship.status.replace(/_/g, " ")}</p>
+          <p className="mt-0.5 truncate text-[10px] text-slate-600">From {ship.from_name} · {held.has(ship.shipment_id) ? "hold approved (simulated)" : ship.status.replace(/_/g, " ")}</p>
         </div>)}
       </div>
     </div>
@@ -153,10 +216,11 @@ export default function TracePage() {
             </li>)}</ol><p className="mt-4 border-t border-slate-100 pt-3 text-xs leading-5 text-slate-500">{trace.interpretation}</p>
           </section>
           <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-lg font-semibold">Where the connected stock moved</h2><p className="mt-1 text-xs text-slate-500">Shipment quantities describe movements; they are not current inventory totals.</p>
-            <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="border-b border-slate-200 text-[10px] uppercase tracking-wide text-slate-500"><tr>{["Lot / shipment", "Movement", "Quantity", "Status"].map((s) => <th key={s} className="px-2 py-3 font-semibold">{s}</th>)}</tr></thead><tbody>{trace.shipments.map((s) => <tr key={s.shipment_id} className="border-b border-slate-100"><td className="whitespace-nowrap px-2 py-3"><strong>{label(s.batch_id)}</strong><span className="mt-1 block text-[10px] text-slate-500">{s.shipment_code}</span></td><td className="min-w-[150px] px-2 py-3">{s.from_name}<span className="mt-1 block text-slate-500">→ {s.to_name}</span></td><td className="whitespace-nowrap px-2 py-3">{s.quantity.toLocaleString()} {s.quantity_unit ?? "(unit not recorded)"}</td><td className="whitespace-nowrap px-2 py-3">{s.status.replace(/_/g, " ")}</td></tr>)}</tbody></table>{!trace.shipments.length && <p className="py-4 text-sm text-slate-500">No shipment locations have been recorded.</p>}</div>
+            <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="border-b border-slate-200 text-[10px] uppercase tracking-wide text-slate-500"><tr>{["Lot / shipment", "Movement", "Quantity", "Status"].map((s) => <th key={s} className="px-2 py-3 font-semibold">{s}</th>)}</tr></thead><tbody>{trace.shipments.map((s) => <tr key={s.shipment_id} className="border-b border-slate-100"><td className="whitespace-nowrap px-2 py-3"><strong>{label(s.batch_id)}</strong><span className="mt-1 block text-[10px] text-slate-500">{s.shipment_code}</span></td><td className="min-w-[150px] px-2 py-3">{s.from_name}<span className="mt-1 block text-slate-500">→ {s.to_name}</span></td><td className="whitespace-nowrap px-2 py-3">{s.quantity.toLocaleString()} {s.quantity_unit ?? "(unit not recorded)"}</td><td className="whitespace-nowrap px-2 py-3">{s.status.replace(/_/g, " ")}{heldBy(trace).has(s.shipment_id) && <span className="mt-1 block w-fit rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800">Hold approved · simulated</span>}</td></tr>)}</tbody></table>{!trace.shipments.length && <p className="py-4 text-sm text-slate-500">No shipment locations have been recorded.</p>}</div>
           </section>
         </div>
         {!!trace.lab_results.length && <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-semibold">Recorded laboratory evidence</h2><ul className="mt-3 space-y-2 text-xs">{trace.lab_results.map((lab) => <li key={lab.lab_result_id}><strong>{label(lab.batch_id)}</strong> · {lab.contaminant ?? "Unspecified test"} · <span className={lab.result === "positive" ? "font-semibold text-rose-700" : "text-slate-600"}>{lab.result}</span> · {lab.tested_at.replace("T", " ")}</li>)}</ul></section>}
+        <DecisionPanel key={trace.selected_batch_ids.join(",")} trace={trace} label={label} onRecorded={(d) => setTrace((t) => t && { ...t, decisions: [d, ...t.decisions] })} />
       </>}
     </div>
   </main>;

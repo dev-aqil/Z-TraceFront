@@ -88,6 +88,26 @@ class SystemTests(unittest.TestCase):
         self.assertEqual(self.call("/api/trace?batch_ids=99999999")[0], 404)
         self.assertEqual(self.call("/api/trace")[0], 422)
 
+    def test_containment_decision_is_recorded_and_survives_restart(self):
+        self.assertEqual(self.call("/api/demo/seed", {})[0], 200)
+        self.assertEqual(self.call("/api/trace?batch_ids=910042")[1]["containment"]["recommended"], "targeted")
+        _, both = self.call("/api/trace?batch_ids=910042&batch_ids=910091")
+        options = both["containment"]["options"]
+        self.assertEqual(both["containment"]["recommended"], "extended")
+        self.assertEqual(len(options["targeted"]["shipment_ids"]), 5)  # CW-42 and CS-91 movements only
+        self.assertEqual(len(options["extended"]["shipment_ids"]), 8)  # plus lettuce, chicken and veggie-wrap movements
+        body = {"batch_ids": [910091, 910042], "scope": "extended", "decision": "approved",
+                "officer": "Test Officer", "reason": "Shared lettuce lot"}
+        code, made = self.call("/api/decisions", body)
+        self.assertEqual(code, 201)
+        self.assertEqual(made["shipment_ids"], options["extended"]["shipment_ids"])
+        self.assertEqual(self.call("/api/decisions", {**body, "officer": " "})[0], 422)
+        self.assertEqual(self.call("/api/decisions", {**body, "scope": "everything"})[0], 422)
+        self.assertEqual(self.call("/api/decisions", {**body, "batch_ids": [99999999]})[0], 404)
+        type(self).stop()
+        type(self).start()
+        self.assertEqual(self.call("/api/trace?batch_ids=910042&batch_ids=910091")[1]["decisions"], [made])
+
     def test_write_validation_and_scoped_lots(self):
         for org in (501, 502):
             self.assertEqual(self.call("/api/organizations", {

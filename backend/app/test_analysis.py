@@ -4,7 +4,7 @@ import json
 import pandas as pd
 from fastapi import HTTPException
 
-from app.analysis import analyse, distribution
+from app.analysis import analyse, coverage, distribution
 
 COLUMNS = ["Shipment ID", "Batch ID", "product", "route", "distributor", "profile", "destination", "delivered_to",
            "Shipment time", "Temperature", "humidity_pct", "planned_arrival", "actual_arrival",
@@ -105,9 +105,20 @@ def test_bad_input_is_rejected_not_dropped():
     assert rejected("s.csv", b"shipment_id,batch_id,profile,temperature_c,reading_time\nS,B,warm,5,2026-10-17\n")
 
 
+def test_coverage_reports_checks_without_data():
+    df, findings = analyse("ids.csv", b"shipment_id,batch_id\nS1,B1\nS2,B2\n")
+    assert findings == []
+    assert all(c["shipments_checked"] == 0 and c["shipments_total"] == 2 for c in coverage(df))
+    checked = {c["check"]: c["shipments_checked"] for c in coverage(analyse("s.csv", csv_bytes(rows()))[0])}
+    # temperature: SHIP-017/050/060; delay needs both times (SHIP-024); destination needs both fields (SHIP-042)
+    assert checked == {"temperature": 3, "humidity": 1, "delay": 1, "quantity": 1, "destination": 1}
+
+
 if __name__ == "__main__":
     test_each_rule_fires_once_and_clean_shipment_has_none()
     test_distribution_flags_only_shipments_with_findings()
     test_json_and_xlsx_match_csv()
+    test_same_route_name_does_not_connect_different_distributors()
     test_bad_input_is_rejected_not_dropped()
+    test_coverage_reports_checks_without_data()
     print("ok")

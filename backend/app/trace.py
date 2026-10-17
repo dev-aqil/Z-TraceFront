@@ -1,5 +1,7 @@
 """Stored lot relationships and shipment locations; investigation leads are not proof of cause."""
 
+from datetime import datetime, timezone
+
 import networkx as nx
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
@@ -7,8 +9,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.graph import build_batch_graph
-from app.models import Batch, BatchLot, BatchRelationship, LabResult, Organization, Shipment, ShipmentManifest, SyntheticBatch
-from app.schemas import OrganizationCreate, OrganizationOut, RelationshipCreate, ShipmentCreate
+from app.models import (Batch, BatchLot, BatchRelationship, ContainmentDecision, LabResult, Organization, Shipment,
+                        ShipmentManifest, SyntheticBatch)
+from app.schemas import DecisionCreate, OrganizationCreate, OrganizationOut, RelationshipCreate, ShipmentCreate
 
 router = APIRouter(prefix="/api")
 
@@ -125,6 +128,31 @@ def trace_batches(db: Session = Depends(get_db)):
     return [batch_document(db, batch) for batch in db.query(Batch).order_by(Batch.batch_id)]
 
 
+def selection_key(batch_ids) -> str:
+    return ",".join(map(str, sorted(set(batch_ids))))
+
+
+def containment(selected, downstream, included, shipment_rows, ranking, batches) -> dict:
+    """Two bounded hold options. Extended is recommended only when one ingredient links several products under review."""
+    def option(ids):
+        return {"batch_ids": sorted(ids), "shipment_ids": [s.shipment_id for s in shipment_rows if s.batch_id in ids]}
+    codes = {b["batch_id"]: b["lot_code"] or f"Batch {b['batch_id']}" for b in batches}
+    shared = ranking[0] if ranking and ranking[0]["flagged_product_count"] > 1 else None
+    basis = (f"{codes[shared['batch_id']]} is an ingredient of {shared['flagged_product_count']} of the {len(selected)} "
+             "products under investigation, so other stock made from it may also be affected." if shared else
+             "No ingredient is shared by more than one product under investigation, so hold only those lots and "
+             "anything made from them.")
+    return {"recommended": "extended" if shared else "targeted", "basis": basis,
+            "options": {"targeted": option(selected | downstream), "extended": option(included)},
+            "note": "Simulated action: an approval is recorded, but no hold is sent to any site."}
+
+
+def decision_document(d: ContainmentDecision) -> dict:
+    at = d.decided_at if d.decided_at.tzinfo else d.decided_at.replace(tzinfo=timezone.utc)  # SQLite drops the zone
+    return {"decision_id": d.decision_id, "scope": d.scope, "decision": d.decision, "batch_ids": d.batch_ids,
+            "shipment_ids": d.shipment_ids, "officer": d.officer, "reason": d.reason, "decided_at": at.isoformat()}
+
+
 def trace_document(db: Session, batch_ids: list[int]) -> dict:
     selected = set(batch_ids)
     for id_ in selected:
@@ -147,18 +175,34 @@ def trace_document(db: Session, batch_ids: list[int]) -> dict:
     ranking.sort(key=lambda r: (-r["flagged_product_count"], r["total_distance"], r["batch_id"]))
     shipment_rows = db.query(Shipment).filter(Shipment.batch_id.in_(included)).order_by(Shipment.shipment_id).all()
     labs = db.query(LabResult).filter(LabResult.batch_id.in_(included)).order_by(LabResult.tested_at, LabResult.lab_result_id)
+    decisions = db.query(ContainmentDecision).filter_by(selection=selection_key(selected)).order_by(ContainmentDecision.decision_id.desc())
     return {"selected_batch_ids": sorted(selected), "upstream": sorted(upstream), "downstream": sorted(downstream),
             "related": sorted(related), "batches": batches,
             "edges": [[a, b] for a, b in sorted(graph.edges) if a in included and b in included],
             "shipments": [shipment_document(db, ship) for ship in shipment_rows], "source_ranking": ranking,
             "lab_results": [{"lab_result_id": lab.lab_result_id, "batch_id": lab.batch_id, "tested_at": lab.tested_at,
                              "contaminant": lab.contaminant, "result": lab.result} for lab in labs],
+            "containment": containment(selected, downstream, included, shipment_rows, ranking, batches),
+            "decisions": [decision_document(d) for d in decisions],
             "interpretation": "Shared ingredients are investigation leads, not proven causes. Related stock needs review, not an automatic recall."}
 
 
 @router.get("/trace")
 def investigate(batch_ids: list[int] = Query(min_length=1, max_length=20), db: Session = Depends(get_db)):
     return trace_document(db, batch_ids)
+
+
+@router.post("/decisions", status_code=201)
+def decide(data: DecisionCreate, db: Session = Depends(get_db)):
+    # The hold list is recomputed from stored records, never taken from the client.
+    held = trace_document(db, data.batch_ids)["containment"]["options"][data.scope]
+    row = ContainmentDecision(selection=selection_key(data.batch_ids), scope=data.scope, decision=data.decision,
+                              officer=data.officer.strip(), reason=data.reason.strip(),
+                              decided_at=datetime.now(timezone.utc), **held)
+    db.add(row)
+    commit(db)
+    db.refresh(row)
+    return decision_document(row)
 
 
 @router.post("/demo/seed")

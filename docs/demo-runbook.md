@@ -26,7 +26,8 @@ The backend and ML services bind to `127.0.0.1` on LinuxONE as `tracefront-backe
 6. For the complete synthetic scenario, open `/trace` and click **Load synthetic scenario**. This adds reserved demo rows idempotently and never overwrites or deletes an existing record. It refuses conflicting reserved IDs.
 7. CW-42 is selected initially. Its upstream lots include L-102 and RM-402. Related products include CS-91 and VW-17 at the other factory, plus their recorded shipment destinations.
 8. Select CS-91 as well. L-102 becomes the top shared ingredient, linked to two selected products. The count is evidence of a shared lot, not a probability or proof of contamination. The recorded positive lab result is explicitly simulated.
-9. Refresh the trace URL to verify the selection is restored. For uploaded results, restart the backend and reopen the same `?analysis=...` URL to verify persistence.
+9. Scroll to **Containment decision**. With CW-42 alone it recommends a targeted hold; with CS-91 added it recommends an extended hold because L-102 is shared. Enter an officer name and reason, then approve. The decision appears in the history, and the held shipments are marked "Hold approved · simulated" in the network and table. Refresh to show it was stored. Decisions are append-only, so a previous rehearsal's decision stays in the history.
+10. Refresh the trace URL to verify the selection is restored. For uploaded results, restart the backend and reopen the same `?analysis=...` URL to verify persistence.
 
 The seed includes ingredient movements in kg and finished-product shipments in units. Shipment rows are movement records, not current warehouse stock; do not sum repeated movements into inventory or prevented-exposure claims. One batch per shipment remains the MVP limit.
 
@@ -47,4 +48,4 @@ The HTTP integration suite starts its own isolated API/database, enforces foreig
 
 Frontend: `frontend/node_modules/.bin/tsc --noEmit --incremental false` and a production build while no development server is running. A restricted Windows sandbox can prevent Next.js from detecting TypeScript through `realpath`; use a normal terminal if that environment-specific error appears.
 
-Decision approval, execution and live sensor replay are outside this change and remain pending.
+Hold execution is simulated: approving records the decision but changes no shipment status. Live sensor replay remains pending.
