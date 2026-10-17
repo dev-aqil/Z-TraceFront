@@ -1,0 +1,30 @@
+{
+  "milestone": "M1",
+  "receipt": "data/manifests/20261017T060123145416Z-29c44de9.json",
+  "checks": {
+    "receipt_hash_matches": true,
+    "config_hash_matches": true,
+    "inspection_code_matches": true,
+    "receipt_code_matches": true,
+    "eligible_source_entries": 6,
+    "artifact_integrity": {
+      "checked_artifacts": 28,
+      "integrity_ok": true,
+      "failures": [],
+      "acquisition_status": "partial"
+    },
+    "primary_files_read_only": true,
+    "no_m2_outputs": true,
+    "git_diff_check_passed": true
+  },
+  "tests": {
+    "python_3_11_pytest": {
+      "passed": 41
+    },
+    "python_3_14_unittest": {
+      "passed": 41
+    }
+  },
+  "s390x_tested": false,
+  "scope": "Raw ingestion/inspection only; no cleaning, features, merges or training"
+}

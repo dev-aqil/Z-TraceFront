@@ -14,3 +14,7 @@ __pycache__/
 /data/raw/fsis/*
 !/data/raw/fsis/README.md
 /data/external/openfda/
+/data/raw/usda_pdp/sha256/
+/data/raw/fda_inspections/sha256/
+/data/raw/noaa/sha256/
+/data/raw/opendosm/sha256/

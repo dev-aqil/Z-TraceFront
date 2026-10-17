@@ -1,0 +1,2841 @@
+{
+  "config_sha256": "687aab324204fee658d237a3e9e150a2fb23c96f8c786959b8d8d3a34752b1cd",
+  "datasets": {
+    "fda_inspections": {
+      "acquisition_status": "pending",
+      "artifacts": [
+        {
+          "artifact_id": "fda_classification_page",
+          "attempted_at": "2026-10-17T05:55:45.409267+00:00",
+          "content_type": "text/html; charset=UTF-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"1792191191\"",
+          "http_last_modified": "Fri, 16 Oct 2026 22:53:11 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/fda_inspections/sha256/7113e6b41a7ba98f99e93c2f4e073550636a653992ab555d1763b0127873a3f6/inspection-classification-database.html",
+          "resolved_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/inspection-classification-database",
+          "retrieved_at": "2026-10-17T05:55:45.750521+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:23.847945+00:00",
+          "reused": false,
+          "role": "documentation",
+          "sha256": "7113e6b41a7ba98f99e93c2f4e073550636a653992ab555d1763b0127873a3f6",
+          "size_bytes": 42257,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/inspection-classification-database",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "fda_inspection_dashboard",
+          "attempted_at": "2026-10-17T05:55:45.409809+00:00",
+          "content_type": "text/html",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"f4f560bf6ce9dc1:0\"",
+          "http_last_modified": "Thu, 21 May 2026 21:56:59 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/fda_inspections/sha256/b47ab3cb75d1e4d97ef5b26081de461e873e4c323bef698f9c7ff02fa715c73d/inspections.htm",
+          "resolved_url": "https://datadashboard.fda.gov/oii/cd/inspections.htm",
+          "retrieved_at": "2026-10-17T05:55:46.921522+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:23.822644+00:00",
+          "reused": false,
+          "role": "documentation",
+          "sha256": "b47ab3cb75d1e4d97ef5b26081de461e873e4c323bef698f9c7ff02fa715c73d",
+          "size_bytes": 27649,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://datadashboard.fda.gov/oii/cd/inspections.htm",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "fda_api_documentation",
+          "attempted_at": "2026-10-17T05:55:45.410236+00:00",
+          "content_type": "text/html",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"72f7ad06911dc1:0\"",
+          "http_last_modified": "Wed, 20 Aug 2025 00:31:48 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/fda_inspections/sha256/91b62cbff3b236e5a2253030fb2d9ea5957d4ba99ffafe190a1f423f8e58a97d/api-index.htm",
+          "resolved_url": "https://datadashboard.fda.gov/oii/api/index.htm",
+          "retrieved_at": "2026-10-17T05:55:47.159603+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:23.823054+00:00",
+          "reused": false,
+          "role": "documentation",
+          "sha256": "91b62cbff3b236e5a2253030fb2d9ea5957d4ba99ffafe190a1f423f8e58a97d",
+          "size_bytes": 58406,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://datadashboard.fda.gov/oii/api/index.htm",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "fda_inspections_xlsx",
+          "attempted_at": "2026-10-17T06:01:23.821578+00:00",
+          "declared_download_url": null,
+          "error": "HTTP Error 404: Not Found",
+          "error_type": "HTTPError",
+          "expected_sha256": null,
+          "http_status": 404,
+          "imported_at": null,
+          "method": "download",
+          "retrieved_at": null,
+          "role": "data",
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://datadashboard.fda.gov/InspectionsDataset.xlsx",
+          "source_version": null,
+          "status": "failed"
+        },
+        {
+          "artifact_id": "fda_inspections_relative_export",
+          "attempted_at": "2026-10-17T06:01:23.822699+00:00",
+          "declared_download_url": null,
+          "error": "HTTP Error 404: Not Found",
+          "error_type": "HTTPError",
+          "expected_sha256": null,
+          "http_status": 404,
+          "imported_at": null,
+          "method": "download",
+          "retrieved_at": null,
+          "role": "data",
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://datadashboard.fda.gov/oii/cd/InspectionsDataset.xlsx",
+          "source_version": null,
+          "status": "failed"
+        },
+        {
+          "artifact_id": "fda_license",
+          "attempted_at": "2026-10-17T05:57:23.212162+00:00",
+          "content_type": "text/html; charset=UTF-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"1792214120\"",
+          "http_last_modified": "Sat, 17 Oct 2026 05:15:20 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/fda_inspections/sha256/63fe227e41e9843bd7855c25c9a7a26a50f0d5a51a7da23aab868d75361b605d/website-policies.html",
+          "resolved_url": "https://www.fda.gov/about-fda/about-website/website-policies",
+          "retrieved_at": "2026-10-17T05:57:23.596251+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:23.847849+00:00",
+          "reused": false,
+          "role": "license_evidence",
+          "sha256": "63fe227e41e9843bd7855c25c9a7a26a50f0d5a51a7da23aab868d75361b605d",
+          "size_bytes": 45587,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.fda.gov/about-fda/about-website/website-policies",
+          "source_version": null,
+          "status": "captured"
+        }
+      ],
+      "canonical_source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/inspection-classification-database",
+      "contamination_domain": "CONTEXT_ONLY",
+      "directory": "data/raw/fda_inspections",
+      "documented_acquisition": {
+        "api_documentation": "https://datadashboard.fda.gov/oii/api/index.htm",
+        "bulk_export_link": "https://datadashboard.fda.gov/InspectionsDataset.xlsx",
+        "bulk_export_observed_status": 404,
+        "food_scope": "Export and API include multiple product jurisdictions; food project-area scope must be inspected before M2",
+        "method": "POST JSON with Authorization-User and Authorization-Key (not available; no account creation attempted)",
+        "pagination": "rows<=5000; start is 1-based; optional returntotalcount=true; preserve each response and request body after credentials are provided",
+        "required_body": {
+          "columns": [],
+          "filters": {},
+          "sort": "",
+          "sortorder": ""
+        }
+      },
+      "inspection": {},
+      "intended_ml_role": "HISTORICAL_RISK_SOURCE",
+      "license": "US public domain unless otherwise noted, under FDA website reuse policy; credit appreciated",
+      "license_known": true,
+      "license_review": {
+        "basis": "FDA website content is public domain unless otherwise noted; official classification records are agency-published information",
+        "review_date": "2026-10-17",
+        "section": "Linking to or Copying Information on the FDA Website",
+        "url": "https://www.fda.gov/about-fda/about-website/website-policies"
+      },
+      "limitations": [
+        "Official POST API requires Authorization-User and Authorization-Key from OII Unified Logon",
+        "NAI/VAI/OAI are compliance classifications, not measured contamination",
+        "FEI is not an FSIS establishment ID; classifications are project-area specific",
+        "No raw records acquired: dashboard absolute export link and dashboard-relative candidate returned 404; documented API needs credentials. Source field definitions do not establish actual export schema."
+      ],
+      "m2_eligible": false,
+      "m2_gate": {
+        "license_known": true,
+        "provenance_confirmed": true,
+        "raw_data_present_and_hash_pinned": false,
+        "row_granularity_understood": false,
+        "schema_issues_documented": false,
+        "schema_review_passed": false
+      },
+      "provenance_confirmed": true,
+      "publisher": "US FDA Office of Inspections and Investigations",
+      "scope": "Full public inspection classification XLSX; API alternative requires credentials"
+    },
+    "fsis_raw_poultry": {
+      "acquisition_status": "pending",
+      "artifacts": [
+        {
+          "artifact_id": "fsis_catalog_page",
+          "attempted_at": "2026-10-17T05:39:58.805778+00:00",
+          "content_type": "text/html; charset=utf-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": null,
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/fsis/sha256/ce9ab489a207ae0faa1aaaf80a6a31318c4f118d81af4a2c8839f2223c4a4ce3/catalog.html",
+          "resolved_url": "https://catalog.data.gov/dataset/fsis-laboratory-sampling-data-raw-poultry-sampling",
+          "retrieved_at": "2026-10-17T05:39:59.722602+00:00",
+          "reused": true,
+          "role": "authoritative_catalog_and_license_evidence",
+          "sha256": "ce9ab489a207ae0faa1aaaf80a6a31318c4f118d81af4a2c8839f2223c4a4ce3",
+          "size_bytes": 123843,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://catalog.data.gov/dataset/fsis-laboratory-sampling-data-raw-poultry-sampling",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "fsis_catalog_metadata",
+          "attempted_at": "2026-10-17T05:39:59.722801+00:00",
+          "content_type": "application/json",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": null,
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/fsis/sha256/e8f3d9d7641f8109eab5405de93e833f573ed349e13266f1b03e71058338c3a0/catalog_metadata.json",
+          "resolved_url": "https://catalog.data.gov/harvest_record/8bd3606e-32f0-415c-ab74-38527ec5f9aa/raw",
+          "retrieved_at": "2026-10-17T05:40:00.232526+00:00",
+          "reused": true,
+          "role": "authoritative_catalog_metadata",
+          "sha256": "e8f3d9d7641f8109eab5405de93e833f573ed349e13266f1b03e71058338c3a0",
+          "size_bytes": 1581,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://catalog.data.gov/harvest_record/8bd3606e-32f0-415c-ab74-38527ec5f9aa/raw",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "fsis_resource_page",
+          "attempted_at": "2026-10-17T05:40:00.232663+00:00",
+          "declared_download_url": null,
+          "error": "HTTP Error 403: Forbidden",
+          "error_type": "HTTPError",
+          "expected_sha256": null,
+          "http_status": 403,
+          "imported_at": null,
+          "method": "download",
+          "retrieved_at": null,
+          "role": "resource_discovery_page_not_sample_data",
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.fsis.usda.gov/news-events/publications/raw-poultry-sampling",
+          "source_version": null,
+          "status": "failed"
+        },
+        {
+          "artifact_id": "fsis_dictionary_reference",
+          "attempted_at": "2026-10-17T05:40:00.401775+00:00",
+          "declared_download_url": null,
+          "error": "HTTP Error 403: Forbidden",
+          "error_type": "HTTPError",
+          "expected_sha256": null,
+          "http_status": 403,
+          "imported_at": null,
+          "method": "download",
+          "retrieved_at": null,
+          "role": "historical_dictionary_reference_not_verified_against_current_release",
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://downloads.regulations.gov/FSIS-2014-0032-0086/content.pdf",
+          "source_version": null,
+          "status": "failed"
+        }
+      ],
+      "canonical_source_url": "https://catalog.data.gov/dataset/fsis-laboratory-sampling-data-raw-poultry-sampling",
+      "contamination_domain": "BIOLOGICAL",
+      "directory": "data/raw/fsis",
+      "inspection": {},
+      "intended_ml_role": "DIRECT_LABEL_SOURCE",
+      "license": "CC0-1.0 (catalog declaration)",
+      "license_known": true,
+      "limitations": [
+        "Raw sample file and matching dictionary pending; no schema or counts known"
+      ],
+      "m2_eligible": false,
+      "m2_gate": {
+        "license_known": true,
+        "provenance_confirmed": true,
+        "raw_data_present_and_hash_pinned": false,
+        "row_granularity_understood": false,
+        "schema_issues_documented": false,
+        "schema_review_passed": false
+      },
+      "prior_inspection": {
+        "reason": "No official sample artifact registered. HTTP 403 is a session access restriction, not evidence of dataset unavailability.",
+        "status": "awaiting_official_file",
+        "training_eligible": false
+      },
+      "provenance_confirmed": true,
+      "publisher": "USDA FSIS",
+      "reuse_manifest": "data/manifests/20261017T053958804059Z-a2601437.json",
+      "reuse_verified_at": "2026-10-17T06:01:23.147815+00:00",
+      "scope": "No sample acquisition attempted; manual intake unchanged",
+      "source_status": "official source confirmed, raw file not yet acquired"
+    },
+    "noaa_ghcn_daily": {
+      "acquisition_status": "acquired",
+      "artifacts": [
+        {
+          "artifact_id": "ghcn_stations",
+          "attempted_at": "2026-10-17T05:55:47.160183+00:00",
+          "content_type": "text/plain",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"ae94ca-65dd583ca760b\"",
+          "http_last_modified": "Wed, 14 Oct 2026 23:44:40 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/noaa/sha256/428eabc955883187935bce283766d5646e3ed7484b92eb0803874c0e8dd9b342/ghcnd-stations.txt",
+          "resolved_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt",
+          "retrieved_at": "2026-10-17T05:55:51.729577+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.951075+00:00",
+          "reused": false,
+          "role": "station_metadata",
+          "sha256": "428eabc955883187935bce283766d5646e3ed7484b92eb0803874c0e8dd9b342",
+          "size_bytes": 11441354,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "ghcn_readme",
+          "attempted_at": "2026-10-17T05:55:47.160559+00:00",
+          "content_type": "text/plain",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"7393-65d1f364ae7e4\"",
+          "http_last_modified": "Mon, 05 Oct 2026 22:14:56 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/noaa/sha256/0e4e6f0e6947cf1add884c328a01760f31c56ef5fb86b85ed57dd5dc4c4aeaa6/readme.txt",
+          "resolved_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/readme.txt",
+          "retrieved_at": "2026-10-17T05:55:48.222051+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.937613+00:00",
+          "reused": false,
+          "role": "documentation",
+          "sha256": "0e4e6f0e6947cf1add884c328a01760f31c56ef5fb86b85ed57dd5dc4c4aeaa6",
+          "size_bytes": 29587,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/readme.txt",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "ghcn_version",
+          "attempted_at": "2026-10-17T05:55:47.160907+00:00",
+          "content_type": "text/plain",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"10e-65dfd500f6101\"",
+          "http_last_modified": "Fri, 16 Oct 2026 23:13:31 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/noaa/sha256/af43ea47247547b0905b10a88cf70d7d99a04120dd29cd0e8f4487457a608cef/ghcnd-version.txt",
+          "resolved_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-version.txt",
+          "retrieved_at": "2026-10-17T05:55:47.997985+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.938349+00:00",
+          "reused": false,
+          "role": "release_metadata",
+          "sha256": "af43ea47247547b0905b10a88cf70d7d99a04120dd29cd0e8f4487457a608cef",
+          "size_bytes": 270,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-version.txt",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "ghcn_catalog",
+          "attempted_at": "2026-10-17T05:55:47.161237+00:00",
+          "content_type": "text/html",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": null,
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/noaa/sha256/48c36b6d4d9ebe2ad523cb20c634372c25a14c89fc1608743d6038638c61d5a0/C00861.html",
+          "resolved_url": "https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00861",
+          "retrieved_at": "2026-10-17T05:55:48.719235+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.938819+00:00",
+          "reused": false,
+          "role": "documentation",
+          "sha256": "48c36b6d4d9ebe2ad523cb20c634372c25a14c89fc1608743d6038638c61d5a0",
+          "size_bytes": 53716,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00861",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "noaa_policy",
+          "attempted_at": "2026-10-17T05:55:47.998040+00:00",
+          "content_type": "text/html; charset=UTF-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": null,
+          "http_last_modified": "Wed, 18 Oct 2017 16:58:53 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/noaa/sha256/472f577c9f53d5f54782f71a9e6a110b694b9e8b4fd33fcb26a4bc4e6417e999/privacy.html",
+          "resolved_url": "https://data.ngdc.noaa.gov/ngdcinfo/privacy.html",
+          "retrieved_at": "2026-10-17T05:55:49.230594+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.938528+00:00",
+          "reused": false,
+          "role": "license_evidence",
+          "sha256": "472f577c9f53d5f54782f71a9e6a110b694b9e8b4fd33fcb26a4bc4e6417e999",
+          "size_bytes": 19821,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://data.ngdc.noaa.gov/ngdcinfo/privacy.html",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "ghcn_station_data",
+          "attempted_at": "2026-10-17T05:56:35.623402+00:00",
+          "content_type": "text/plain",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"aebfa-65dfc571a8d63\"",
+          "http_last_modified": "Fri, 16 Oct 2026 22:03:54 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/noaa/sha256/66f1bdd365da92a90f5fe4f74347f9988c09bc09eeadeff8090f031f8f75ee24/MYM00048647.dly",
+          "resolved_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/all/MYM00048647.dly",
+          "retrieved_at": "2026-10-17T05:56:38.000203+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.942052+00:00",
+          "reused": false,
+          "role": "data",
+          "sha256": "66f1bdd365da92a90f5fe4f74347f9988c09bc09eeadeff8090f031f8f75ee24",
+          "size_bytes": 715770,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.ncei.noaa.gov/pub/data/ghcn/daily/all/MYM00048647.dly",
+          "source_version": null,
+          "status": "captured"
+        }
+      ],
+      "canonical_source_url": "https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00861",
+      "contamination_domain": "CONTEXT_ONLY",
+      "directory": "data/raw/noaa",
+      "inspection": {
+        "columns": [
+          "ID",
+          "YEAR",
+          "MONTH",
+          "ELEMENT",
+          "VALUE1..31",
+          "MFLAG1..31",
+          "QFLAG1..31",
+          "SFLAG1..31"
+        ],
+        "duplicate_station_month_element_rows": 0,
+        "element_month_row_counts": {
+          "PRCP": 741,
+          "TAVG": 780,
+          "TMAX": 543,
+          "TMIN": 587
+        },
+        "format": "GHCN-Daily fixed-width ASCII; 269 characters plus newline",
+        "geography": "Single Malaysian airport station; current official station line retained below",
+        "identifiers": [
+          "MYM00048647"
+        ],
+        "malformed_width_rows": 0,
+        "official_station_lines": [
+          "MYM00048647   3.1310  101.5490   27.4    SULTAN ABDUL AZIZ SHAH INTL            48647"
+        ],
+        "populated_day_slots": 59655,
+        "quality_flag_slot_counts": {
+          " ": 82149,
+          "D": 2,
+          "K": 24,
+          "O": 6
+        },
+        "release_status_text": "The current version of GHCN Daily is 3.35-upd-2026101517 (i.e, an update that started at 2026101517 [yyyymmddhh] UTC; yyyy=year; mm=month; dd=day; hh=hour),\ncreated by appending recently available data updates to the last fully reprocessed version: 3.35-por-2026100923.\n",
+        "row_granularity": "station x year x month x weather element, with 31 day value/measurement/quality/source slots",
+        "rows": 2651,
+        "schema_issues": [
+          "31-day slots include invalid calendar days as -9999 padding; not all slots are observations",
+          "TMIN/TMAX/TAVG are tenths Celsius and PRCP tenths mm in raw .dly; other elements have distinct units",
+          "Nonblank quality flags need exclusion/review in M2; blanks do not prove perfect measurements",
+          "One station is not national coverage, a farm location, or an FSIS weather join",
+          "Station-month counts differ by element; earliest/latest month is not continuous daily completeness",
+          "Downloaded global station inventory contains UTF-8 station names; .dly weather values are ASCII"
+        ],
+        "sentinel_day_slots_including_noncalendar_padding": 22526,
+        "structural_review_ok": true,
+        "target": null,
+        "time_coverage": [
+          "1949-04",
+          "2025-08"
+        ],
+        "timestamps": [
+          "YEAR",
+          "MONTH",
+          "day slot 1..31"
+        ]
+      },
+      "intended_ml_role": "AUXILIARY_FEATURE_SOURCE",
+      "license": "US public domain under NCEI copyright policy, with exceptions and dataset use/citation constraints",
+      "license_known": true,
+      "limitations": [
+        "Station metadata is current, not an historical location crosswalk",
+        "Station observations do not measure batch exposure or contamination",
+        "Quality flags, missing sentinels, reporting lags and retrospective revisions must be retained",
+        "A current archive is not a historical availability-time snapshot",
+        "The acquired station file ends 2025-08 although the global version status is 2026-10; global version is not station coverage or proof of a transactional snapshot"
+      ],
+      "m2_eligible": true,
+      "m2_gate": {
+        "license_known": true,
+        "provenance_confirmed": true,
+        "raw_data_present_and_hash_pinned": true,
+        "row_granularity_understood": true,
+        "schema_issues_documented": true,
+        "schema_review_passed": true
+      },
+      "provenance_confirmed": true,
+      "publisher": "NOAA National Centers for Environmental Information",
+      "release": "GHCN-Daily Version 3; rolling reconstruction; exact status file captured",
+      "scope": "Full available history for MYM00048647, verified in station inventory: Sultan Abdul Aziz Shah Intl, 3.131N 101.549E; bounded Malaysian ingestion pilot, not national weather coverage"
+    },
+    "opendosm_crops_district_area": {
+      "acquisition_status": "acquired",
+      "artifacts": [
+        {
+          "artifact_id": "crops_district_area",
+          "attempted_at": "2026-10-17T05:55:52.733510+00:00",
+          "content_type": "binary/octet-stream",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"35364618cdef6122395ef97633baf5e2\"",
+          "http_last_modified": "Sat, 21 Sep 2024 14:50:55 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/opendosm/sha256/10e71cb5da3471b92ecf20d7ac0d74c3be3e403b226086307fefa808b4b7e672/crops_district_area.csv",
+          "resolved_url": "https://storage.data.gov.my/agriculture/crops_district_area.csv",
+          "retrieved_at": "2026-10-17T05:55:52.943510+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.956589+00:00",
+          "reused": false,
+          "role": "data",
+          "sha256": "10e71cb5da3471b92ecf20d7ac0d74c3be3e403b226086307fefa808b4b7e672",
+          "size_bytes": 542038,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://storage.data.gov.my/agriculture/crops_district_area.csv",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "crops_district_area_catalog",
+          "attempted_at": "2026-10-17T05:55:52.733979+00:00",
+          "content_type": "text/html; charset=utf-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"qv3w4gtyf42gxn\"",
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/opendosm/sha256/2b93292c7c60d6712557c4976087f0f4b84ede81adc45dd06fb32ccab36b9ecf/crops_district_area.html",
+          "resolved_url": "https://open.dosm.gov.my/data-catalogue/crops_district_area",
+          "retrieved_at": "2026-10-17T05:55:53.003432+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.956668+00:00",
+          "reused": false,
+          "role": "license_and_dictionary_evidence",
+          "sha256": "2b93292c7c60d6712557c4976087f0f4b84ede81adc45dd06fb32ccab36b9ecf",
+          "size_bytes": 115303,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://open.dosm.gov.my/data-catalogue/crops_district_area",
+          "source_version": null,
+          "status": "captured"
+        }
+      ],
+      "canonical_source_url": "https://open.dosm.gov.my/data-catalogue/crops_district_area",
+      "contamination_domain": "CONTEXT_ONLY",
+      "directory": "data/raw/opendosm",
+      "inspection": {
+        "column_count": 6,
+        "columns": [
+          "date",
+          "state",
+          "district",
+          "crop_type",
+          "crop_species",
+          "planted_area"
+        ],
+        "duplicate_key_extra_rows": null,
+        "empty_string_counts": {},
+        "format": "CSV with header, UTF-8",
+        "geography": "Malaysia; state/district names and national aggregates where present",
+        "identifiers": [
+          "state",
+          "district",
+          "crop_type",
+          "crop_species"
+        ],
+        "key": null,
+        "malformed_width_rows": 0,
+        "missing_key_rows": null,
+        "raw_category_counts": {
+          "crop_type": {
+            "cash_crops": 894,
+            "fruit": 3125,
+            "herbs": 951,
+            "industrial_crops": 660,
+            "spices": 1247,
+            "vegetables": 3678
+          },
+          "state": {
+            "Johor": 897,
+            "Kedah": 995,
+            "Kelantan": 741,
+            "Melaka": 189,
+            "Negeri Sembilan": 490,
+            "Pahang": 869,
+            "Perak": 851,
+            "Perlis": 47,
+            "Pulau Pinang": 270,
+            "Sabah": 1861,
+            "Sarawak": 2177,
+            "Selangor": 594,
+            "Terengganu": 536,
+            "W.P. Labuan": 38
+          }
+        },
+        "raw_lexical_ranges": {
+          "date": [
+            "2017-01-01",
+            "2017-01-01"
+          ]
+        },
+        "row_granularity": "year x state x district x crop type x species",
+        "row_width_counts": {
+          "6": 10555
+        },
+        "rows": 10555,
+        "schema_issues": [
+          "Annual reference date 01-01 is not publication/availability date",
+          "State/country totals and district/crop breakdowns can overlap; do not sum or join without grain review",
+          "Agricultural production/area does not label food safety; no justified link to US FSIS samples",
+          "Reporting lag, absent zero-activity districts, rounding and district definitions require review"
+        ],
+        "structural_review_ok": true,
+        "target": null,
+        "time_coverage": [
+          "2017-01-01",
+          "2017-01-01"
+        ],
+        "timestamps": [
+          "date (annual reference year, not publication instant)"
+        ],
+        "unique_nonempty_keys": null
+      },
+      "intended_ml_role": "EXTERNAL_CONTEXT_SOURCE",
+      "license": "CC-BY-4.0",
+      "license_known": true,
+      "limitations": [
+        "Annual reference date 01-01 is not publication/availability date",
+        "State/country totals and district/crop breakdowns can overlap; do not sum or join without grain review",
+        "Agricultural production/area does not label food safety; no justified link to US FSIS samples",
+        "Reporting lag, absent zero-activity districts, rounding and district definitions require review"
+      ],
+      "m2_eligible": true,
+      "m2_gate": {
+        "license_known": true,
+        "provenance_confirmed": true,
+        "raw_data_present_and_hash_pinned": true,
+        "row_granularity_understood": true,
+        "schema_issues_documented": true,
+        "schema_review_passed": true
+      },
+      "provenance_confirmed": true,
+      "publisher": "Department of Statistics Malaysia; Department of Agriculture; Ministry of Agriculture and Food Security",
+      "release": "Rolling publisher CSV; version pinned by content hash",
+      "scope": "Full publisher CSV; annual aggregate table retained separately"
+    },
+    "opendosm_crops_district_production": {
+      "acquisition_status": "acquired",
+      "artifacts": [
+        {
+          "artifact_id": "crops_district_production",
+          "attempted_at": "2026-10-17T05:55:52.313730+00:00",
+          "content_type": "binary/octet-stream",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"3ccd26cb4ac45e5776f5b8d06bd94298\"",
+          "http_last_modified": "Sat, 21 Sep 2024 14:51:01 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/opendosm/sha256/d3bdf3a710f4635214f3191deb6970849e9f8b623bae43b3de823bfe802449cd/crops_district_production.csv",
+          "resolved_url": "https://storage.data.gov.my/agriculture/crops_district_production.csv",
+          "retrieved_at": "2026-10-17T05:55:52.598252+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.954976+00:00",
+          "reused": false,
+          "role": "data",
+          "sha256": "d3bdf3a710f4635214f3191deb6970849e9f8b623bae43b3de823bfe802449cd",
+          "size_bytes": 567921,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://storage.data.gov.my/agriculture/crops_district_production.csv",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "crops_district_production_catalog",
+          "attempted_at": "2026-10-17T05:55:52.314233+00:00",
+          "content_type": "text/html; charset=utf-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"1ygtaj5u3j2gwt\"",
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/opendosm/sha256/90f565daeeec929a06eb4e178441d0675fdd0fbebbda944b52b658764f297fee/crops_district_production.html",
+          "resolved_url": "https://open.dosm.gov.my/data-catalogue/crops_district_production",
+          "retrieved_at": "2026-10-17T05:55:52.732970+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.954549+00:00",
+          "reused": false,
+          "role": "license_and_dictionary_evidence",
+          "sha256": "90f565daeeec929a06eb4e178441d0675fdd0fbebbda944b52b658764f297fee",
+          "size_bytes": 115273,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://open.dosm.gov.my/data-catalogue/crops_district_production",
+          "source_version": null,
+          "status": "captured"
+        }
+      ],
+      "canonical_source_url": "https://open.dosm.gov.my/data-catalogue/crops_district_production",
+      "contamination_domain": "CONTEXT_ONLY",
+      "directory": "data/raw/opendosm",
+      "inspection": {
+        "column_count": 6,
+        "columns": [
+          "date",
+          "state",
+          "district",
+          "crop_type",
+          "crop_species",
+          "production"
+        ],
+        "duplicate_key_extra_rows": null,
+        "empty_string_counts": {},
+        "format": "CSV with header, UTF-8",
+        "geography": "Malaysia; state/district names and national aggregates where present",
+        "identifiers": [
+          "state",
+          "district",
+          "crop_type",
+          "crop_species"
+        ],
+        "key": null,
+        "malformed_width_rows": 0,
+        "missing_key_rows": null,
+        "raw_category_counts": {
+          "crop_type": {
+            "cash_crops": 941,
+            "fruit": 3150,
+            "herbs": 1198,
+            "industrial_crops": 712,
+            "spices": 1271,
+            "vegetable": 3730
+          },
+          "state": {
+            "Johor": 907,
+            "Kedah": 1020,
+            "Kelantan": 750,
+            "Melaka": 207,
+            "Negeri Sembilan": 490,
+            "Pahang": 1024,
+            "Perak": 972,
+            "Perlis": 50,
+            "Pulau Pinang": 275,
+            "Sabah": 1889,
+            "Sarawak": 2180,
+            "Selangor": 648,
+            "Terengganu": 552,
+            "W.P. Labuan": 38
+          }
+        },
+        "raw_lexical_ranges": {
+          "date": [
+            "2017-01-01",
+            "2017-01-01"
+          ]
+        },
+        "row_granularity": "year x state x district x crop type x species",
+        "row_width_counts": {
+          "6": 11002
+        },
+        "rows": 11002,
+        "schema_issues": [
+          "Annual reference date 01-01 is not publication/availability date",
+          "State/country totals and district/crop breakdowns can overlap; do not sum or join without grain review",
+          "Agricultural production/area does not label food safety; no justified link to US FSIS samples",
+          "Reporting lag, absent zero-activity districts, rounding and district definitions require review"
+        ],
+        "structural_review_ok": true,
+        "target": null,
+        "time_coverage": [
+          "2017-01-01",
+          "2017-01-01"
+        ],
+        "timestamps": [
+          "date (annual reference year, not publication instant)"
+        ],
+        "unique_nonempty_keys": null
+      },
+      "intended_ml_role": "EXTERNAL_CONTEXT_SOURCE",
+      "license": "CC-BY-4.0",
+      "license_known": true,
+      "limitations": [
+        "Annual reference date 01-01 is not publication/availability date",
+        "State/country totals and district/crop breakdowns can overlap; do not sum or join without grain review",
+        "Agricultural production/area does not label food safety; no justified link to US FSIS samples",
+        "Reporting lag, absent zero-activity districts, rounding and district definitions require review"
+      ],
+      "m2_eligible": true,
+      "m2_gate": {
+        "license_known": true,
+        "provenance_confirmed": true,
+        "raw_data_present_and_hash_pinned": true,
+        "row_granularity_understood": true,
+        "schema_issues_documented": true,
+        "schema_review_passed": true
+      },
+      "provenance_confirmed": true,
+      "publisher": "Department of Statistics Malaysia; Department of Agriculture; Ministry of Agriculture and Food Security",
+      "release": "Rolling publisher CSV; version pinned by content hash",
+      "scope": "Full publisher CSV; annual aggregate table retained separately"
+    },
+    "opendosm_crops_state": {
+      "acquisition_status": "acquired",
+      "artifacts": [
+        {
+          "artifact_id": "crops_state",
+          "attempted_at": "2026-10-17T05:55:51.730244+00:00",
+          "content_type": "binary/octet-stream",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"f69547e2204486102ca92eb00e69cfa0\"",
+          "http_last_modified": "Sun, 11 Oct 2026 01:04:09 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/opendosm/sha256/b977d8ff61c536909f8131374de484bd1d0cb2d37935c875018b1b89577a849b/crops_state.csv",
+          "resolved_url": "https://storage.data.gov.my/agriculture/crops_state.csv",
+          "retrieved_at": "2026-10-17T05:55:52.137738+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.952789+00:00",
+          "reused": false,
+          "role": "data",
+          "sha256": "b977d8ff61c536909f8131374de484bd1d0cb2d37935c875018b1b89577a849b",
+          "size_bytes": 68546,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://storage.data.gov.my/agriculture/crops_state.csv",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "crops_state_catalog",
+          "attempted_at": "2026-10-17T05:55:51.730666+00:00",
+          "content_type": "text/html; charset=utf-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"pjkyizbwx92ac2\"",
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/opendosm/sha256/f5d90d4b1404fb01abbf3d4d775bc62e682d9e699df4e8120da09fab7a217d5c/crops_state.html",
+          "resolved_url": "https://open.dosm.gov.my/data-catalogue/crops_state",
+          "retrieved_at": "2026-10-17T05:55:52.313171+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:24.953254+00:00",
+          "reused": false,
+          "role": "license_and_dictionary_evidence",
+          "sha256": "f5d90d4b1404fb01abbf3d4d775bc62e682d9e699df4e8120da09fab7a217d5c",
+          "size_bytes": 106748,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://open.dosm.gov.my/data-catalogue/crops_state",
+          "source_version": null,
+          "status": "captured"
+        }
+      ],
+      "canonical_source_url": "https://open.dosm.gov.my/data-catalogue/crops_state",
+      "contamination_domain": "CONTEXT_ONLY",
+      "directory": "data/raw/opendosm",
+      "inspection": {
+        "column_count": 5,
+        "columns": [
+          "state",
+          "date",
+          "crop_type",
+          "planted_area",
+          "production"
+        ],
+        "duplicate_key_extra_rows": null,
+        "empty_string_counts": {},
+        "format": "CSV with header, UTF-8",
+        "geography": "Malaysia; state/district names and national aggregates where present",
+        "identifiers": [
+          "state",
+          "crop_type"
+        ],
+        "key": null,
+        "malformed_width_rows": 0,
+        "missing_key_rows": null,
+        "raw_category_counts": {
+          "crop_type": {
+            "cash_crops": 176,
+            "coconut": 176,
+            "flower": 176,
+            "fruits": 176,
+            "herbs": 176,
+            "industrial_crops": 176,
+            "paddy": 176,
+            "spices": 176,
+            "vegetables": 176
+          },
+          "state": {
+            "Johor": 99,
+            "Kedah": 99,
+            "Kelantan": 99,
+            "Malaysia": 99,
+            "Melaka": 99,
+            "Negeri Sembilan": 99,
+            "Pahang": 99,
+            "Perak": 99,
+            "Perlis": 99,
+            "Pulau Pinang": 99,
+            "Sabah": 99,
+            "Sarawak": 99,
+            "Selangor": 99,
+            "Terengganu": 99,
+            "W.P. Kuala Lumpur": 99,
+            "W.P. Labuan": 99
+          }
+        },
+        "raw_lexical_ranges": {
+          "date": [
+            "2014-01-01",
+            "2024-01-01"
+          ]
+        },
+        "row_granularity": "year x state/country x crop type",
+        "row_width_counts": {
+          "5": 1584
+        },
+        "rows": 1584,
+        "schema_issues": [
+          "Annual reference date 01-01 is not publication/availability date",
+          "State/country totals and district/crop breakdowns can overlap; do not sum or join without grain review",
+          "Agricultural production/area does not label food safety; no justified link to US FSIS samples",
+          "Reporting lag, absent zero-activity districts, rounding and district definitions require review"
+        ],
+        "structural_review_ok": true,
+        "target": null,
+        "time_coverage": [
+          "2014-01-01",
+          "2024-01-01"
+        ],
+        "timestamps": [
+          "date (annual reference year, not publication instant)"
+        ],
+        "unique_nonempty_keys": null
+      },
+      "intended_ml_role": "EXTERNAL_CONTEXT_SOURCE",
+      "license": "CC-BY-4.0",
+      "license_known": true,
+      "limitations": [
+        "Annual reference date 01-01 is not publication/availability date",
+        "State/country totals and district/crop breakdowns can overlap; do not sum or join without grain review",
+        "Agricultural production/area does not label food safety; no justified link to US FSIS samples",
+        "Reporting lag, absent zero-activity districts, rounding and district definitions require review"
+      ],
+      "m2_eligible": true,
+      "m2_gate": {
+        "license_known": true,
+        "provenance_confirmed": true,
+        "raw_data_present_and_hash_pinned": true,
+        "row_granularity_understood": true,
+        "schema_issues_documented": true,
+        "schema_review_passed": true
+      },
+      "provenance_confirmed": true,
+      "publisher": "Department of Statistics Malaysia; Department of Agriculture; Ministry of Agriculture and Food Security",
+      "release": "Rolling publisher CSV; version pinned by content hash",
+      "scope": "Full publisher CSV; annual aggregate table retained separately"
+    },
+    "openfda_enforcement": {
+      "acquisition_status": "acquired",
+      "artifacts": [
+        {
+          "artifact_id": "openfda_local_json",
+          "attempted_at": "2026-10-17T05:40:01.127165+00:00",
+          "declared_download_url": null,
+          "expected_sha256": "02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d",
+          "imported_at": "2026-10-17T05:40:01.353543+00:00",
+          "method": "local_import",
+          "path": "data/external/openfda/sha256/02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d/food-enforcement-0001-of-0001.json",
+          "retrieved_at": null,
+          "reused": true,
+          "role": "context_data",
+          "sha256": "02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d",
+          "size_bytes": 39906111,
+          "source_path": "tmp/food-enforcement-0001-of-0001.json",
+          "source_reference_url": "https://open.fda.gov/apis/food/enforcement/download/",
+          "source_url": null,
+          "source_version": "embedded 2026-10-14; original retrieval unknown",
+          "status": "captured"
+        },
+        {
+          "artifact_id": "openfda_local_zip",
+          "attempted_at": "2026-10-17T05:40:01.353700+00:00",
+          "declared_download_url": null,
+          "expected_sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+          "imported_at": "2026-10-17T05:40:01.406927+00:00",
+          "method": "local_import",
+          "path": "data/external/openfda/sha256/7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6/food-enforcement-0001-of-0001.json.zip",
+          "retrieved_at": null,
+          "reused": true,
+          "role": "original_local_archive",
+          "sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+          "size_bytes": 5858570,
+          "source_path": "tmp/food-enforcement-0001-of-0001.json.zip",
+          "source_reference_url": "https://open.fda.gov/apis/food/enforcement/download/",
+          "source_url": null,
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "openfda_download_index",
+          "attempted_at": "2026-10-17T05:40:01.407070+00:00",
+          "content_type": "application/json; charset=utf-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "W/\"90f87-nnQbPecO5MBKHkCf43i4mDGGqV0\"",
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/external/openfda/sha256/e9c8536852ecd25fdc15b79a5f7c41cb3803f31dbc7c52b86a6feddc3ac220a1/download_index.json",
+          "resolved_url": "https://api.fda.gov/download.json",
+          "retrieved_at": "2026-10-17T05:40:03.609682+00:00",
+          "reused": true,
+          "role": "official_download_metadata",
+          "sha256": "e9c8536852ecd25fdc15b79a5f7c41cb3803f31dbc7c52b86a6feddc3ac220a1",
+          "size_bytes": 593799,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://api.fda.gov/download.json",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "openfda_license",
+          "attempted_at": "2026-10-17T05:40:03.609827+00:00",
+          "content_type": "text/html; charset=utf-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"c7c23090779db92de761c5d528b1fb6a\"",
+          "http_last_modified": "Fri, 09 Oct 2026 15:48:36 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/external/openfda/sha256/7fda0041a24f8d7139a1781d4462ae39643a2ee6f3b0f079946c989a8e1982d2/license.html",
+          "resolved_url": "https://open.fda.gov/license/",
+          "retrieved_at": "2026-10-17T05:40:05.044709+00:00",
+          "reused": true,
+          "role": "license_evidence",
+          "sha256": "7fda0041a24f8d7139a1781d4462ae39643a2ee6f3b0f079946c989a8e1982d2",
+          "size_bytes": 123019,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://open.fda.gov/license/",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "openfda_dictionary",
+          "attempted_at": "2026-10-17T05:40:05.044844+00:00",
+          "content_type": "application/pdf",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"4aff5859123bcd0f8134f27f5cf11957\"",
+          "http_last_modified": "Fri, 09 Oct 2026 15:48:51 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/external/openfda/sha256/9c92fc04f447e70936c8646d9ac0f7a50af2118f01fd3b26d039e19860418baa/foodenforcement_reference.pdf",
+          "resolved_url": "https://open.fda.gov/fields/foodenforcement_reference.pdf",
+          "retrieved_at": "2026-10-17T05:40:05.830130+00:00",
+          "reused": true,
+          "role": "official_field_dictionary",
+          "sha256": "9c92fc04f447e70936c8646d9ac0f7a50af2118f01fd3b26d039e19860418baa",
+          "size_bytes": 55827,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://open.fda.gov/fields/foodenforcement_reference.pdf",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "openfda_upstream_zip",
+          "attempted_at": "2026-10-17T05:40:05.830261+00:00",
+          "content_type": "application/zip",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"994f924b4c879f12928a92ab608bb107\"",
+          "http_last_modified": "Fri, 16 Oct 2026 11:05:33 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/external/openfda/sha256/7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6/food-enforcement-0001-of-0001.json.zip",
+          "resolved_url": "https://download.open.fda.gov/food/enforcement/food-enforcement-0001-of-0001.json.zip",
+          "retrieved_at": "2026-10-17T05:40:08.830596+00:00",
+          "reused": true,
+          "role": "official_archive_comparison",
+          "sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+          "size_bytes": 5858570,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://download.open.fda.gov/food/enforcement/food-enforcement-0001-of-0001.json.zip",
+          "source_version": null,
+          "status": "captured"
+        }
+      ],
+      "canonical_source_url": "https://open.fda.gov/apis/food/enforcement/download/",
+      "contamination_domain": "CONTEXT_ONLY",
+      "directory": "data/external/openfda",
+      "inspection": {
+        "archive": {
+          "crc_error_member": null,
+          "input_path": "data/external/openfda/sha256/7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6/food-enforcement-0001-of-0001.json.zip",
+          "member_matches_input": true,
+          "members": [
+            "food-enforcement-0001-of-0001.json"
+          ],
+          "sha256": "7f8e2b5bd6e05e0cbf15e43860c74538ad09e1f8b07928e9c92de3ead3dac9c6",
+          "size_bytes": 5858570
+        },
+        "audit_version": 1,
+        "category_counts": {
+          "classification": {
+            "Class I": 12976,
+            "Class II": 14745,
+            "Class III": 1762,
+            "Not Yet Classified": 2
+          },
+          "country": {
+            "Armenia": 4,
+            "Australia": 2,
+            "Belgium": 5,
+            "Canada": 188,
+            "Chile": 10,
+            "China": 14,
+            "Costa Rica": 3,
+            "Dominican Republic (the)": 3,
+            "Egypt": 3,
+            "El Salvador": 1,
+            "Fiji": 1,
+            "France": 13,
+            "Germany": 1,
+            "Guatemala": 2,
+            "India": 11,
+            "Ireland": 5,
+            "Israel": 86,
+            "Italy": 7,
+            "Korea (the Republic of)": 11,
+            "Mexico": 42,
+            "Netherlands": 3,
+            "New Zealand": 2,
+            "Pakistan": 1,
+            "Poland": 3,
+            "Serbia": 1,
+            "Spain": 6,
+            "Sweden": 2,
+            "Taiwan": 13,
+            "Thailand": 1,
+            "United Kingdom": 1,
+            "United States": 29039,
+            "Vietnam": 1
+          },
+          "product_type": {
+            "Food": 29485
+          },
+          "status": {
+            "Completed": 448,
+            "Ongoing": 1079,
+            "Terminated": 27958
+          }
+        },
+        "column_count": 25,
+        "columns": [
+          "address_1",
+          "address_2",
+          "center_classification_date",
+          "city",
+          "classification",
+          "code_info",
+          "country",
+          "distribution_pattern",
+          "event_id",
+          "initial_firm_notification",
+          "more_code_info",
+          "openfda",
+          "postal_code",
+          "product_description",
+          "product_quantity",
+          "product_type",
+          "reason_for_recall",
+          "recall_initiation_date",
+          "recall_number",
+          "recalling_firm",
+          "report_date",
+          "state",
+          "status",
+          "termination_date",
+          "voluntary_mandated"
+        ],
+        "dates": {
+          "center_classification_date": {
+            "invalid_count": 0,
+            "invalid_examples": [],
+            "parsed_max": "2026-10-01",
+            "parsed_min": "2012-06-08",
+            "pre_2000_count": 0,
+            "pre_2000_examples": []
+          },
+          "recall_initiation_date": {
+            "invalid_count": 0,
+            "invalid_examples": [],
+            "parsed_max": "2026-09-24",
+            "parsed_min": "0212-12-07",
+            "pre_2000_count": 1,
+            "pre_2000_examples": [
+              {
+                "recall_number": "F-0880-2013",
+                "row_index": 10149,
+                "value": "02121207"
+              }
+            ]
+          },
+          "report_date": {
+            "invalid_count": 0,
+            "invalid_examples": [],
+            "parsed_max": "2026-10-07",
+            "parsed_min": "2012-06-20",
+            "pre_2000_count": 0,
+            "pre_2000_examples": []
+          },
+          "termination_date": {
+            "invalid_count": 0,
+            "invalid_examples": [],
+            "parsed_max": "2026-10-01",
+            "parsed_min": "2012-06-08",
+            "pre_2000_count": 0,
+            "pre_2000_examples": []
+          }
+        },
+        "exact_duplicate_rows": 0,
+        "geography": "Recalling-firm country/state/city/postal address plus textual distribution",
+        "identifiers": [
+          "recall_number (one missing)",
+          "event_id",
+          "recalling_firm (name, no verified facility ID)"
+        ],
+        "input_path": "data/external/openfda/sha256/02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d/food-enforcement-0001-of-0001.json",
+        "missing_counts": {
+          "address_1": 2,
+          "address_2": 8990,
+          "center_classification_date": 2,
+          "city": 0,
+          "classification": 0,
+          "code_info": 29,
+          "country": 0,
+          "distribution_pattern": 0,
+          "event_id": 0,
+          "initial_firm_notification": 3,
+          "more_code_info": 29484,
+          "openfda": 29485,
+          "postal_code": 0,
+          "product_description": 0,
+          "product_quantity": 437,
+          "product_type": 0,
+          "reason_for_recall": 0,
+          "recall_initiation_date": 0,
+          "recall_number": 1,
+          "recalling_firm": 0,
+          "report_date": 0,
+          "state": 237,
+          "status": 0,
+          "termination_date": 1527,
+          "voluntary_mandated": 1
+        },
+        "missingness_definition": "absent, null, whitespace/empty string, empty list or object",
+        "official_archive_matches_local_archive": true,
+        "row_granularity": "product-specific recall enforcement record; multiple products can share event_id",
+        "rows": 29485,
+        "rows_changed": 0,
+        "rows_removed": 0,
+        "schema_issues": [
+          "No tested-negative denominator or direct contamination labels",
+          "Firm location is not food origin; no verified facility crosswalk",
+          "Current recall status/termination and retrospective corrections can reveal future information",
+          "Original local retrieval time remains unknown",
+          "One missing recall_number; initiation-date year 0212 is retained unchanged"
+        ],
+        "sha256": "02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d",
+        "size_bytes": 39906111,
+        "source_metadata_unverified": {
+          "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.",
+          "last_updated": "2026-10-14",
+          "license": "https://open.fda.gov/license/",
+          "results": {
+            "limit": 29485,
+            "skip": 0,
+            "total": 29485
+          },
+          "terms": "https://open.fda.gov/terms/"
+        },
+        "structural_review_ok": true,
+        "target": null,
+        "time_coverage": "report_date 2012-06-20..2026-10-07",
+        "timestamps": [
+          "report_date",
+          "recall_initiation_date",
+          "center_classification_date",
+          "termination_date"
+        ],
+        "training_eligible": false,
+        "training_ineligibility_reason": "Recall records are not a tested-positive/negative sample cohort."
+      },
+      "intended_ml_role": "HISTORICAL_RISK_SOURCE",
+      "license": "CC0-1.0 generally, subject to stated exceptions and service terms",
+      "license_known": true,
+      "limitations": [
+        "No tested-negative denominator or direct contamination labels",
+        "Firm location is not food origin; no verified facility crosswalk",
+        "Current recall status/termination and retrospective corrections can reveal future information",
+        "Original local retrieval time remains unknown"
+      ],
+      "m2_eligible": true,
+      "m2_gate": {
+        "license_known": true,
+        "provenance_confirmed": true,
+        "raw_data_present_and_hash_pinned": true,
+        "row_granularity_understood": true,
+        "schema_issues_documented": true,
+        "schema_review_passed": true
+      },
+      "prior_inspection": {
+        "column_count": 25,
+        "embedded_source_metadata": {
+          "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.",
+          "last_updated": "2026-10-14",
+          "license": "https://open.fda.gov/license/",
+          "results": {
+            "limit": 29485,
+            "skip": 0,
+            "total": 29485
+          },
+          "terms": "https://open.fda.gov/terms/"
+        },
+        "joined_to_fsis": false,
+        "json_sha256": "02f3e7959cc732d8f1983f2b87edbbecc6d2f4959eaef50a597f640fbc513e2d",
+        "local_archive_matches_json": true,
+        "official_archive_matches_local_archive": true,
+        "official_download_metadata": {
+          "export_date": "2026-10-14",
+          "partitions": [
+            {
+              "display_name": "/food/enforcement data",
+              "file": "https://download.open.fda.gov/food/enforcement/food-enforcement-0001-of-0001.json.zip",
+              "records": 29485,
+              "size_mb": "5.59"
+            }
+          ],
+          "total_records": 29485
+        },
+        "original_acquisition_time": null,
+        "provenance_note": "A current byte match verifies this copy against today's official artifact; it does not recover its original retrieval time.",
+        "role": "context_only",
+        "rows": 29485,
+        "status": "registered_context_only",
+        "training_eligible": false
+      },
+      "provenance_confirmed": true,
+      "publisher": "US FDA openFDA",
+      "release": "embedded last_updated=2026-10-14",
+      "reuse_manifest": "data/manifests/20261017T053958804059Z-a2601437.json",
+      "reuse_verified_at": "2026-10-17T06:01:23.820080+00:00",
+      "scope": "Existing official-byte-verified full food enforcement snapshot; original acquisition unknown"
+    },
+    "usda_pdp": {
+      "acquisition_status": "acquired",
+      "artifacts": [
+        {
+          "artifact_id": "pdp_2024",
+          "attempted_at": "2026-10-17T05:55:43.060177+00:00",
+          "content_type": "application/zip",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"a1c1ab-6464fcc08f3cd\"",
+          "http_last_modified": "Fri, 19 Dec 2025 15:33:19 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/usda_pdp/sha256/de916ba119f8d6dd5a4d5596c69b00c476fceeb31a96b1389dd005031c9c4d79/2024PDPDatabase.zip",
+          "resolved_url": "https://www.ams.usda.gov/sites/default/files/media/2024PDPDatabase.zip",
+          "retrieved_at": "2026-10-17T05:55:45.335571+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:23.163332+00:00",
+          "reused": false,
+          "role": "data",
+          "sha256": "de916ba119f8d6dd5a4d5596c69b00c476fceeb31a96b1389dd005031c9c4d79",
+          "size_bytes": 10600875,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.ams.usda.gov/sites/default/files/media/2024PDPDatabase.zip",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "pdp_catalog",
+          "attempted_at": "2026-10-17T05:55:43.061478+00:00",
+          "content_type": "text/html; charset=utf-8",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": null,
+          "http_last_modified": null,
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/usda_pdp/sha256/2ed2e7b9eb9111d0bd5ca722cf28a3101e49bc5c7d9615f33025e5509bcbf338/pdpdata.html",
+          "resolved_url": "https://www.ams.usda.gov/datasets/pdp/pdpdata",
+          "retrieved_at": "2026-10-17T05:55:44.364242+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:23.154913+00:00",
+          "reused": false,
+          "role": "documentation",
+          "sha256": "2ed2e7b9eb9111d0bd5ca722cf28a3101e49bc5c7d9615f33025e5509bcbf338",
+          "size_bytes": 49219,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.ams.usda.gov/datasets/pdp/pdpdata",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "pdp_instructions",
+          "attempted_at": "2026-10-17T05:55:43.062429+00:00",
+          "content_type": "application/pdf",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"13b60-6464fc641fe4a\"",
+          "http_last_modified": "Fri, 19 Dec 2025 15:31:42 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/usda_pdp/sha256/e1e1bbe759d73074a9915373097b5433f05aeb4c8ef7d70c5a904949ae4bb1fe/PDPDatabaseInstructions.pdf",
+          "resolved_url": "https://www.ams.usda.gov/sites/default/files/media/PDPDatabaseInstructions.pdf",
+          "retrieved_at": "2026-10-17T05:55:44.645478+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:23.156206+00:00",
+          "reused": false,
+          "role": "documentation",
+          "sha256": "e1e1bbe759d73074a9915373097b5433f05aeb4c8ef7d70c5a904949ae4bb1fe",
+          "size_bytes": 80736,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.ams.usda.gov/sites/default/files/media/PDPDatabaseInstructions.pdf",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "pdp_search_dictionary",
+          "attempted_at": "2026-10-17T05:55:43.063670+00:00",
+          "content_type": "application/pdf",
+          "declared_download_url": null,
+          "expected_sha256": null,
+          "http_etag": "\"3d10c-647bad11868a4\"",
+          "http_last_modified": "Tue, 06 Jan 2026 16:39:17 GMT",
+          "http_status": 200,
+          "imported_at": null,
+          "method": "download",
+          "path": "data/raw/usda_pdp/sha256/da5a0b019cafd956b707aef30059d1e089fa9893e721c78967fd3c3942e176e1/PDPSearchAppDataDictionary.pdf",
+          "resolved_url": "https://www.ams.usda.gov/sites/default/files/media/PDPSearchAppDataDictionary.pdf",
+          "retrieved_at": "2026-10-17T05:55:43.768886+00:00",
+          "reuse_verified_at": "2026-10-17T06:01:23.156359+00:00",
+          "reused": false,
+          "role": "documentation",
+          "sha256": "da5a0b019cafd956b707aef30059d1e089fa9893e721c78967fd3c3942e176e1",
+          "size_bytes": 250124,
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.ams.usda.gov/sites/default/files/media/PDPSearchAppDataDictionary.pdf",
+          "source_version": null,
+          "status": "captured"
+        },
+        {
+          "artifact_id": "usda_license",
+          "attempted_at": "2026-10-17T06:01:23.154974+00:00",
+          "declared_download_url": null,
+          "error": "HTTP Error 403: Forbidden",
+          "error_type": "HTTPError",
+          "expected_sha256": null,
+          "http_status": 403,
+          "imported_at": null,
+          "method": "download",
+          "retrieved_at": null,
+          "role": "license_evidence",
+          "source_path": null,
+          "source_reference_url": null,
+          "source_url": "https://www.usda.gov/about-usda/policies-and-links",
+          "source_version": null,
+          "status": "failed"
+        }
+      ],
+      "canonical_source_url": "https://www.ams.usda.gov/datasets/pdp/pdpdata",
+      "contamination_domain": "CHEMICAL",
+      "directory": "data/raw/usda_pdp",
+      "inspection": {
+        "dictionary_mapping": {
+          "dictionary_member": "PDP DataDictionary 2024.pdf",
+          "dictionary_review_date": "2026-10-17",
+          "dictionary_version": "8 August 2025; 2024 annual archive",
+          "grain": "Sample identity record and separate analytical result record; multiple results per SAMPLE_PK; not yet joined",
+          "mean_code_meanings": {
+            "ND": "Non-detect: validated, well-recovered",
+            "NP": "Non-detect: marginal performing analyte",
+            "O": "Detect: original extraction value",
+            "R": "Detect: re-extraction analysis value"
+          },
+          "reference_member": "PDP ReferenceTables 2024.xlsx",
+          "result_columns": [
+            "SAMPLE_PK",
+            "COMMOD",
+            "COMMTYPE",
+            "LAB",
+            "PESTCODE",
+            "TESTCLASS",
+            "CONCEN",
+            "LOD",
+            "CONUNIT",
+            "CONFMETHOD",
+            "CONFMETHOD2",
+            "ANNOTATE",
+            "QUANTITATE",
+            "MEAN",
+            "EXTRACT",
+            "DETERMIN"
+          ],
+          "result_member": "PDP24Results.txt",
+          "reviewed_archive_sha256": "de916ba119f8d6dd5a4d5596c69b00c476fceeb31a96b1389dd005031c9c4d79",
+          "sample_columns": [
+            "SAMPLE_PK",
+            "STATE",
+            "YEAR",
+            "MONTH",
+            "DAY",
+            "SITE",
+            "COMMOD",
+            "SOURCE_ID",
+            "VARIETY",
+            "ORIGIN",
+            "COUNTRY",
+            "DISTTYPE",
+            "COMMTYPE",
+            "CLAIM",
+            "QUANTITY",
+            "GROWST",
+            "PACKST",
+            "DISTST"
+          ],
+          "sample_member": "PDP24Samples.txt"
+        },
+        "format": "ZIP: headerless pipe-delimited text + PDF/XLSX dictionaries + Access template",
+        "geography": "US sampling STATE; ORIGIN/COUNTRY and GROWST/PACKST/DISTST codes; not coordinates",
+        "identifiers": [
+          "SAMPLE_PK (release-local)",
+          "SITE (collection site, not farm/facility)",
+          "LAB",
+          "COMMOD",
+          "PESTCODE"
+        ],
+        "members": [
+          {
+            "crc_checked": true,
+            "filename": "INSTRUCTIONS 2024.pdf",
+            "sha256": "8ee8f3c7955f4471ac0a3b43f8a47568864db8b99668f97d23c91f00d0ad41d3",
+            "size_bytes": 90806
+          },
+          {
+            "crc_checked": true,
+            "filename": "PDP DataDictionary 2024.pdf",
+            "sha256": "8224a7cfb70db2b7876ef5cf3b61da6f09db5fc553753c6a1089ae80ad9d4fcc",
+            "size_bytes": 117185
+          },
+          {
+            "crc_checked": true,
+            "filename": "PDP ReferenceTables 2024.pdf",
+            "sha256": "feef902206fba2b52715df3cdd5c09f6a07c84412f681a44743a46e1d0dd1e23",
+            "size_bytes": 1594320
+          },
+          {
+            "crc_checked": true,
+            "filename": "PDP ReferenceTables 2024.xlsx",
+            "sha256": "f530bd5dd31256733d4f9302f153111aeee14dcf3a04ebc8a88265203d108158",
+            "size_bytes": 230309
+          },
+          {
+            "crc_checked": true,
+            "filename": "PDP24Results.txt",
+            "sha256": "3593f79153bee69070eb0392a2283541e846b33de724f73d6cd3bef781cbaa7a",
+            "size_bytes": 129989303
+          },
+          {
+            "crc_checked": true,
+            "filename": "PDP24Samples.txt",
+            "sha256": "444a08c2f6cbee5312aa04fcf32a2412479b7a7b2ed0ddc3cdc9e2eebaa00083",
+            "size_bytes": 537146
+          },
+          {
+            "crc_checked": true,
+            "filename": "PDP2024.MDB",
+            "sha256": "e5837bdf53e39777cc29c3a6a0ce314b874e141b911a94ce003a0494fa9ebf33",
+            "size_bytes": 1220608
+          }
+        ],
+        "reference_workbook": {
+          "Annotate": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "ANNOTATED INFORMATION in 2024 PDP Analytical Results",
+                "B2": ""
+              },
+              {
+                "A4": "Annotate Code",
+                "B4": "Annotated Information"
+              },
+              {
+                "A5": "Q",
+                "B5": "Residue at below quantifiable level (BQL)"
+              },
+              {
+                "A6": "QV",
+                "B6": "Residue at <BQL> with presumptive violation - No Tolerance"
+              },
+              {
+                "A7": "V",
+                "B7": "Residue with a presumptive violation - No Tolerance"
+              },
+              {
+                "A8": "X",
+                "B8": "Residue with a presumptive violation - Exceeds Tolerance"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 7
+          },
+          "Claim": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "COMMODITY MARKETING CLAIM on 2024 PDP Samples",
+                "B2": ""
+              },
+              {
+                "A4": "Claim Code",
+                "B4": "Commodity Marketing Claim"
+              },
+              {
+                "A5": "NC",
+                "B5": "No Claim"
+              },
+              {
+                "A6": "PD",
+                "B6": "No Pesticides Detected"
+              },
+              {
+                "A7": "PO",
+                "B7": "Organic"
+              },
+              {
+                "A8": "PP",
+                "B8": "Pesticide Free"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 7
+          },
+          "Commod Type": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "COMMODITY TYPE in 2024 PDP Samples",
+                "B2": ""
+              },
+              {
+                "A4": "Commodity Type Code",
+                "B4": "Commodity Type"
+              },
+              {
+                "A5": "FR",
+                "B5": "Fresh"
+              },
+              {
+                "A6": "FZ",
+                "B6": "Frozen"
+              },
+              {
+                "A7": "PU",
+                "B7": "Puree"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 6
+          },
+          "Commodity": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": "",
+                "C1": ""
+              },
+              {
+                "A2": "COMMODITIES Sampled/Analyzed by PDP in 2024",
+                "B2": "",
+                "C2": ""
+              },
+              {
+                "A3": "(Fresh Product Unless Otherwise Noted)",
+                "B3": "",
+                "C3": ""
+              },
+              {
+                "A5": "Commodity Code",
+                "B5": "Commodity Name",
+                "C5": "# of Samples Analyzed"
+              },
+              {
+                "A6": "AL",
+                "B6": "Almonds",
+                "C6": "531"
+              },
+              {
+                "A7": "AP",
+                "B7": "Apples",
+                "C7": "704"
+              },
+              {
+                "A8": "AV",
+                "B8": "Avocado",
+                "C8": "706"
+              },
+              {
+                "A9": "BK",
+                "B9": "Blackberries, Fresh",
+                "C9": "685"
+              },
+              {
+                "A10": "CB",
+                "B10": "Sweet Corn, Fresh",
+                "C10": "607"
+              },
+              {
+                "A11": "CS",
+                "B11": "Sweet Corn, Frozen",
+                "C11": "101"
+              },
+              {
+                "A12": "CT",
+                "B12": "Cherry Tomatoes",
+                "C12": "529"
+              },
+              {
+                "A13": "CU",
+                "B13": "Cucumbers",
+                "C13": "708"
+              },
+              {
+                "A14": "FS",
+                "B14": "Fish, Salmon",
+                "C14": "176"
+              },
+              {
+                "A15": "KZ",
+                "B15": "Blackberries, Frozen",
+                "C15": "24"
+              },
+              {
+                "A16": "LH",
+                "B16": "Lettuce, Head",
+                "C16": "708"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 23
+          },
+          "Con Unit": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "Concentration/LOD Unit-of-Measure Code",
+                "B2": ""
+              },
+              {
+                "A4": "Concen/LOD Unit Code",
+                "B4": "Concen/LOD Unit Description"
+              },
+              {
+                "A5": "B",
+                "B5": "Parts-per-Billion (ppb)"
+              },
+              {
+                "A6": "M",
+                "B6": "Parts-per-Million (ppm)"
+              },
+              {
+                "A7": "T",
+                "B7": "Parts-per-Trillion (ppt)"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 6
+          },
+          "Conf Method": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "CONFIRMATION METHOD in 2024 PDP Analytical Results",
+                "B2": ""
+              },
+              {
+                "A4": "ConfMethod Code",
+                "B4": "Confirmation Method"
+              },
+              {
+                "A5": "GT",
+                "B5": "GC/MS/MS - triple quadropole"
+              },
+              {
+                "A6": "HR",
+                "B6": "GC or LC High Resolution MS"
+              },
+              {
+                "A7": "LU",
+                "B7": "LC-MS/MS - triple quadrapole"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 6
+          },
+          "Country": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "COUNTRIES Where PDP 2024 Samples Originated",
+                "B2": ""
+              },
+              {
+                "A4": "Country Code",
+                "B4": "Country Name"
+              },
+              {
+                "A5": "160",
+                "B5": "Australia"
+              },
+              {
+                "A6": "260",
+                "B6": "Canada"
+              },
+              {
+                "A7": "275",
+                "B7": "Chile"
+              },
+              {
+                "A8": "280",
+                "B8": "China"
+              },
+              {
+                "A9": "285",
+                "B9": "Colombia"
+              },
+              {
+                "A10": "295",
+                "B10": "Costa Rica"
+              },
+              {
+                "A11": "315",
+                "B11": "Denmark"
+              },
+              {
+                "A12": "320",
+                "B12": "Dominican Republic"
+              },
+              {
+                "A13": "325",
+                "B13": "Ecuador"
+              },
+              {
+                "A14": "336",
+                "B14": "Faeroe Islands"
+              },
+              {
+                "A15": "415",
+                "B15": "Guatemala"
+              },
+              {
+                "A16": "430",
+                "B16": "Honduras"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 30
+          },
+          "Determin": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "DETERMINATIVE METHOD in 2024 PDP Analytical Results",
+                "B2": ""
+              },
+              {
+                "A4": "Determin Code",
+                "B4": "Determinative Method"
+              },
+              {
+                "A5": "35",
+                "B5": "GC/MS/MS - triple quadrupole"
+              },
+              {
+                "A6": "52",
+                "B6": "LC/MS/MS - Liquid Chrom w/ Tandem Mass Spec - triple quad"
+              },
+              {
+                "A7": "64",
+                "B7": "Second LC/MS/MS"
+              },
+              {
+                "A8": "67",
+                "B8": "Third LC/MS/MS"
+              },
+              {
+                "A9": "80",
+                "B9": "LC/HRMS - Liquid Chrom w/High Resolution Mass Spec"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 8
+          },
+          "Dist Type": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "COLLECTION/DISTRIBUTION FACILITY TYPE in 2024 PDP Samples",
+                "B2": ""
+              },
+              {
+                "A4": "DistType Code",
+                "B4": "Collection Facility Type"
+              },
+              {
+                "A5": "D",
+                "B5": "Distribution Center"
+              },
+              {
+                "A6": "F",
+                "B6": "Farmgate / Produce Stand"
+              },
+              {
+                "A7": "H",
+                "B7": "Wholesale"
+              },
+              {
+                "A8": "L",
+                "B8": "Wholesale and Retail"
+              },
+              {
+                "A9": "R",
+                "B9": "Retail"
+              },
+              {
+                "A10": "T",
+                "B10": "Terminal Market"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 9
+          },
+          "Extraction": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "EXTRACTION METHOD in 2024 PDP Analytical Results",
+                "B2": ""
+              },
+              {
+                "A4": "Extract Code",
+                "B4": "Extraction Method"
+              },
+              {
+                "A5": "805",
+                "B5": "MDA Modified QuEChERS Method"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 4
+          },
+          "Lab": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": "",
+                "C1": ""
+              },
+              {
+                "A2": "PDP Participating LABORATORIES in 2024",
+                "B2": "",
+                "C2": ""
+              },
+              {
+                "A4": "Lab Code",
+                "B4": "Lab Agency Name",
+                "C4": "Lab City/State"
+              },
+              {
+                "A5": "CA1",
+                "B5": "California Department of Food & Agriculture",
+                "C5": "Sacramento, CA"
+              },
+              {
+                "A6": "FL1",
+                "B6": "Florida Dept of Agriculture & Consumer Services",
+                "C6": "Tallahassee, FL"
+              },
+              {
+                "A7": "MI1",
+                "B7": "Michigan Dept of Agriculture & Rural Development",
+                "C7": "East Lansing, MI"
+              },
+              {
+                "A8": "NY1",
+                "B8": "New York Department of Agriculture and Markets",
+                "C8": "Albany, NY"
+              },
+              {
+                "A9": "OH1",
+                "B9": "Ohio Department of Agriculture",
+                "C9": "Reynoldsburg, OH"
+              },
+              {
+                "A10": "TX1",
+                "B10": "Texas Department of Agriculture",
+                "C10": "College Station, TX"
+              },
+              {
+                "A11": "WA1",
+                "B11": "Washington State Department of Agriculture",
+                "C11": "Yakima, WA"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 10
+          },
+          "Mean": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "MEAN RESULT in 2024 PDP Analytical Results",
+                "B2": ""
+              },
+              {
+                "A3": "(O, A, and R indicated Positive Detections)",
+                "B3": ""
+              },
+              {
+                "A5": "Mean Code",
+                "B5": "Mean Result Finding"
+              },
+              {
+                "A6": "ND",
+                "B6": "Non-Detect: Validated, well-recovered"
+              },
+              {
+                "A7": "NP",
+                "B7": "Non-Detect: Marginal Performing Analyte"
+              },
+              {
+                "A8": "O",
+                "B8": "Detect: Original Extraction Value"
+              },
+              {
+                "A9": "R",
+                "B9": "Detect - Re-extraction Analysis Value"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 8
+          },
+          "Origin": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "Sample ORIGIN Code",
+                "B2": ""
+              },
+              {
+                "A4": "Origin Code",
+                "B4": "Origin of Sample"
+              },
+              {
+                "A5": "1",
+                "B5": "Domestic (U.S.)"
+              },
+              {
+                "A6": "2",
+                "B6": "Imported"
+              },
+              {
+                "A7": "3",
+                "B7": "Unknown origin"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 6
+          },
+          "Pest Code": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": "",
+                "C1": "",
+                "D1": ""
+              },
+              {
+                "A2": "Compounds (PESTICIDES) Analyzed by PDP in 2024",
+                "B2": "",
+                "C2": "",
+                "D2": ""
+              },
+              {
+                "A4": "Pest Code",
+                "B4": "Pesticide Name",
+                "C4": "Test Class",
+                "D4": "# of Analysis Results"
+              },
+              {
+                "A5": "001",
+                "B5": "Aldrin",
+                "C5": "A",
+                "D5": "8963"
+              },
+              {
+                "A6": "002",
+                "B6": "Allethrin",
+                "C6": "O",
+                "D6": "2467"
+              },
+              {
+                "A7": "007",
+                "B7": "Biphenyl",
+                "C7": "I",
+                "D7": "1054"
+              },
+              {
+                "A8": "011",
+                "B8": "Captan",
+                "C8": "A",
+                "D8": "2119"
+              },
+              {
+                "A9": "014",
+                "B9": "Chlordanes Total",
+                "C9": "A",
+                "D9": "1414"
+              },
+              {
+                "A10": "015",
+                "B10": "Chlorobenzilate",
+                "C10": "A",
+                "D10": "1745"
+              },
+              {
+                "A11": "020",
+                "B11": "Rotenone",
+                "C11": "I",
+                "D11": "1745"
+              },
+              {
+                "A12": "024",
+                "B12": "Diazinon",
+                "C12": "C",
+                "D12": "9872"
+              },
+              {
+                "A13": "028",
+                "B13": "Dieldrin",
+                "C13": "A",
+                "D13": "8796"
+              },
+              {
+                "A14": "032",
+                "B14": "Diuron",
+                "C14": "A",
+                "D14": "8459"
+              },
+              {
+                "A15": "034",
+                "B15": "Endrin",
+                "C15": "A",
+                "D15": "8458"
+              },
+              {
+                "A16": "035",
+                "B16": "EPN",
+                "C16": "C",
+                "D16": "2799"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 621
+          },
+          "Quantitate": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "QUANTITATION METHOD in 2024 PDP Analytical Results",
+                "B2": ""
+              },
+              {
+                "A4": "Quantitate Code",
+                "B4": "Quantitation Method"
+              },
+              {
+                "A5": "E",
+                "B5": "Estimate"
+              },
+              {
+                "A6": "P",
+                "B6": "Marginal Performing Analyte"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 5
+          },
+          "State": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "All 50 STATES (plus Washington D.C. and Territories)",
+                "B2": ""
+              },
+              {
+                "A4": "State Code",
+                "B4": "State"
+              },
+              {
+                "A5": "AK",
+                "B5": "Alaska"
+              },
+              {
+                "A6": "AL",
+                "B6": "Alabama"
+              },
+              {
+                "A7": "AR",
+                "B7": "Arkansas"
+              },
+              {
+                "A8": "AZ",
+                "B8": "Arizona"
+              },
+              {
+                "A9": "CA",
+                "B9": "California"
+              },
+              {
+                "A10": "CO",
+                "B10": "Colorado"
+              },
+              {
+                "A11": "CT",
+                "B11": "Connecticut"
+              },
+              {
+                "A12": "DC",
+                "B12": "Washington D.C."
+              },
+              {
+                "A13": "DE",
+                "B13": "Delaware"
+              },
+              {
+                "A14": "FL",
+                "B14": "Florida"
+              },
+              {
+                "A15": "GA",
+                "B15": "Georgia"
+              },
+              {
+                "A16": "GU",
+                "B16": "Guam"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 56
+          },
+          "Test Class": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "Valid Codes & Descriptions for",
+                "B1": ""
+              },
+              {
+                "A2": "TEST (COMPOUND) CLASS in 2024 PDP Analytical Results",
+                "B2": ""
+              },
+              {
+                "A4": "Test Class Code",
+                "B4": "Test (Compound) Class"
+              },
+              {
+                "A5": "A",
+                "B5": "Halogenated"
+              },
+              {
+                "A6": "B",
+                "B6": "Benzimidazole"
+              },
+              {
+                "A7": "C",
+                "B7": "Organophosphorus"
+              },
+              {
+                "A8": "D",
+                "B8": "Avermectin"
+              },
+              {
+                "A9": "E",
+                "B9": "Carbamate"
+              },
+              {
+                "A10": "F",
+                "B10": "Organonitrogen"
+              },
+              {
+                "A11": "G",
+                "B11": "2,4-D / Acid Herbicides"
+              },
+              {
+                "A12": "I",
+                "B12": "Other Compounds"
+              },
+              {
+                "A13": "J",
+                "B13": "Imidazolinone"
+              },
+              {
+                "A14": "K",
+                "B14": "Sulfonyl Urea Herbicides"
+              },
+              {
+                "A15": "L",
+                "B15": "Conazoles / Triazoles"
+              },
+              {
+                "A16": "N",
+                "B16": "Imidazoles"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 23
+          },
+          "Tolerance": {
+            "first_rows_raw_cells": [
+              {
+                "A1": "EPA TOLERANCES for",
+                "B1": "",
+                "C1": "",
+                "D1": "",
+                "E1": "",
+                "F1": ""
+              },
+              {
+                "A2": "Pesticide/Commodity Pairs Analyzed by PDP in 2024",
+                "B2": "",
+                "C2": "",
+                "D2": "",
+                "E2": "",
+                "F2": ""
+              },
+              {
+                "A4": "Pesticide Code",
+                "B4": "Commodity Code",
+                "C4": "EPA Tolerance Value",
+                "D4": "pp_",
+                "E4": "Note",
+                "F4": "Comment"
+              },
+              {
+                "A5": "001",
+                "B5": "AP",
+                "C5": "0.03",
+                "D5": "M",
+                "E5": "AL",
+                "F5": "FDA Action Level"
+              },
+              {
+                "A6": "001",
+                "B6": "AV",
+                "C6": "NT",
+                "D6": "M",
+                "E6": "",
+                "F6": ""
+              },
+              {
+                "A7": "001",
+                "B7": "BK",
+                "C7": "0.05",
+                "D7": "M",
+                "E7": "AL",
+                "F7": "FDA Action Level"
+              },
+              {
+                "A8": "001",
+                "B8": "CB",
+                "C8": "0.02",
+                "D8": "M",
+                "E8": "AL",
+                "F8": "FDA Action Level"
+              },
+              {
+                "A9": "001",
+                "B9": "CS",
+                "C9": "0.02",
+                "D9": "M",
+                "E9": "AL",
+                "F9": "FDA Action Level"
+              },
+              {
+                "A10": "001",
+                "B10": "CT",
+                "C10": "0.05",
+                "D10": "M",
+                "E10": "AL",
+                "F10": "FDA Action Level"
+              },
+              {
+                "A11": "001",
+                "B11": "CU",
+                "C11": "0.1",
+                "D11": "M",
+                "E11": "AL",
+                "F11": "FDA Action Level"
+              },
+              {
+                "A12": "001",
+                "B12": "FS",
+                "C12": "0.3",
+                "D12": "M",
+                "E12": "AL",
+                "F12": "FDA Action Level; Tolerance has restrictions.  Consult CFR."
+              },
+              {
+                "A13": "001",
+                "B13": "KZ",
+                "C13": "0.05",
+                "D13": "M",
+                "E13": "AL",
+                "F13": "FDA Action Level"
+              },
+              {
+                "A14": "001",
+                "B14": "LH",
+                "C14": "0.03",
+                "D14": "M",
+                "E14": "AL",
+                "F14": "FDA Action Level"
+              },
+              {
+                "A15": "001",
+                "B15": "LL",
+                "C15": "0.03",
+                "D15": "M",
+                "E15": "AL",
+                "F15": "FDA Action Level"
+              },
+              {
+                "A16": "001",
+                "B16": "NZ",
+                "C16": "0.03",
+                "D16": "M",
+                "E16": "AL",
+                "F16": "FDA Action Level"
+              }
+            ],
+            "nonempty_rows_including_titles_headers": 5877
+          }
+        },
+        "result_table": {
+          "column_count": 16,
+          "columns": [
+            "SAMPLE_PK",
+            "COMMOD",
+            "COMMTYPE",
+            "LAB",
+            "PESTCODE",
+            "TESTCLASS",
+            "CONCEN",
+            "LOD",
+            "CONUNIT",
+            "CONFMETHOD",
+            "CONFMETHOD2",
+            "ANNOTATE",
+            "QUANTITATE",
+            "MEAN",
+            "EXTRACT",
+            "DETERMIN"
+          ],
+          "duplicate_key_extra_rows": 2862201,
+          "empty_string_counts": {
+            "ANNOTATE": 2870593,
+            "CONCEN": 2853583,
+            "CONFMETHOD": 2853583,
+            "CONFMETHOD2": 2872073,
+            "QUANTITATE": 2871781
+          },
+          "foreign_keys_absent_from_sample_table": [],
+          "key": "SAMPLE_PK",
+          "malformed_width_rows": 0,
+          "missing_key_rows": 0,
+          "raw_category_counts": {
+            "ANNOTATE": {
+              "": 2870593,
+              "Q": 1008,
+              "QV": 18,
+              "V": 376,
+              "X": 78
+            },
+            "CONUNIT": {
+              "M": 2872073
+            },
+            "MEAN": {
+              "ND": 2798390,
+              "NP": 55193,
+              "O": 18458,
+              "R": 32
+            }
+          },
+          "raw_lexical_ranges": {},
+          "row_width_counts": {
+            "16": 2872073
+          },
+          "rows": 2872073,
+          "unique_nonempty_keys": 9872
+        },
+        "row_granularity": "Sample identity record and separate analytical result record; multiple results per SAMPLE_PK; not yet joined",
+        "sample_table": {
+          "column_count": 18,
+          "columns": [
+            "SAMPLE_PK",
+            "STATE",
+            "YEAR",
+            "MONTH",
+            "DAY",
+            "SITE",
+            "COMMOD",
+            "SOURCE_ID",
+            "VARIETY",
+            "ORIGIN",
+            "COUNTRY",
+            "DISTTYPE",
+            "COMMTYPE",
+            "CLAIM",
+            "QUANTITY",
+            "GROWST",
+            "PACKST",
+            "DISTST"
+          ],
+          "duplicate_key_extra_rows": 0,
+          "empty_string_counts": {
+            "COUNTRY": 6028,
+            "DISTST": 2661,
+            "GROWST": 8926,
+            "PACKST": 7817,
+            "QUANTITY": 2046
+          },
+          "key": "SAMPLE_PK",
+          "malformed_width_rows": 0,
+          "missing_key_rows": 0,
+          "raw_category_counts": {
+            "COMMOD": {
+              "AL": 531,
+              "AP": 704,
+              "AV": 706,
+              "BK": 685,
+              "CB": 607,
+              "CS": 101,
+              "CT": 529,
+              "CU": 708,
+              "FS": 176,
+              "KZ": 24,
+              "LH": 708,
+              "LL": 706,
+              "NZ": 52,
+              "OG": 709,
+              "ON": 708,
+              "PK": 706,
+              "PN": 656,
+              "PO": 177,
+              "TT": 679
+            },
+            "COUNTRY": {
+              "": 6028,
+              "160": 4,
+              "260": 172,
+              "275": 148,
+              "280": 77,
+              "285": 5,
+              "295": 579,
+              "315": 2,
+              "320": 26,
+              "325": 29,
+              "336": 1,
+              "415": 46,
+              "430": 51,
+              "450": 2,
+              "595": 2557,
+              "610": 19,
+              "660": 6,
+              "685": 16,
+              "720": 60,
+              "730": 1,
+              "801": 31,
+              "830": 2,
+              "925": 2,
+              "930": 4,
+              "945": 1,
+              "973": 1,
+              "M15": 1,
+              "MT5": 1
+            },
+            "DAY": {
+              "01": 306,
+              "02": 417,
+              "03": 393,
+              "04": 444,
+              "05": 407,
+              "06": 254,
+              "07": 240,
+              "08": 427,
+              "09": 527,
+              "10": 278,
+              "11": 233,
+              "12": 486,
+              "13": 273,
+              "14": 173,
+              "15": 407,
+              "16": 685,
+              "17": 381,
+              "18": 368,
+              "19": 245,
+              "20": 397,
+              "21": 221,
+              "22": 517,
+              "23": 340,
+              "24": 227,
+              "25": 330,
+              "26": 377,
+              "27": 92,
+              "28": 335,
+              "29": 51,
+              "30": 40,
+              "31": 1
+            },
+            "MONTH": {
+              "01": 822,
+              "02": 825,
+              "03": 827,
+              "04": 792,
+              "05": 818,
+              "06": 820,
+              "07": 826,
+              "08": 825,
+              "09": 828,
+              "10": 825,
+              "11": 833,
+              "12": 831
+            },
+            "ORIGIN": {
+              "1": 5936,
+              "2": 3844,
+              "3": 92
+            },
+            "STATE": {
+              "CA": 2167,
+              "CO": 336,
+              "FL": 1176,
+              "MD": 672,
+              "MI": 1008,
+              "NY": 1496,
+              "OH": 1008,
+              "TX": 1335,
+              "WA": 674
+            },
+            "YEAR": {
+              "24": 9872
+            }
+          },
+          "raw_lexical_ranges": {},
+          "row_width_counts": {
+            "18": 9872
+          },
+          "rows": 9872,
+          "unique_nonempty_keys": 9872
+        },
+        "schema_issues": [
+          "Headerless file order from matching embedded annual dictionary; basename case differs in dictionary",
+          "SAMPLE_PK only unique within annual release; results are one-to-many and sample/analyte uniqueness unproven",
+          "Blank concentration denotes nondetect in annual text; ND and NP have distinct analytical quality meanings",
+          "Tolerance workbook exists but has special strings/notes and requires effective-date/residue-definition review",
+          "No safe/unsafe or chemical_exceedance label created; untested analytes absent"
+        ],
+        "structural_review_ok": true,
+        "target": "Raw concentration / documented detection finding; regulatory exceedance remains conditional",
+        "time_coverage": "2024 (raw YEAR/MONTH/DAY distributions recorded; no date normalization)",
+        "timestamps": [
+          "YEAR",
+          "MONTH",
+          "DAY"
+        ],
+        "unknown_mean_codes": []
+      },
+      "intended_ml_role": "DIRECT_LABEL_SOURCE",
+      "license": "US public domain under USDA Digital Rights and Copyright policy, except marked third-party material; attribution requested",
+      "license_known": true,
+      "license_review": {
+        "basis": "USDA states most information on its website is public domain and requests attribution; separately marked protected material is excepted",
+        "canonical_url": "https://www.usda.gov/about-usda/policies-and-links",
+        "method": "Official page reviewed using browser tool; automated HTML snapshot may be HTTP 403",
+        "release_specific_cc0_declaration": false,
+        "review_date": "2026-10-17",
+        "section": "Digital Rights and Copyright",
+        "url": "https://www.usda.gov/policies-and-links"
+      },
+      "limitations": [
+        "Detection is not regulatory exceedance; applicable tolerance, units, residue definition and effective date require review",
+        "Search-export dictionary may differ from annual archive; embedded release documentation takes precedence",
+        "Untested analytes are not negatives; nondetects are censored",
+        "No 2024-specific CC0 declaration located; reuse basis is USDA general public-domain policy with stated exceptions, not the CC0 catalog entry for another year"
+      ],
+      "m2_eligible": true,
+      "m2_gate": {
+        "license_known": true,
+        "provenance_confirmed": true,
+        "raw_data_present_and_hash_pinned": true,
+        "row_granularity_understood": true,
+        "schema_issues_documented": true,
+        "schema_review_passed": true
+      },
+      "provenance_confirmed": true,
+      "publisher": "USDA Agricultural Marketing Service",
+      "release": "2024 annual database; publisher posted 2025-12-23; embedded dictionary dated 2025-08-08",
+      "scope": "One complete annual release; no pooling with other years"
+    }
+  },
+  "inspection_code_sha256": {
+    "__init__.py": "970c6fbf9be374749e1eb3bf1175ed49a13d6d207f94233f68d91256865e6934",
+    "audit.py": "f814084aaa462f45b9d0855aec70fc1390f84ffaa1b4f347cdae0041b5daf993",
+    "fsis.py": "13a47a3796427300939e7371588880b4edec61baf51b6e7d38433b72b8996f81",
+    "ingest.py": "067d68724acd766c25beeb5d92d306fffce6b28c7e3ff8c3e964b00528350037",
+    "provenance.py": "896baf305dfd7ee2fbe40f6b8cc868fb67eb849652a9aeb5b856807e4240e97f",
+    "public_sources.py": "3652488b34b1ed5717905e2089ebc84428c0631db4fb13d1261f99ee56d400c9",
+    "raw_inspection.py": "9b567aa9f73ba9e3a0b61358eedf72c7e7b0ef97b33b8f9631af56fad4d0ad78"
+  },
+  "integrity": {
+    "acquisition_status": "partial",
+    "checked_artifacts": 28,
+    "failures": [],
+    "integrity_ok": true
+  },
+  "milestone": "M1",
+  "receipt": "data/manifests/20261017T060123145416Z-29c44de9.json",
+  "receipt_created_at": "2026-10-17T06:01:23.145495+00:00",
+  "receipt_sha256": "5cd347331c535ad3376262c1079b4909b4cb5a129b9e848c568bf2b83d3c203b",
+  "status": "partial"
+}

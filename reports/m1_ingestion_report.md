@@ -1,5 +1,7 @@
 # M1 — Source ingestion and registration
 
+**Update:** This report preserves the initial FSIS/openFDA pass. The expanded public-source M1 work is documented in [the current ingestion report](m1_public_ingestion_report.md), [inventory](dataset_inventory.md) and [source manifest](m1_source_manifest.json). FSIS remains pending and does not block the other source-specific gates.
+
 Date: 2026-10-17. **Milestone status: PARTIAL.** The ingestion/manual-intake implementation is tested and openFDA registration is verified. The official FSIS sample file and matching release dictionary have not been acquired, so actual sample-key/result-code inspection and selection of a biological cohort remain pending. Do not begin M2 biological cleaning by assuming a schema or inventing labels.
 
 **Current FSIS state: official source confirmed, raw file not yet acquired.** [Current source-status evidence](m1_fsis_source_status.json) checks the preserved catalog against the configured dataset ID, license and official resource link. It confirms that no sample-field descriptions or sample-schema references are exposed by that saved metadata. The sample dictionary, exact official filename, keys, assay codes and cohort counts remain pending. No nonexistent local file or dictionary path is assumed, and no unofficial mirror is used.

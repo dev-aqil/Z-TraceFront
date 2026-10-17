@@ -40,7 +40,7 @@ Decision engine, ML risk model training, Cytoscape graph visualization (dependen
 
 The data work prepares reproducible source-specific observations for Person B's modeling: ingestion → cleaning → features → validation → training-table handoff. Biological contamination, chemical exceedance and spoilage/quality remain separate prediction tasks. Recalls and inspection classes are contextual signals, not laboratory labels. Raw inputs stay immutable; operational demos and synthetic data do not establish predictive accuracy.
 
-**Current milestone: M1 partial. FSIS: official source confirmed, raw file not yet acquired.** Reproducible capture, manifests, replay and manual intake are implemented. The openFDA snapshot is registered as context and matches the official ZIP. Authoritative FSIS catalog metadata/license are preserved; no local sample filename, current sample schema or matching dictionary is assumed. The sample dictionary remains pending because the saved metadata exposes no field descriptions/schema. See the [source-status evidence](reports/m1_fsis_source_status.json) and [M1 report](reports/m1_ingestion_report.md). No cleaning, features, merges or training have occurred.
+**Current milestone: M1 partial. FSIS: official source confirmed, raw file not yet acquired.** PDP 2024, the existing official-byte-verified openFDA snapshot, one NOAA Malaysian station history and three OpenDOSM crop tables are acquired. FDA inspection records remain pending after official export URLs returned 404; its API requires credentials. The [current inventory](reports/dataset_inventory.md), [machine-readable source manifest](reports/m1_source_manifest.json) and [expanded M1 report](reports/m1_public_ingestion_report.md) record actual counts, licenses, hashes and source-specific M2 eligibility. FSIS manual intake and [source-status evidence](reports/m1_fsis_source_status.json) remain unchanged. No cleaning, features, merges or training have occurred.
 
 | Path | Purpose |
 | --- | --- |
@@ -107,6 +107,18 @@ Without uv, use `python -m venv .venv` and `.venv/bin/python -m pip install --re
 - [Preliminary leakage audit and future acceptance tests](reports/data_leakage_audit.md)
 - [LinuxONE/s390x portability](reports/linuxone_portability.md)
 
-The remaining M1 gate is acquisition and inspection of a real official FSIS release and applicable official documentation. Until then its source-confirmation work is retained and its sample dictionary/counts stay pending. Then M2 cleans; M3 analyzes real distributions; M4 freezes verified mappings; M5 builds features; M6 enriches; M7 verifies leakage/quality; M8 produces separate Parquet training tables and a modeling handoff with measured labels, missingness and split manifests. Commands for M2–M8 do not exist yet.
+### Continue or reproduce public-source ingestion (M1)
+
+Use the frozen receipt to verify local raw files or restore missing bytes. Restoration checks exact hashes and appends a receipt; a changed publisher file fails. Keep an offline copy of the raw store because publisher URLs can change or disappear. The full command details and pending-source routes are in the [expanded M1 report](reports/m1_public_ingestion_report.md).
+
+```bash
+PYTHONPATH=src python -m tracefront_data.public_sources verify --manifest data/manifests/20261017T060123145416Z-29c44de9.json
+PYTHONPATH=src python -m tracefront_data.public_sources restore --manifest data/manifests/20261017T060123145416Z-29c44de9.json
+PYTHONPATH=src python -m tracefront_data.public_sources inspect --manifest data/manifests/20261017T060123145416Z-29c44de9.json
+```
+
+With the frozen raw store present, `PYTHONPATH=src python -m tracefront_data.public_sources acquire` revalidates captured artifacts and retries pending public downloads, preserving original retrieval clocks. `--source usda_pdp` restricts acquisition to that source. Changing source/version requires deliberate config and dictionary review; the PDP schema is pinned to the reviewed archive hash.
+
+M2 may subsequently handle only sources with all eligibility gates passed; FSIS and FDA inspection records remain excluded until acquired and reviewed. Then M3 analyzes distributions; M4 freezes verified mappings; M5 builds features; M6 enriches; M7 verifies leakage/quality; M8 produces separate Parquet training tables and a modeling handoff. Commands for M2–M8 do not exist yet.
 
 No public dataset currently supplies a verified complete farm-to-retail batch trajectory. Keep unknowns explicit, avoid future/publication-time leakage, report sampling/domain limitations and avoid interpreting an uncalibrated score as the probability that a batch is safe or contaminated.
