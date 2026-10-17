@@ -1,0 +1,39 @@
+# Source -> canonical mapping for the SALMONELLA model on the FSIS Raw Beef Sampling data product (FY2014-FY2026).
+#
+# Evidence: the data_dictionary embedded in each downloaded JSON file (metadata.creation_date "October 09, 2026"),
+# plus a scan of all 13 files on 2026-10-17: identical primary-table columns in every year; form_id unique except one
+# form with two rows that are identical after mapping (deduplication keeps one). Files: data/raw/fsis_raw_beef/ (hashes in
+# DOWNLOAD_PROVENANCE.json, source https://www.fsis.usda.gov/news-events/publications/raw-beef-sampling).
+# Scan of salmonella_sp_analysis: Negative 215,125 / Positive 4,093 / NULL 13,143 / lab-problem codes 2.
+
+verified_by = "Claude Code draft from the embedded FSIS data dictionary; pending team review"
+verified_against = "FSIS Raw Beef Sampling FY2014-FY2026 JSON, embedded metadata.data_dictionary (creation_date October 09, 2026), downloaded 2026-10-17"
+
+[columns]
+sample_id = "form_id"
+sample_date = "collection_date"
+establishment_id = "establishment_id"
+# FSIS sampling project (e.g. MT43 = risk-based raw ground beef, MT60/MT60_C = beef manufacturing trimmings).
+# CAVEAT: MT44*, MT52*, MT53* are follow-up sampling triggered by an earlier positive (FSIS project_codes table):
+# known before this sample, but they encode FSIS targeting; see the model card.
+product_category = "project_code"
+# data_dictionary: "The result of the analysis for Salmonella in the sample. Negative indicates Salmonella was not
+# found in the sample. Positive indicates Salmonella was found in the sample."
+pathogen_result = "salmonella_sp_analysis"
+
+[dates]
+format = "%Y-%m-%d"
+
+[missing]
+values = ["NULL"]
+
+[labels]
+positive_values = ["Positive"]
+negative_values = ["Negative"]
+
+[features]
+# Pre-sampling attributes. Excluded on purpose: establishment_name/number (identifiers), project_name (duplicates
+# project_code), not_analyzed*, every *_canceled field, and every other result for the same sample: STEC,
+# pcr_stx_1_2 / pcr_eae screening, O157:H7 and Salmonella MPN, Salmonella MPN qualitative, aerobic plate counts.
+extra = { "sample_source_name" = "categorical", "establishment_state" = "categorical" }
+normalise_text = true

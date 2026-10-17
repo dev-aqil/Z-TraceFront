@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -39,11 +40,28 @@ def test_predictor_outputs_valid_deterministic_scores(trained):
         assert r["trained_on_synthetic_data"] is True
 
 
-def test_select_model_breaks_near_ties_by_preference():
+def test_select_model_ties_are_statistical_and_go_to_preference():
     from src.models.train import select_model
     pref = ["xgboost", "logistic_regression", "random_forest"]
-    # Campylobacter validation case: a 0.0005 forest lead is a tie, so XGBoost is kept
-    assert select_model({"random_forest": 0.4359, "xgboost": 0.4354, "logistic_regression": 0.4292}, 0.005, pref) \
-        == ("xgboost", ["random_forest", "xgboost"])
-    assert select_model({"random_forest": 0.45, "xgboost": 0.43}, 0.005, pref)[0] == "random_forest"  # real gap wins
-    assert select_model({"random_forest": 0.45, "xgboost": 0.43}, 0.0, pref)[0] == "random_forest"
+    rng = np.random.default_rng(0)
+    y = rng.binomial(1, 0.3, 2000)
+    signal = y + rng.normal(0, 1.0, len(y))
+    # Same signal plus tiny noise: the leader cannot be told apart, so the tie goes to xgboost
+    near = {"random_forest": signal + rng.normal(0, 0.05, len(y)), "xgboost": signal}
+    best, tied, tests = select_model(y, near, pref, 200, 0)
+    assert best == "xgboost" and set(tied) == {"random_forest", "xgboost"}
+    # Pure noise for xgboost: a real gap, so the better model wins despite preference
+    far = {"random_forest": signal, "xgboost": rng.normal(size=len(y))}
+    best, tied, tests = select_model(y, far, pref, 200, 0)
+    assert best == "random_forest" and tied == ["random_forest"] and tests["vs_leader"]["xgboost"]["ci"][0] > 0
+
+
+def test_pinned_model_overrides_selection_and_is_recorded(tmp_path, cfg, synthetic_df):
+    from src.models.train import run_training
+    rep = run_training(synthetic_df, cfg, tmp_path / "r", tmp_path / "reg", {}, pinned_model="logistic_regression")
+    assert rep["selected_model"] == "logistic_regression" and rep["pinned_model"] == "logistic_regression"
+    assert "platform_selection" in rep["tie_tests"]
+    meta = json.loads((latest_model_dir(tmp_path / "reg") / "metadata.json").read_text())
+    assert meta["selection"]["pinned_model"] == "logistic_regression"
+    with pytest.raises(ValueError, match="not a candidate"):
+        run_training(synthetic_df, cfg, tmp_path / "r2", tmp_path / "reg2", {}, pinned_model="dummy_prior")

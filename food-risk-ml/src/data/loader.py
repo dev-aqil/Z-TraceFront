@@ -105,6 +105,13 @@ def mapping_problems(m: dict[str, Any]) -> list[str]:
     return problems
 
 
+def normalise_category(s: pd.Series) -> pd.Series:
+    """Merge spelling variants of one category ("ALT 3"/"Alt 3", "Post Lethality"/"Post-Lethality"): casefold,
+    hyphens as spaces, collapsed whitespace. Opt-in per mapping (features.normalise_text); a model trained with it
+    records the flag and its Predictor applies the same function to requests."""
+    return s.astype("string").str.casefold().str.replace("-", " ").str.split().str.join(" ")
+
+
 def _snake(name: str) -> str:
     return re.sub(r"\W+", "_", name).strip("_").lower()
 
@@ -124,6 +131,11 @@ def apply_mapping(raw: pd.DataFrame, m: dict[str, Any]) -> pd.DataFrame:
     def text(col: str) -> pd.Series:
         s = raw[col].astype("string").str.strip()
         return s.mask(s.isin(missing_tokens))
+
+    norm = bool(m.get("features", {}).get("normalise_text", False))
+
+    def category(col: str) -> pd.Series:
+        return normalise_category(text(col)) if norm else text(col)
 
     out = pd.DataFrame(index=raw.index)
     if cols.get("sample_id"):
@@ -158,7 +170,7 @@ def apply_mapping(raw: pd.DataFrame, m: dict[str, Any]) -> pd.DataFrame:
         if kind == "numeric":
             out[META_NUM_PREFIX + _snake(col)] = pd.to_numeric(text(col), errors="coerce")
         elif kind == "categorical":
-            out[META_CAT_PREFIX + _snake(col)] = text(col).fillna(UNKNOWN_CATEGORY).astype(object)
+            out[META_CAT_PREFIX + _snake(col)] = category(col).fillna(UNKNOWN_CATEGORY).astype(object)
         else:
             raise MappingIncompleteError(f"features.extra.{col} must be 'categorical' or 'numeric', got {kind!r}")
     return out

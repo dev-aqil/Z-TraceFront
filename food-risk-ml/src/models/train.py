@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import sklearn  # noqa: E402
-from sklearn.metrics import precision_recall_curve  # noqa: E402
+from sklearn.metrics import average_precision_score, precision_recall_curve  # noqa: E402
 
 from src.config import ROOT  # noqa: E402
 from src.data.contract import (  # noqa: E402
@@ -26,7 +26,7 @@ from src.data.contract import (  # noqa: E402
     validate_canonical,
 )
 from src.evaluation.calibration import PlattCalibrated, assess_calibration, reliability_plot  # noqa: E402
-from src.evaluation.metrics import binary_metrics, choose_threshold, threshold_table  # noqa: E402
+from src.evaluation.metrics import binary_metrics, choose_threshold, paired_bootstrap_diff, threshold_table  # noqa: E402
 from src.explainability.shap_explain import Explainer, save_global_importance  # noqa: E402
 from src.features.build import (  # noqa: E402
     HISTORY_FEATURES,
@@ -41,6 +41,8 @@ from src.models.baselines import build_models, make_pipeline  # noqa: E402
 from src.models.registry import save_model  # noqa: E402
 
 log = logging.getLogger(__name__)
+SELECTION_RULE = ("max validation PR-AUC among learned models, unless statistically tied (paired-bootstrap 95% CI "
+                  "of leader minus model includes 0); a tie goes to the preference order")
 MEDIUM_BAND_RECALL = 0.95  # "medium" band = scores inside the validation 95%-recall net but below the threshold
 
 
@@ -74,15 +76,25 @@ def _pr_plot(y: np.ndarray, probs: dict[str, np.ndarray], path: Path) -> None:
     plt.close(fig)
 
 
-def select_model(val_pr_auc: dict[str, float], tie_tolerance: float, preference: list[str]) -> tuple[str, list[str]]:
-    """Best validation PR-AUC; models within tie_tolerance of it are tied and the tie goes to `preference` order."""
-    top = max(val_pr_auc.values())
-    tied = [m for m, v in val_pr_auc.items() if v >= top - tie_tolerance]
+def select_model(y_val: np.ndarray, p_val: dict[str, np.ndarray], preference: list[str], n_boot: int,
+                 seed: int) -> tuple[str, list[str], dict]:
+    """Best validation PR-AUC, unless the data cannot tell it apart from another model: a model is tied with the
+    leader when the paired-bootstrap 95% interval of (leader - model) PR-AUC includes 0. Ties go to `preference`
+    order (cheapest to explain per request and on s390x). Scales with how many positives validation has, unlike a
+    fixed tolerance, which is meaningless for rare targets."""
+    scores = {m: float(average_precision_score(y_val, p)) for m, p in p_val.items()}
+    leader = max(scores, key=scores.get)
+    tests = {m: paired_bootstrap_diff(average_precision_score, y_val, p_val[leader], p, n_boot, seed)
+             for m, p in p_val.items() if m != leader}
+    tied = [leader] + [m for m, r in tests.items() if r["ci"][0] <= 0]
     rank = {m: i for i, m in enumerate(preference)}
-    return min(tied, key=lambda m: (rank.get(m, len(rank)), -val_pr_auc[m])), tied
+    return min(tied, key=lambda m: (rank.get(m, len(rank)), -scores[m])), tied, {"leader": leader, "vs_leader": tests}
 
 
-def run_training(df: pd.DataFrame, cfg: dict, reports_dir: Path, registry_dir: Path, provenance: dict) -> dict:
+def run_training(df: pd.DataFrame, cfg: dict, reports_dir: Path, registry_dir: Path, provenance: dict,
+                 pinned_model: str | None = None) -> dict:
+    """pinned_model: retrain a model type already chosen on the reference platform instead of re-selecting.
+    Used on s390x, where older library versions can move a borderline tie test (beef STEC, 2026-10-17)."""
     seed = cfg["seed"]
     np.random.seed(seed)
     reports_dir, registry_dir = Path(reports_dir), Path(registry_dir)
@@ -129,11 +141,15 @@ def run_training(df: pd.DataFrame, cfg: dict, reports_dir: Path, registry_dir: P
     _pr_plot(y["val"], p_val, reports_dir / "pr_curves_val.png")
 
     # Model selection uses validation PR-AUC only; the test split is reported, never used to choose.
-    cand = metrics[(metrics["split"] == "val") & (metrics["model"] != "dummy_prior")]
     sel = cfg["selection"]
-    best, tied = select_model(dict(zip(cand["model"], cand["pr_auc"], strict=True)), sel["tie_tolerance"],
-                              sel["preference"])
-    log.info("selected %s (tied within %.3f validation PR-AUC: %s)", best, sel["tie_tolerance"], tied)
+    best, tied, tie_tests = select_model(y["val"], {m: p for m, p in p_val.items() if m != "dummy_prior"},
+                                         sel["preference"], sel["bootstrap"], seed)
+    if pinned_model:
+        if pinned_model not in fitted or pinned_model == "dummy_prior":
+            raise ValueError(f"pinned model {pinned_model!r} is not a candidate: {sorted(fitted)}")
+        log.info("PINNED %s (this platform's own selection would be %s, tied: %s)", pinned_model, best, tied)
+        tie_tests["platform_selection"], best = best, pinned_model
+    log.info("selected %s (statistically tied on validation PR-AUC: %s)", best, tied)
     pipe = fitted[best]
     cal = assess_calibration(y["val"], p_val[best], seed)
     final = PlattCalibrated(pipe).fit(p_val[best], y["val"]) if cal["apply"] else pipe
@@ -150,23 +166,24 @@ def run_training(df: pd.DataFrame, cfg: dict, reports_dir: Path, registry_dir: P
         sample = X["test"].sample(min(cfg["explain"]["shap_sample"], len(X["test"])), random_state=seed)
         importance = save_global_importance(explainer.global_importance(sample), reports_dir, explainer.units)
 
-    version = f"{cfg['pathogen'].lower()}-{best}-{datetime.now(UTC):%Y%m%dT%H%M%SZ}"
+    version = f"{cfg['pathogen_key']}-{best}-{datetime.now(UTC):%Y%m%dT%H%M%SZ}"
     final_report = {
         "model_version": version, "selected_model": best,
-        "selection": f"max validation PR-AUC (dummy excluded); models within {sel['tie_tolerance']} tied, "
-                     f"tie goes to preference order {sel['preference']}",
-        "tied_models": tied,
+        "selection": f"{SELECTION_RULE}; preference {sel['preference']}",
+        "tied_models": tied, "tie_tests": tie_tests, "pinned_model": pinned_model,
         "calibration": cal, "threshold": thr, "threshold_rule": how,
         "val": binary_metrics(y["val"], fv, thr), "test": binary_metrics(y["test"], ft, thr),
     }
     metadata = {
-        "model_version": version, "task": TASK, "pathogen": cfg["pathogen"],
+        "model_version": version, "task": TASK, "pathogen": cfg["pathogen"], "product": cfg["product"],
+        "model_key": cfg["pathogen_key"], "selection": {"rule": SELECTION_RULE, "tied": tied, "pinned_model": pinned_model},
         "target": f"{TARGET}: laboratory sample tested positive for {cfg['pathogen']} (not batch safety)",
         "created_at": datetime.now(UTC).isoformat(), "provenance": provenance,
         "split": {"method": split.method, "notes": split.notes,
                   "sizes": {k: len(v) for k, v in parts.items()}},
         "features": {"all": list(X["train"].columns), "categorical": cat, "numeric": num,
                      "uses_history": uses_history, "prior_rate": prior_rate,
+                     "normalise_text": bool((provenance.get("upstream") or {}).get("normalise_text", False)),
                      "history_params": {k: cfg["features"][k] for k in ("label_lag_days", "history_smoothing")}},
         "threshold": thr, "threshold_rule": how,
         "risk_bands": {"high_from": thr, "medium_from": medium_from,

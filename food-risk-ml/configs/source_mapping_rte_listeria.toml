@@ -1,0 +1,50 @@
+# Source -> canonical mapping for the LISTERIA MONOCYTOGENES model on the FSIS Ready-to-Eat (RTE) Product
+# Risk-based Lm Sampling data product (FY2014-FY2026).
+#
+# Evidence: the data_dictionary embedded in each downloaded JSON file (metadata.creation_date "October 09, 2026"),
+# plus a scan of all 13 files on 2026-10-17: identical primary-table columns in every year; form_id unique except one
+# form with two rows that are identical after mapping (deduplication keeps one). Files: data/raw/fsis_rte/ (hashes in
+# DOWNLOAD_PROVENANCE.json, source https://www.fsis.usda.gov/news-events/publications/ready-eat-rte-product-risk-based-listeria-monocytogenes-sampling).
+# Scan of lm_listeria_analysis: Negative 262,442 / Positive 1,599 / "Confirmed Negative of a Previous Presumptive" 60
+# / NULL 1,930.
+#
+# Unit: one FSIS sample, which may be RTE product, a food-contact surface sponge or a non-food-contact surface sponge
+# (sample_source_name). All are kept, with the sample type as a feature, and results are reported per type: an
+# environmental Lm positive is a recognised leading indicator for product contamination, and history is pooled per
+# establishment across types.
+
+verified_by = "Claude Code draft from the embedded FSIS data dictionary; pending team review"
+verified_against = "FSIS RTE Product Risk-based Lm Sampling FY2014-FY2026 JSON, embedded metadata.data_dictionary (creation_date October 09, 2026), downloaded 2026-10-17"
+
+[columns]
+sample_id = "form_id"
+sample_date = "collection_date"
+establishment_id = "establishment_id"
+# FSIS sampling project (e.g. RTEPROD_RISK / RTEPROD_RAND product sampling, RLMCONT_* food-contact surfaces,
+# RLMENVC_* non-food-contact surfaces). CAVEAT: intensified / follow-up projects are triggered by earlier results.
+product_category = "project_code"
+# data_dictionary: "The result of the analysis for Listeria monocytogenes in the sample that was tested as per FSIS
+# MLG Chapter 8. Negative indicates Listeria monocytogenes was not found in the sample. Positive indicates Listeria
+# monocytogenes was found in the sample."
+# "Confirmed Negative of a Previous Presumptive" is not defined in the data dictionary; read literally (a presumptive
+# screen that confirmation ruled out) its final result is negative, so it is mapped to 0. Affects few rows (see scan).
+pathogen_result = "lm_listeria_analysis"
+
+[dates]
+format = "%Y-%m-%d"
+
+[missing]
+values = ["NULL"]
+
+[labels]
+positive_values = ["Positive"]
+negative_values = ["Negative", "Confirmed Negative of a Previous Presumptive"]
+
+[features]
+# Pre-sampling attributes. production_alternative (data_dictionary): "The production alternative used by the
+# establishment to produce the product that was sampled" (ALT 1 / 2 PLT / 2 AMAP / 3 sanitation only): the plant's
+# declared Lm control, known before sampling. Spelling variants ("ALT 3"/"Alt 3") are merged by normalise_text.
+# Excluded on purpose: identifiers, project_name, not_analyzed*, *_canceled, and every other result for the same
+# sample: non_lm_listeria_analysis (other Listeria species), Lm MPN, Salmonella and Salmonella MPN.
+extra = { "sample_source_name" = "categorical", "production_alternative" = "categorical", "establishment_state" = "categorical" }
+normalise_text = true

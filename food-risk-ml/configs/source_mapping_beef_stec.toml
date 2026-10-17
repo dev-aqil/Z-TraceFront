@@ -1,0 +1,41 @@
+# Source -> canonical mapping for the STEC model on the FSIS Raw Beef Sampling data product (FY2014-FY2026).
+#
+# Evidence: the data_dictionary embedded in each downloaded JSON file (metadata.creation_date "October 09, 2026"),
+# plus a scan of all 13 files on 2026-10-17: identical primary-table columns in every year; form_id unique except one
+# form with two rows that are identical after mapping (deduplication keeps one). Files: data/raw/fsis_raw_beef/ (hashes in
+# DOWNLOAD_PROVENANCE.json, source https://www.fsis.usda.gov/news-events/publications/raw-beef-sampling).
+# Scan of stec_analysis: Negative 231,654 / Positive 664 / "Confirmed Negative of a Previous Presumptive" 29 / NULL 16.
+
+verified_by = "Claude Code draft from the embedded FSIS data dictionary; pending team review"
+verified_against = "FSIS Raw Beef Sampling FY2014-FY2026 JSON, embedded metadata.data_dictionary (creation_date October 09, 2026), downloaded 2026-10-17"
+
+[columns]
+sample_id = "form_id"
+sample_date = "collection_date"
+establishment_id = "establishment_id"
+# FSIS sampling project (e.g. MT43 = risk-based raw ground beef, MT60/MT60_C = beef manufacturing trimmings).
+# CAVEAT: MT44*, MT52*, MT53* are follow-up sampling triggered by an earlier positive (FSIS project_codes table):
+# known before this sample, but they encode FSIS targeting; see the model card.
+product_category = "project_code"
+# data_dictionary: "The result of the analysis for Shiga-toxin Producing E. Coli (STEC) in the sample. All O-groups are
+# included in this test. Negative indicates STEC was not found in the sample. Positive indicates STEC was found".
+# "Confirmed Negative of a Previous Presumptive" is not defined in the data dictionary; read literally (a presumptive
+# screen that confirmation ruled out) its final result is negative, so it is mapped to 0. Affects few rows (see scan).
+pathogen_result = "stec_analysis"
+
+[dates]
+format = "%Y-%m-%d"
+
+[missing]
+values = ["NULL"]
+
+[labels]
+positive_values = ["Positive"]
+negative_values = ["Negative", "Confirmed Negative of a Previous Presumptive"]
+
+[features]
+# Pre-sampling attributes. Excluded on purpose: establishment_name/number (identifiers), project_name (duplicates
+# project_code), not_analyzed*, every *_canceled field, and every other result for the same sample: Salmonella,
+# pcr_stx_1_2 / pcr_eae (the screening step of this very STEC test), O157:H7 and Salmonella MPN, aerobic plate counts.
+extra = { "sample_source_name" = "categorical", "establishment_state" = "categorical" }
+normalise_text = true

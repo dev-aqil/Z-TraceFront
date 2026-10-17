@@ -35,6 +35,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--canonical", type=Path)
     p = sub.add_parser("train", help="train/evaluate baselines and register the selected model")
     p.add_argument("--canonical", type=Path)
+    p.add_argument("--model", help="pin the model type chosen on the reference platform (no re-selection)")
     p = sub.add_parser("predict", help="score a JSON request file (object or list) with a registered model")
     p.add_argument("request", type=Path)
     p.add_argument("--model-dir", type=Path)
@@ -51,6 +52,12 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("train-chemical", help="train/register a chemical model from a Person A readiness bundle")
     p.add_argument("--key", default="imidacloprid", help="[chemical.<key>] section of the config")
     p.add_argument("--readiness", type=Path, help="override the configured readiness.json")
+    p = sub.add_parser("cold-chain", help="apply the cold-chain rules to readings (CSV) or a SIMULATED scenario")
+    p.add_argument("--profile", default="poultry_chilled", help="[profiles.<name>] in configs/cold_chain_rules.toml")
+    p.add_argument("--readings", type=Path, help="CSV with stream_id,time,temp_c (ISO time, ascending per stream)")
+    p.add_argument("--scenario", default="compressor_failure", help="simulated feed when --readings is not given")
+    p.add_argument("--offset", type=float, default=0.0, help="sensor calibration offset in °C added to every reading")
+    p.add_argument("--benchmark", type=int, default=0, help="also time N simulated readings through the monitor")
     args = ap.parse_args(argv)
 
     setup_logging()
@@ -71,13 +78,15 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"{raw}: {rep['n_rows']} rows, {rep['n_columns']} columns "
                       f"-> reports/schema_inspection_{raw.stem}.md")
         elif args.cmd == "prepare":
+            from src.data.loader import load_mapping
             df = load_fsis(args.raw, resolve(paths["mapping"]))
             out = resolve(paths["processed"])
             out.parent.mkdir(parents=True, exist_ok=True)
             df.to_csv(out, index=False, date_format="%Y-%m-%d")
+            norm = bool(load_mapping(resolve(paths["mapping"])).get("features", {}).get("normalise_text", False))
             (out.with_suffix(".provenance.json")).write_text(json.dumps(
                 {"raw_files": {str(p): _sha256(p) for p in args.raw}, "mapping": str(paths["mapping"]),
-                 "mapping_sha256": _sha256(resolve(paths["mapping"]))}, indent=2))
+                 "mapping_sha256": _sha256(resolve(paths["mapping"])), "normalise_text": norm}, indent=2))
             print(f"wrote {len(df)} canonical rows -> {out}")
         elif args.cmd == "validate":
             df = load_canonical(args.canonical, cfg["pathogen"])
@@ -96,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
             provenance = {"canonical_file": str(canonical), "canonical_sha256": _sha256(Path(canonical)),
                           "upstream": json.loads(prov_file.read_text()) if prov_file.exists() else None}
             rep = run_training(load_canonical(canonical, cfg["pathogen"]), cfg, resolve(paths["reports"]),
-                               resolve(paths["registry"]), provenance)
+                               resolve(paths["registry"]), provenance, args.model)
             print(json.dumps({k: rep[k] for k in ("model_version", "selected_model", "threshold", "test")}, indent=2))
         elif args.cmd == "predict":
             from src.models.predict import Predictor
@@ -119,6 +128,10 @@ def main(argv: list[str] | None = None) -> int:
             from src.models.experiment import run_experiment
             rep = run_experiment(args.manifest, resolve(args.out), cfg["seed"], use_xgboost=not args.no_xgboost)
             print(json.dumps({r["model_type"]: r["metrics"]["test"] for r in rep["runs"]}, indent=2, default=str))
+        elif args.cmd == "cold-chain":
+            from src.coldchain.rules import cold_chain_cli
+            print(json.dumps(cold_chain_cli(args.profile, args.readings, args.scenario, args.offset, args.benchmark),
+                             indent=2))
         elif args.cmd == "train-chemical":
             from src.models.chemical import run_chemical
             rep = run_chemical(cfg, args.key, args.readiness)

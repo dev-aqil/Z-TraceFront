@@ -1,0 +1,111 @@
+{
+  "model_version": "beef_stec-xgboost-20261017T143643Z",
+  "selected_model": "xgboost",
+  "selection": "max validation PR-AUC among learned models, unless statistically tied (paired-bootstrap 95% CI of leader minus model includes 0); a tie goes to the preference order; preference ['xgboost', 'logistic_regression', 'random_forest']",
+  "tied_models": [
+    "random_forest"
+  ],
+  "tie_tests": {
+    "leader": "random_forest",
+    "vs_leader": {
+      "logistic_regression": {
+        "diff": 0.015758172941373366,
+        "ci": [
+          0.003153653076578958,
+          0.04671725642167287
+        ],
+        "share_a_better": 0.998,
+        "resamples": 1000
+      },
+      "xgboost": {
+        "diff": 0.011925045650622997,
+        "ci": [
+          0.0014116858393115213,
+          0.04167499474477082
+        ],
+        "share_a_better": 0.99,
+        "resamples": 1000
+      }
+    },
+    "platform_selection": "random_forest"
+  },
+  "pinned_model": "xgboost",
+  "calibration": {
+    "raw_brier": 0.08748487860730708,
+    "platt_oof_brier": 0.003368814009609494,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "threshold": 0.0019864291556726853,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "val": {
+    "n": 30405,
+    "prevalence": 0.003387600723565203,
+    "threshold": 0.0019864291556726853,
+    "precision": 0.00423623224520309,
+    "recall": 0.8252427184466019,
+    "f1": 0.008429194763982547,
+    "specificity": 0.340637581677777,
+    "false_negative_rate": 0.17475728155339806,
+    "pr_auc": 0.010411005339393329,
+    "roc_auc": 0.6641925971114087,
+    "brier": 0.0033684730194746913,
+    "tn": 10322,
+    "fp": 19980,
+    "fn": 18,
+    "tp": 85
+  },
+  "test": {
+    "n": 33803,
+    "prevalence": 0.003402064905481762,
+    "threshold": 0.0019864291556726853,
+    "precision": 0.004076676207823749,
+    "recall": 0.8173913043478261,
+    "f1": 0.008112890001294611,
+    "specificity": 0.31833293754452624,
+    "false_negative_rate": 0.1826086956521739,
+    "pr_auc": 0.010794490494403484,
+    "roc_auc": 0.6293691212455991,
+    "brier": 0.0033855647522607352,
+    "tn": 10724,
+    "fp": 22964,
+    "fn": 21,
+    "tp": 94
+  },
+  "model_dir": "/home/linux1/tracefront/food-risk-ml/artifacts/registry_beef_stec/beef_stec-xgboost-20261017T143643Z",
+  "synthetic": false,
+  "top_features": [
+    {
+      "source_feature": "product_category",
+      "mean_abs_shap": 0.8949029445648193
+    },
+    {
+      "source_feature": "meta_cat_establishment_state",
+      "mean_abs_shap": 0.8821379542350769
+    },
+    {
+      "source_feature": "meta_cat_sample_source_name",
+      "mean_abs_shap": 0.6065845489501953
+    },
+    {
+      "source_feature": "sample_month",
+      "mean_abs_shap": 0.4875752627849579
+    },
+    {
+      "source_feature": "est_prior_rate_smoothed",
+      "mean_abs_shap": 0.46059471368789673
+    },
+    {
+      "source_feature": "est_prior_samples",
+      "mean_abs_shap": 0.37708207964897156
+    },
+    {
+      "source_feature": "est_days_since_prior",
+      "mean_abs_shap": 0.3132244348526001
+    },
+    {
+      "source_feature": "est_prior_positives",
+      "mean_abs_shap": 0.06623496115207672
+    }
+  ]
+}

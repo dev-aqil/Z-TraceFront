@@ -1,0 +1,110 @@
+{
+  "model_version": "beef_salmonella-xgboost-20261017T141151Z",
+  "selected_model": "xgboost",
+  "selection": "max validation PR-AUC among learned models, unless statistically tied (paired-bootstrap 95% CI of leader minus model includes 0); a tie goes to the preference order; preference ['xgboost', 'logistic_regression', 'random_forest']",
+  "tied_models": [
+    "xgboost",
+    "logistic_regression"
+  ],
+  "tie_tests": {
+    "leader": "xgboost",
+    "vs_leader": {
+      "logistic_regression": {
+        "diff": 0.005816559318202935,
+        "ci": [
+          -0.00023561856396338553,
+          0.013336206348126241
+        ],
+        "share_a_better": 0.97,
+        "resamples": 1000
+      },
+      "random_forest": {
+        "diff": 0.01323797025842681,
+        "ci": [
+          0.001224005316639963,
+          0.024935731691099743
+        ],
+        "share_a_better": 0.986,
+        "resamples": 1000
+      }
+    }
+  },
+  "calibration": {
+    "raw_brier": 0.14867687225341797,
+    "platt_oof_brier": 0.014810197276131542,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "threshold": 0.010340124368667603,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "val": {
+    "n": 30403,
+    "prevalence": 0.015524783738446863,
+    "threshold": 0.010340124368667603,
+    "precision": 0.028664593918252823,
+    "recall": 0.8008474576271186,
+    "f1": 0.0553481221172853,
+    "specificity": 0.5720490461394541,
+    "false_negative_rate": 0.19915254237288135,
+    "pr_auc": 0.07483346511121432,
+    "roc_auc": 0.7700076347916591,
+    "brier": 0.014805970713496208,
+    "tn": 17122,
+    "fp": 12809,
+    "fn": 94,
+    "tp": 378
+  },
+  "test": {
+    "n": 33803,
+    "prevalence": 0.013844925006656215,
+    "threshold": 0.010340124368667603,
+    "precision": 0.02554893478083422,
+    "recall": 0.6688034188034188,
+    "f1": 0.049217705794480704,
+    "specificity": 0.6418779061046948,
+    "false_negative_rate": 0.3311965811965812,
+    "pr_auc": 0.0584031963923434,
+    "roc_auc": 0.7234225147716973,
+    "brier": 0.013386308215558529,
+    "tn": 21397,
+    "fp": 11938,
+    "fn": 155,
+    "tp": 313
+  },
+  "model_dir": "D:\\Documents\\Portfolio\\hackathon\\Z-TraceFront\\food-risk-ml\\artifacts\\registry_beef_salmonella\\beef_salmonella-xgboost-20261017T141151Z",
+  "synthetic": false,
+  "top_features": [
+    {
+      "source_feature": "est_prior_rate_smoothed",
+      "mean_abs_shap": 0.7262955904006958
+    },
+    {
+      "source_feature": "sample_month",
+      "mean_abs_shap": 0.5774721503257751
+    },
+    {
+      "source_feature": "meta_cat_establishment_state",
+      "mean_abs_shap": 0.3467647433280945
+    },
+    {
+      "source_feature": "product_category",
+      "mean_abs_shap": 0.334320604801178
+    },
+    {
+      "source_feature": "est_prior_samples",
+      "mean_abs_shap": 0.16473515331745148
+    },
+    {
+      "source_feature": "est_days_since_prior",
+      "mean_abs_shap": 0.10595516860485077
+    },
+    {
+      "source_feature": "est_prior_positives",
+      "mean_abs_shap": 0.07267045229673386
+    },
+    {
+      "source_feature": "meta_cat_sample_source_name",
+      "mean_abs_shap": 0.032145027071237564
+    }
+  ]
+}

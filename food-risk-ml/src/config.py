@@ -16,7 +16,7 @@ def load_config(path: Path = DEFAULT_CONFIG, pathogen: str | None = None) -> dic
     if key not in cfg["pathogens"]:
         raise KeyError(f"unknown pathogen {key!r}; configured: {sorted(cfg['pathogens'])}")
     section = cfg["pathogens"][key]
-    cfg["pathogen"], cfg["pathogen_key"] = section["name"], key
+    cfg["pathogen"], cfg["pathogen_key"], cfg["product"] = section["name"], key, section.get("product")
     cfg["paths"] = {k: section[k] for k in ("mapping", "processed", "reports", "registry")}
     return cfg
 

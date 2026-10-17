@@ -1,0 +1,10 @@
+source_feature,mean_abs_shap
+meta_cat_sample_source_name,1.0685875
+est_prior_rate_smoothed,0.5272022
+meta_cat_establishment_state,0.5167177
+est_prior_samples,0.35271436
+product_category,0.27939647
+sample_month,0.21972677
+est_days_since_prior,0.14242254
+meta_cat_production_alternative,0.14153656
+est_prior_positives,0.08276783

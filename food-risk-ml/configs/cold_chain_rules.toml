@@ -1,0 +1,39 @@
+# Cold-chain monitoring rules (src/coldchain/rules.py). RULES, not a trained model: no cold-chain dataset with
+# outcomes exists (Person A M8: BLOCKED_PENDING_SENSOR_DATA), so nothing here is learned or has an accuracy figure.
+# Every threshold quotes its source; sources checked 2026-10-17.
+
+# Readings further apart than this are not bridged: the gap is reported as DATA_GAP (unknown), never as "in range".
+max_gap_minutes = 15.0
+
+# USDA FSIS danger-zone guidance: bacteria grow most rapidly between 40 °F and 140 °F; perishable food should not be
+# out of refrigeration for more than 2 hours, or 1 hour when the temperature is above 90 °F.
+# (fsis.usda.gov "USDA Urges Consumers to Keep Clear of the Danger Zone"; the page blocks automated fetching, so
+# the wording was checked through search results.)
+[danger_zone]
+low_c = 4.4            # 40 °F
+high_c = 60.0          # 140 °F
+limit_minutes = 120.0  # cumulative time inside the zone
+hot_c = 32.2           # 90 °F
+hot_limit_minutes = 60.0
+
+# Product limits. A reading above `max_c` is an excursion, judged against the stated legal/code limit for that
+# product. These are the limits the product must stay at or below; they are not a spoilage model.
+[profiles.poultry_chilled]
+max_c = 4.0
+source = "Regulation (EC) No 853/2004, Annex III, Section II, Chapter V: poultry meat maintained at not more than 4 °C"
+
+[profiles.red_meat_chilled]
+max_c = 7.0
+source = "Regulation (EC) No 853/2004, Annex III, Section I, Chapter VII: not more than 7 °C for meat, kept during storage and transport"
+
+[profiles.offal_chilled]
+max_c = 3.0
+source = "Regulation (EC) No 853/2004, Annex III, Section I, Chapter VII: not more than 3 °C for offal, kept during storage and transport"
+
+[profiles.tcs_food_us]
+max_c = 5.0
+source = "FDA Food Code 2022, 3-501.16: time/temperature control for safety (TCS) food held at 41 °F (5 °C) or less"
+
+[profiles.frozen]
+max_c = -18.0
+source = "Council Directive 89/108/EEC, Article 2: quick-frozen foodstuffs held at -18 °C or lower. Article 5 allows brief upward fluctuations; their numeric limit was not verified here, so no tolerance is applied."

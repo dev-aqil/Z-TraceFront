@@ -1,8 +1,8 @@
 source_feature,mean_abs_shap
-pdp_commodity_code,0.2395507871869234
-pdp_sample_unit_count,0.10358634698505112
-pdp_import_origin_country_code,0.06913413705653568
-pdp_product_claim_code,0.027558817412440064
-pdp_commodity_type_code,0.02317411574946572
-pdp_origin_code,0.013370514931889293
-pdp_collection_dow_iso,0.010924482071909871
+pdp_commodity_code,2.2471504
+pdp_sample_unit_count,1.1804914
+pdp_import_origin_country_code,0.46288517
+pdp_product_claim_code,0.32160446
+pdp_commodity_type_code,0.2726455
+pdp_collection_dow_iso,0.17772588
+pdp_origin_code,0.10264812

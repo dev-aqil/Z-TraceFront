@@ -54,6 +54,7 @@ Excluded:
     - The 0.0005 gap is well inside fold-to-fold spread, and the backtest ranked them the other way (0.4024 RF vs 0.4025 XGB).
     - TreeSHAP on the 400-tree forest took more than 15 minutes in training. That would make per-request explanations far too slow for real-time use and the artifact large on LinuxONE.
   - The test split was not used for any choice.
+  - **Rule updated the same day.** The fixed 0.005 tolerance was replaced for all models by a statistical tie test: a paired bootstrap 95% interval of the validation PR-AUC difference that includes 0 (see `docs/model_card_beef_rte.md`). Re-run under the new rule, this model gets the same choice. XGBoost vs the leading forest gave a difference CI of [−0.004, +0.005], so they are tied. Logistic regression is genuinely worse ([+0.001, +0.013]), so it is not tied. The registered model is unchanged.
 - **Calibration:** Platt on validation scores, applied because out-of-fold validation Brier fell from 0.203 to 0.134.
 - **Threshold:** from validation only, the highest-precision threshold with recall ≥ 0.80.
 

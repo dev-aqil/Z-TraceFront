@@ -53,7 +53,7 @@ Excluded by design:
   - validation: 2023-02-22 → 2024-10-10 (48,671)
   - test: 2024-10-11 → 2026-06-30 (48,707)
 - **Models:** prior-rate dummy, logistic regression, random forest and XGBoost, each in a single sklearn `Pipeline` with a `ColumnTransformer`. Class reweighting handles imbalance.
-- **Selection:** best validation PR-AUC, which picked XGBoost. The test split was not used for any choice. (Since 2026-10-17 a tie rule also applies: models within 0.005 count as tied and XGBoost is preferred; XGBoost had the best validation PR-AUC here, so the result is the same.)
+- **Selection:** best validation PR-AUC, which picked XGBoost. The test split was not used for any choice. (Since 2026-10-17 a statistical tie rule applies to every model: a paired-bootstrap tie with the leader goes to XGBoost. XGBoost had the best validation PR-AUC here, so the result is the same.)
 - **Calibration:** Platt scaling fit on validation scores. It was applied because out-of-fold validation Brier fell from 0.138 to 0.075. Class reweighting had inflated the raw probabilities.
 - **Threshold:** from validation only. The policy is the highest-precision threshold that still catches at least 80% of positives, which gives 0.061 on the calibrated scale.
 

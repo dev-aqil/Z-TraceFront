@@ -1,0 +1,6 @@
+utc: 2026-10-17T14:27:54Z  host: ibmdatatontest  arch: s390x
+code: working tree on top of commit 9f5f278 (uncommitted changes), tarball sha256 f610e45a7c51db84aa351b23f27d23b940ec76be03cc10f03d6584f44065153a
+data: tarball sha256 1c5736bd9f46092f1b24e16f11f7d46f870051c99040e597416640240ab338b1
+poultry registries copied from earlier VM runs:
+salmonella-xgboost-20261017T103204Z
+campylobacter-xgboost-20261017T131153Z

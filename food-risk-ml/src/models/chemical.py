@@ -44,7 +44,7 @@ from src.models.contracts import (
 )
 from src.models.experiment import feature_matrix
 from src.models.registry import save_model
-from src.models.train import MEDIUM_BAND_RECALL, _git_commit, _version, select_model
+from src.models.train import MEDIUM_BAND_RECALL, SELECTION_RULE, _git_commit, _version, select_model
 
 log = logging.getLogger(__name__)
 PINS = {"dataset_path": "dataset_sha256", "feature_manifest_path": "feature_manifest_sha256",
@@ -172,10 +172,9 @@ def run_chemical(cfg: dict, key: str = "imidacloprid", readiness: str | Path | N
     metrics.to_csv(reports_dir / "metrics.csv", index=False)
 
     # Selection: validation PR-AUC among learned models, same tie rule as the pathogen models.
-    learned = metrics[(metrics["split"] == "val") & ~metrics["model"].isin(["dummy_prior", "commodity_rate"])]
-    best, tied = select_model(dict(zip(learned["model"], learned["pr_auc"], strict=True)), sel["tie_tolerance"],
-                              sel["preference"])
-    log.info("selected %s (tied within %.3f validation PR-AUC: %s)", best, sel["tie_tolerance"], tied)
+    learned = {m: q["val"] for m, q in p.items() if m not in ("dummy_prior", "commodity_rate")}
+    best, tied, tie_tests = select_model(y["val"], learned, sel["preference"], sel["bootstrap"], seed)
+    log.info("selected %s (statistically tied on validation PR-AUC: %s)", best, tied)
     # The pre-registered question: does the model add anything beyond commodity? Paired, same resamples.
     vs_commodity = {s: paired_bootstrap_diff(average_precision_score, y[s], p[best][s], p["commodity_rate"][s],
                                              n_boot, seed) for s in ("val", "test")}
@@ -206,9 +205,8 @@ def run_chemical(cfg: dict, key: str = "imidacloprid", readiness: str | Path | N
 
     version = f"chemical-{key}-{best}-{datetime.now(UTC):%Y%m%dT%H%M%SZ}"
     summary = {
-        "model_version": version, "selected_model": best, "tied_models": tied,
-        "selection": f"max validation PR-AUC among learned models; within {sel['tie_tolerance']} tied, "
-                     f"preference {sel['preference']}",
+        "model_version": version, "selected_model": best, "tied_models": tied, "tie_tests": tie_tests,
+        "selection": f"{SELECTION_RULE}; preference {sel['preference']}",
         "calibration": cal, "threshold": thr, "threshold_rule": how,
         "val": binary_metrics(y["val"], fv, thr), "test": binary_metrics(y["test"], ft, thr),
         "test_pr_auc_ci": bootstrap_ci(average_precision_score, y["test"], ft, n_boot, seed),

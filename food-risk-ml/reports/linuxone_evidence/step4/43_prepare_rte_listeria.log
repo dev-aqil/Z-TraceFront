@@ -1,0 +1,63 @@
+==================================================================
+step:      step4/43_prepare_rte_listeria
+utc:       2026-10-17T14:30:02Z
+host:      ibmdatatontest   kernel: Linux 6.8.0-147-generic   arch: s390x
+machine:   Manufacturer: IBM  Type: 9175
+os:        "Ubuntu 24.04.5 LTS"
+python:    3.12.3 big-endian
+command:   python -m src.cli --pathogen rte_listeria prepare data/raw/fsis_rte/zips/rte_sampling_data_fy2014.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2015.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2016.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2017.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2018.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2019.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2020.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2021.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2022.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2023.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2024.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2025.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2026.zip
+==================================================================
+2026-10-17 14:30:02,940 INFO numexpr.utils: NumExpr defaulting to 3 threads.
+2026-10-17 14:30:03,303 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2014.json: FSIS data product, reading 21974 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:03,694 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2015.json: FSIS data product, reading 21738 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:04,105 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2016.json: FSIS data product, reading 22905 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:04,497 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2017.json: FSIS data product, reading 22516 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:04,866 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2018.json: FSIS data product, reading 21053 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:05,217 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2019.json: FSIS data product, reading 19944 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:05,530 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2020.json: FSIS data product, reading 17320 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:05,845 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2021.json: FSIS data product, reading 19506 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:06,175 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2022.json: FSIS data product, reading 20060 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:06,511 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2023.json: FSIS data product, reading 20251 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:06,806 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2024.json: FSIS data product, reading 17239 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:07,249 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2025.json: FSIS data product, reading 27211 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:07,518 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_rte_product_fy2026.json: FSIS data product, reading 14314 primary rows (secondary table deliberately ignored)
+2026-10-17 14:30:07,596 INFO src.data.loader: read 21974 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2014.zip
+2026-10-17 14:30:07,596 INFO src.data.loader: read 21738 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2015.zip
+2026-10-17 14:30:07,596 INFO src.data.loader: read 22905 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2016.zip
+2026-10-17 14:30:07,596 INFO src.data.loader: read 22516 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2017.zip
+2026-10-17 14:30:07,596 INFO src.data.loader: read 21053 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2018.zip
+2026-10-17 14:30:07,596 INFO src.data.loader: read 19944 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2019.zip
+2026-10-17 14:30:07,596 INFO src.data.loader: read 17320 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2020.zip
+2026-10-17 14:30:07,596 INFO src.data.loader: read 19506 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2021.zip
+2026-10-17 14:30:07,596 INFO src.data.loader: read 20060 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2022.zip
+2026-10-17 14:30:07,596 INFO src.data.loader: read 20251 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2023.zip
+2026-10-17 14:30:07,596 INFO src.data.loader: read 17239 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2024.zip
+2026-10-17 14:30:07,597 INFO src.data.loader: read 27211 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2025.zip
+2026-10-17 14:30:07,597 INFO src.data.loader: read 14314 rows x 28 columns from data/raw/fsis_rte/zips/rte_sampling_data_fy2026.zip
+2026-10-17 14:30:08,407 WARNING src.data.loader: 1930 rows have a result value in neither label list (excluded from training): {<NA>: 1930}
+2026-10-17 14:30:10,450 INFO src.data.loader: deduplication: 266031 -> 266030 rows
+wrote 266030 canonical rows -> /home/linux1/tracefront/food-risk-ml/data/processed/canonical_rte_listeria.csv
+	Command being timed: "python -m src.cli --pathogen rte_listeria prepare data/raw/fsis_rte/zips/rte_sampling_data_fy2014.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2015.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2016.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2017.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2018.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2019.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2020.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2021.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2022.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2023.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2024.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2025.zip data/raw/fsis_rte/zips/rte_sampling_data_fy2026.zip"
+	User time (seconds): 7.73
+	System time (seconds): 0.89
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:08.69
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 827500
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 636440
+	Voluntary context switches: 8
+	Involuntary context switches: 51
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 56600
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+exit_code: 0

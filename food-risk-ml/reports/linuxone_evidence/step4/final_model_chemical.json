@@ -1,0 +1,177 @@
+{
+  "model_version": "chemical-imidacloprid-xgboost-20261017T143208Z",
+  "selected_model": "xgboost",
+  "tied_models": [
+    "random_forest",
+    "logistic_regression",
+    "xgboost"
+  ],
+  "tie_tests": {
+    "leader": "random_forest",
+    "vs_leader": {
+      "logistic_regression": {
+        "diff": 0.016415813614986507,
+        "ci": [
+          -0.005731700116650899,
+          0.05053329829961294
+        ],
+        "share_a_better": 0.922,
+        "resamples": 1000
+      },
+      "xgboost": {
+        "diff": 0.012950011039703446,
+        "ci": [
+          -0.003952445602006232,
+          0.039095227222237704
+        ],
+        "share_a_better": 0.922,
+        "resamples": 1000
+      }
+    }
+  },
+  "selection": "max validation PR-AUC among learned models, unless statistically tied (paired-bootstrap 95% CI of leader minus model includes 0); a tie goes to the preference order; preference ['xgboost', 'logistic_regression', 'random_forest']",
+  "calibration": {
+    "raw_brier": 0.15730171835093731,
+    "platt_oof_brier": 0.03188124630937989,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "threshold": 0.037202704203122446,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "val": {
+    "n": 1540,
+    "prevalence": 0.03441558441558441,
+    "threshold": 0.037202704203122446,
+    "precision": 0.07198748043818466,
+    "recall": 0.8679245283018868,
+    "f1": 0.1329479768786127,
+    "specificity": 0.6012104909213181,
+    "false_negative_rate": 0.1320754716981132,
+    "pr_auc": 0.13457222210479436,
+    "roc_auc": 0.7760655238481938,
+    "brier": 0.031866963949453264,
+    "tn": 894,
+    "fp": 593,
+    "fn": 7,
+    "tp": 46
+  },
+  "test": {
+    "n": 1418,
+    "prevalence": 0.03244005641748942,
+    "threshold": 0.037202704203122446,
+    "precision": 0.06774193548387097,
+    "recall": 0.9130434782608695,
+    "f1": 0.12612612612612614,
+    "specificity": 0.5787172011661808,
+    "false_negative_rate": 0.08695652173913043,
+    "pr_auc": 0.15128753953897428,
+    "roc_auc": 0.8432152364051211,
+    "brier": 0.029553041148016445,
+    "tn": 794,
+    "fp": 578,
+    "fn": 4,
+    "tp": 42
+  },
+  "test_pr_auc_ci": [
+    0.09589257784371233,
+    0.23901721516420704
+  ],
+  "test_recall_at_budget": {
+    "10pct": {
+      "budget": 0.1,
+      "recall": 0.44927536231884063,
+      "precision": 0.1455399061032864,
+      "lift": 4.492753623188406
+    },
+    "20pct": {
+      "budget": 0.2,
+      "recall": 0.6956521739130435,
+      "precision": 0.11267605633802817,
+      "lift": 3.4782608695652173
+    },
+    "30pct": {
+      "budget": 0.3,
+      "recall": 0.8478260869565217,
+      "precision": 0.09176470588235294,
+      "lift": 2.8260869565217392
+    }
+  },
+  "vs_commodity_rate_pr_auc": {
+    "val": {
+      "diff": 0.03374138695263029,
+      "ci": [
+        -0.025314196929368177,
+        0.09490918541091325
+      ],
+      "share_a_better": 0.8905,
+      "resamples": 2000
+    },
+    "test": {
+      "diff": 0.0475076709311882,
+      "ci": [
+        0.014594520142516106,
+        0.11476743160026048
+      ],
+      "share_a_better": 0.997,
+      "resamples": 2000
+    }
+  },
+  "ablation_with_calendar_position": {
+    "added_features": [
+      "pdp_collection_doy",
+      "pdp_collection_isoweek"
+    ],
+    "model": "xgboost",
+    "val": {
+      "pr_auc": 0.09298770340219639,
+      "pr_auc_ci": [
+        0.06069384315861646,
+        0.14342553902761965
+      ]
+    },
+    "test": {
+      "pr_auc": 0.10233969800359279,
+      "pr_auc_ci": [
+        0.06740471166111915,
+        0.15627642596067612
+      ]
+    }
+  },
+  "sizes": {
+    "train": 6913,
+    "val": 1540,
+    "test": 1418
+  },
+  "synthetic": false,
+  "top_features": [
+    {
+      "source_feature": "pdp_commodity_code",
+      "mean_abs_shap": 2.1925432682037354
+    },
+    {
+      "source_feature": "pdp_sample_unit_count",
+      "mean_abs_shap": 1.2141114473342896
+    },
+    {
+      "source_feature": "pdp_import_origin_country_code",
+      "mean_abs_shap": 0.4797441065311432
+    },
+    {
+      "source_feature": "pdp_product_claim_code",
+      "mean_abs_shap": 0.351853609085083
+    },
+    {
+      "source_feature": "pdp_commodity_type_code",
+      "mean_abs_shap": 0.2400164008140564
+    },
+    {
+      "source_feature": "pdp_collection_dow_iso",
+      "mean_abs_shap": 0.18525497615337372
+    },
+    {
+      "source_feature": "pdp_origin_code",
+      "mean_abs_shap": 0.0997103825211525
+    }
+  ],
+  "model_dir": "/home/linux1/tracefront/food-risk-ml/artifacts/registry_chemical_imidacloprid/chemical-imidacloprid-xgboost-20261017T143208Z"
+}

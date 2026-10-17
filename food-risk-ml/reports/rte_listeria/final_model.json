@@ -1,0 +1,115 @@
+{
+  "model_version": "rte_listeria-xgboost-20261017T141626Z",
+  "selected_model": "xgboost",
+  "selection": "max validation PR-AUC among learned models, unless statistically tied (paired-bootstrap 95% CI of leader minus model includes 0); a tie goes to the preference order; preference ['xgboost', 'logistic_regression', 'random_forest']",
+  "tied_models": [
+    "random_forest",
+    "logistic_regression",
+    "xgboost"
+  ],
+  "tie_tests": {
+    "leader": "random_forest",
+    "vs_leader": {
+      "logistic_regression": {
+        "diff": 9.778432001222859e-05,
+        "ci": [
+          -0.00791928322794533,
+          0.005786657833387594
+        ],
+        "share_a_better": 0.479,
+        "resamples": 1000
+      },
+      "xgboost": {
+        "diff": 0.004228223983967994,
+        "ci": [
+          -0.0009857565075889905,
+          0.00917454193527054
+        ],
+        "share_a_better": 0.952,
+        "resamples": 1000
+      }
+    }
+  },
+  "calibration": {
+    "raw_brier": 0.08111216872930527,
+    "platt_oof_brier": 0.006172142446443895,
+    "apply": true,
+    "reason": "Platt scaling lowers out-of-fold validation Brier"
+  },
+  "threshold": 0.0038618315011262894,
+  "threshold_rule": "highest-precision threshold with validation recall >= 0.8",
+  "val": {
+    "n": 30147,
+    "prevalence": 0.006269280525425415,
+    "threshold": 0.0038618315011262894,
+    "precision": 0.008300114672636924,
+    "recall": 0.8042328042328042,
+    "f1": 0.01643065614528159,
+    "specificity": 0.39378463181787837,
+    "false_negative_rate": 0.19576719576719576,
+    "pr_auc": 0.023876699368325205,
+    "roc_auc": 0.6836974762904398,
+    "brier": 0.006171355955302715,
+    "tn": 11797,
+    "fp": 18161,
+    "fn": 37,
+    "tp": 152
+  },
+  "test": {
+    "n": 40536,
+    "prevalence": 0.006734754292480758,
+    "threshold": 0.0038618315011262894,
+    "precision": 0.009198683636651996,
+    "recall": 0.8498168498168498,
+    "f1": 0.01820036086922413,
+    "specificity": 0.37935573603556616,
+    "false_negative_rate": 0.15018315018315018,
+    "pr_auc": 0.03180736948730096,
+    "roc_auc": 0.7601276187819666,
+    "brier": 0.006598751526325941,
+    "tn": 15274,
+    "fp": 24989,
+    "fn": 41,
+    "tp": 232
+  },
+  "model_dir": "D:\\Documents\\Portfolio\\hackathon\\Z-TraceFront\\food-risk-ml\\artifacts\\registry_rte_listeria\\rte_listeria-xgboost-20261017T141626Z",
+  "synthetic": false,
+  "top_features": [
+    {
+      "source_feature": "meta_cat_sample_source_name",
+      "mean_abs_shap": 1.0685875415802002
+    },
+    {
+      "source_feature": "est_prior_rate_smoothed",
+      "mean_abs_shap": 0.5272021889686584
+    },
+    {
+      "source_feature": "meta_cat_establishment_state",
+      "mean_abs_shap": 0.5167176723480225
+    },
+    {
+      "source_feature": "est_prior_samples",
+      "mean_abs_shap": 0.3527143597602844
+    },
+    {
+      "source_feature": "product_category",
+      "mean_abs_shap": 0.2793964743614197
+    },
+    {
+      "source_feature": "sample_month",
+      "mean_abs_shap": 0.2197267711162567
+    },
+    {
+      "source_feature": "est_days_since_prior",
+      "mean_abs_shap": 0.14242254197597504
+    },
+    {
+      "source_feature": "meta_cat_production_alternative",
+      "mean_abs_shap": 0.14153656363487244
+    },
+    {
+      "source_feature": "est_prior_positives",
+      "mean_abs_shap": 0.08276782929897308
+    }
+  ]
+}

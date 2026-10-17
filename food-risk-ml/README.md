@@ -21,7 +21,7 @@ cd food-risk-ml
 python -m venv .venv
 .venv\Scripts\activate          # Windows;  source .venv/bin/activate on Linux/macOS
 pip install -e ".[dev,boost,explain]"   # boost = xgboost, explain = shap; both optional (no s390x wheels)
-pytest                          # 100 tests on synthetic fixtures
+pytest                          # 115 tests on synthetic fixtures
 ruff check src tests
 ```
 
@@ -56,6 +56,8 @@ Other supported inputs: CSV, XLSX, generic JSON (a list of records, or an object
 | `python -m src.cli check-handoff <handoff.json>` | Validate a Person A model-ready handoff against the target contracts (no training) |
 | `python -m src.cli experiment <handoff.json>` | Baseline sequence (dummy → linear → RF → HistGradientBoosting → XGBoost if installed) on a validated handoff |
 | `python -m src.cli train-chemical` | Imidacloprid detection model from Person A's readiness bundle (hash-pinned, audited split, commodity baseline, paired bootstrap) → `reports/chemical_imidacloprid/`, `artifacts/registry_chemical_imidacloprid/`. Model card: `docs/model_card_chemical_imidacloprid.md` |
+| `python -m src.cli --pathogen <key> prepare` / `backtest` / `train` | Same pipeline for every FSIS model: `salmonella`, `campylobacter` (raw poultry), `beef_salmonella`, `beef_stec` (raw beef), `rte_listeria` (ready-to-eat). Cards: `docs/model_card*.md` |
+| `python -m src.cli cold-chain --scenario compressor_failure --benchmark 100000` | Real-time cold-chain rules on a SIMULATED feed (or `--readings file.csv`); see `docs/cold_chain.md` |
 
 All settings (seed, split fractions, label lag, smoothing, imbalance strategy, model parameters, threshold policy) live in [configs/config.toml](configs/config.toml).
 

@@ -1,0 +1,60 @@
+==================================================================
+step:      step4/41_verify_data
+utc:       2026-10-17T14:27:54Z
+host:      ibmdatatontest   kernel: Linux 6.8.0-147-generic   arch: s390x
+machine:   Manufacturer: IBM  Type: 9175
+os:        "Ubuntu 24.04.5 LTS"
+python:    3.12.3 big-endian
+command:   python /tmp/verify_zips.py data/raw/fsis_raw_beef data/raw/fsis_rte
+==================================================================
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2014.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2015.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2016.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2017.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2018.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2019.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2020.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2021.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2022.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2023.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2024.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2025.zip
+OK   data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2026.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2014.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2015.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2016.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2017.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2018.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2019.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2020.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2021.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2022.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2023.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2024.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2025.zip
+OK   data/raw/fsis_rte/zips/rte_sampling_data_fy2026.zip
+0 mismatched
+	Command being timed: "python /tmp/verify_zips.py data/raw/fsis_raw_beef data/raw/fsis_rte"
+	User time (seconds): 0.02
+	System time (seconds): 0.00
+	Percent of CPU this job got: 97%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.03
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 17504
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 2606
+	Voluntary context switches: 1
+	Involuntary context switches: 2
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+exit_code: 0

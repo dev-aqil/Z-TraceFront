@@ -131,10 +131,22 @@ def test_config_selects_pathogen_sections_with_separate_outputs():
     from src.config import load_config
     s, c = load_config(), load_config(pathogen="campylobacter")
     assert (s["pathogen"], c["pathogen"]) == ("Salmonella", "Campylobacter")
+    keys = list(s["pathogens"])
+    assert {"beef_salmonella", "beef_stec", "rte_listeria"} <= set(keys)
     for k in ("mapping", "processed", "reports", "registry"):
-        assert s["paths"][k] != c["paths"][k]  # models can never overwrite each other
+        paths = [load_config(pathogen=p)["paths"][k] for p in keys]
+        assert len(set(paths)) == len(paths)  # models can never overwrite each other
     with pytest.raises(KeyError, match="unknown pathogen"):
         load_config(pathogen="norovirus")
+
+
+def test_normalise_text_is_opt_in_and_merges_spelling_variants():
+    raw = RAW.assign(fake_product=["Alt 3", "ALT 3", "Alt 2a PLT (Post Lethality)", "ALT 2a  PLT (Post-Lethality)"])
+    m = {**MAPPING, "features": {"extra": {"fake_product": "categorical"}}}
+    plain = apply_mapping(raw, m)["meta_cat_fake_product"]
+    merged = apply_mapping(raw, {**m, "features": {**m["features"], "normalise_text": True}})["meta_cat_fake_product"]
+    assert plain.nunique() == 4 and merged.tolist() == ["alt 3", "alt 3"] + ["alt 2a plt (post lethality)"] * 2
+    assert apply_mapping(raw, m)["product_category"].tolist() == raw["fake_product"].tolist()  # codes untouched
 
 
 def test_campylobacter_mapping_reads_enrichment_result_only():

@@ -1,0 +1,63 @@
+==================================================================
+step:      step4/43_prepare_beef_stec
+utc:       2026-10-17T14:29:04Z
+host:      ibmdatatontest   kernel: Linux 6.8.0-147-generic   arch: s390x
+machine:   Manufacturer: IBM  Type: 9175
+os:        "Ubuntu 24.04.5 LTS"
+python:    3.12.3 big-endian
+command:   python -m src.cli --pathogen beef_stec prepare data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2014.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2015.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2016.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2017.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2018.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2019.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2020.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2021.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2022.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2023.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2024.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2025.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2026.zip
+==================================================================
+2026-10-17 14:29:05,019 INFO numexpr.utils: NumExpr defaulting to 3 threads.
+2026-10-17 14:29:05,322 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2014.json: FSIS data product, reading 17765 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:05,647 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2015.json: FSIS data product, reading 17871 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:05,966 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2016.json: FSIS data product, reading 17894 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:06,262 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2017.json: FSIS data product, reading 17455 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:06,567 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2018.json: FSIS data product, reading 17916 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:06,874 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2019.json: FSIS data product, reading 17964 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:07,185 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2020.json: FSIS data product, reading 18162 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:07,497 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2021.json: FSIS data product, reading 18197 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:07,804 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2022.json: FSIS data product, reading 17923 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:08,102 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2023.json: FSIS data product, reading 18025 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:08,408 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2024.json: FSIS data product, reading 18741 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:08,716 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2025.json: FSIS data product, reading 19089 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:08,948 INFO src.data.loader: usda_fsis_data_product_establishment_specific_laboratory_sampling_raw_beef_product_fy2026.json: FSIS data product, reading 15361 primary rows (secondary table deliberately ignored)
+2026-10-17 14:29:09,027 INFO src.data.loader: read 17765 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2014.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 17871 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2015.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 17894 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2016.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 17455 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2017.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 17916 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2018.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 17964 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2019.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 18162 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2020.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 18197 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2021.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 17923 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2022.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 18025 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2023.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 18741 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2024.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 19089 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2025.zip
+2026-10-17 14:29:09,027 INFO src.data.loader: read 15361 rows x 29 columns from data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2026.zip
+2026-10-17 14:29:09,735 WARNING src.data.loader: 16 rows have a result value in neither label list (excluded from training): {<NA>: 16}
+2026-10-17 14:29:11,058 INFO src.data.loader: deduplication: 232363 -> 232362 rows
+wrote 232362 canonical rows -> /home/linux1/tracefront/food-risk-ml/data/processed/canonical_beef_stec.csv
+	Command being timed: "python -m src.cli --pathogen beef_stec prepare data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2014.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2015.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2016.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2017.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2018.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2019.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2020.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2021.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2022.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2023.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2024.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2025.zip data/raw/fsis_raw_beef/zips/raw_beef_sampling_data_fy2026.zip"
+	User time (seconds): 6.43
+	System time (seconds): 0.55
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.04
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 751256
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 545918
+	Voluntary context switches: 8
+	Involuntary context switches: 40
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 38280
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+exit_code: 0

@@ -21,7 +21,7 @@ from src.models.baselines import XGBClassifier  # noqa: E402  (None when xgboost
 
 try:
     import shap
-except ImportError:  # ponytail: no s390x wheel; predictions still work, explanations are omitted
+except ImportError:  # no s390x wheel: XGBoost and linear models use the native explainers below; RF goes unexplained
     shap = None
 
 
@@ -32,19 +32,45 @@ def source_feature(name: str, inputs: list[str]) -> str:
     return max(matches, key=len) if matches else base
 
 
+def _dense(Xt) -> np.ndarray:
+    return np.asarray(Xt.todense()) if hasattr(Xt, "todense") else np.asarray(Xt)
+
+
+class _XGBNative:
+    """XGBoost's built-in TreeSHAP (pred_contribs): the same algorithm as shap.TreeExplainer, with no shap package,
+    so explanations also work on s390x. The last column is the bias term and is dropped."""
+
+    def __init__(self, model):
+        self.booster = model.get_booster()
+
+    def shap_values(self, Xt) -> np.ndarray:
+        from xgboost import DMatrix
+        return self.booster.predict(DMatrix(Xt), pred_contribs=True)[:, :-1]
+
+
+class _LinearNative:
+    """Exact SHAP values of a linear model against a background (what shap.LinearExplainer computes with an
+    independent masker): coef * (x - background mean), in log-odds."""
+
+    def __init__(self, model, background_t):
+        self.coef, self.mean = model.coef_[0], _dense(background_t).mean(axis=0)
+
+    def shap_values(self, Xt) -> np.ndarray:
+        return (_dense(Xt) - self.mean) * self.coef
+
+
 class Explainer:
     def __init__(self, pipeline, background: pd.DataFrame):
         self.pre = pipeline.named_steps["preprocess"]
         model = pipeline.named_steps["model"]
         self.inputs = list(self.pre.feature_names_in_)
         self.names = list(self.pre.get_feature_names_out())
-        if shap is None:
-            self._exp, self.units = None, None
-        elif isinstance(model, LogisticRegression):
-            self._exp, self.units = shap.LinearExplainer(model, self.pre.transform(background)), "log-odds"
+        # Native explainers first: identical on x86 and s390x. shap is only needed for random forests.
+        if isinstance(model, LogisticRegression):
+            self._exp, self.units = _LinearNative(model, self.pre.transform(background)), "log-odds"
         elif XGBClassifier is not None and isinstance(model, XGBClassifier):
-            self._exp, self.units = shap.TreeExplainer(model), "log-odds"
-        elif isinstance(model, RandomForestClassifier):
+            self._exp, self.units = _XGBNative(model), "log-odds"
+        elif shap is not None and isinstance(model, RandomForestClassifier):
             self._exp, self.units = shap.TreeExplainer(model), "probability"
         else:
             self._exp, self.units = None, None

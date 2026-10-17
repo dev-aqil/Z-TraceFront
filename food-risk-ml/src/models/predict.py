@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.data.contract import ESTABLISHMENT_ID, PRODUCT_CATEGORY, SAMPLE_DATE, UNKNOWN_CATEGORY
+from src.data.contract import ESTABLISHMENT_ID, META_CAT_PREFIX, PRODUCT_CATEGORY, SAMPLE_DATE, UNKNOWN_CATEGORY
+from src.data.loader import normalise_category
 from src.explainability.shap_explain import Explainer
 from src.features.build import make_features
 from src.models.registry import load_model
@@ -41,9 +42,11 @@ class Predictor:
             PRODUCT_CATEGORY: [r.get("product_category") or UNKNOWN_CATEGORY for r in records],
             ESTABLISHMENT_ID: [r.get("establishment_id") for r in records],
         })
+        f = self.meta["features"]
         for c in self.meta_features:
             df[c] = [r.get("metadata", {}).get(c) for r in records]
-        f = self.meta["features"]
+            if f.get("normalise_text") and c.startswith(META_CAT_PREFIX):  # same merge as at training
+                df[c] = normalise_category(df[c]).astype(object)
         X = make_features(df, self.history if f["uses_history"] else None,
                           {"features": f["history_params"]}, f["prior_rate"])[f["all"]]
         for c in f["numeric"]:

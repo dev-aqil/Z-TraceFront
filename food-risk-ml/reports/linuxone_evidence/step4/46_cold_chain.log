@@ -1,0 +1,73 @@
+==================================================================
+step:      step4/46_cold_chain
+utc:       2026-10-17T14:32:09Z
+host:      ibmdatatontest   kernel: Linux 6.8.0-147-generic   arch: s390x
+machine:   Manufacturer: IBM  Type: 9175
+os:        "Ubuntu 24.04.5 LTS"
+python:    3.12.3 big-endian
+command:   python -m src.cli cold-chain --scenario compressor_failure --benchmark 200000
+==================================================================
+2026-10-17 14:32:09,777 INFO numexpr.utils: NumExpr defaulting to 3 threads.
+{
+  "simulated": true,
+  "scenario": "compressor_failure",
+  "profile": "poultry_chilled",
+  "streams": {
+    "sim": {
+      "stream_id": "sim",
+      "time": "2026-01-01T11:59:00",
+      "temp_c": 27.199,
+      "profile": "poultry_chilled",
+      "status": "critical",
+      "limit_c": 4.0,
+      "minutes_above_limit": 294.0,
+      "minutes_in_danger_zone": 291.0,
+      "minutes_above_hot": 0.0,
+      "data_gaps": 0,
+      "alerts": [
+        {
+          "rule": "EXCURSION",
+          "time": "2026-01-01T07:05:00",
+          "message": "4.01 \u00b0C is above the poultry_chilled limit of 4.00 \u00b0C",
+          "source": "Regulation (EC) No 853/2004, Annex III, Section II, Chapter V: poultry meat maintained at not more than 4 \u00b0C"
+        },
+        {
+          "rule": "CRITICAL",
+          "time": "2026-01-01T09:08:00",
+          "message": "120 min above 4.4 \u00b0C (0 min above 32.2 \u00b0C): USDA limit is 120 min, or 60 min above 32.2 \u00b0C",
+          "source": "USDA FSIS danger-zone guidance (2-hour / 1-hour rule)"
+        }
+      ]
+    }
+  },
+  "benchmark": {
+    "readings": 200000,
+    "seconds": 0.7431,
+    "readings_per_second": 269141,
+    "mean_latency_us": 3.72
+  }
+}
+	Command being timed: "python -m src.cli cold-chain --scenario compressor_failure --benchmark 200000"
+	User time (seconds): 1.55
+	System time (seconds): 0.03
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.60
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 100776
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 19178
+	Voluntary context switches: 8
+	Involuntary context switches: 6
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+exit_code: 0

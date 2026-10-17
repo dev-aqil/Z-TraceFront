@@ -7,6 +7,7 @@ default_pathogen = "salmonella"   # CLI: --pathogen <key>
 # models never overwrite each other. Salmonella keeps the original paths.
 [pathogens.salmonella]
 name = "Salmonella"
+product = "raw poultry"
 mapping = "configs/source_mapping.toml"
 processed = "data/processed/canonical.csv"
 reports = "reports"
@@ -14,10 +15,35 @@ registry = "artifacts/registry"
 
 [pathogens.campylobacter]
 name = "Campylobacter"
+product = "raw poultry"
 mapping = "configs/source_mapping_campylobacter.toml"
 processed = "data/processed/canonical_campylobacter.csv"
 reports = "reports/campylobacter"
 registry = "artifacts/registry_campylobacter"
+
+[pathogens.beef_salmonella]
+name = "Salmonella"
+product = "raw beef"
+mapping = "configs/source_mapping_beef_salmonella.toml"
+processed = "data/processed/canonical_beef_salmonella.csv"
+reports = "reports/beef_salmonella"
+registry = "artifacts/registry_beef_salmonella"
+
+[pathogens.beef_stec]
+name = "STEC"
+product = "raw beef"
+mapping = "configs/source_mapping_beef_stec.toml"
+processed = "data/processed/canonical_beef_stec.csv"
+reports = "reports/beef_stec"
+registry = "artifacts/registry_beef_stec"
+
+[pathogens.rte_listeria]
+name = "Listeria monocytogenes"
+product = "ready-to-eat products and RTE processing environment"
+mapping = "configs/source_mapping_rte_listeria.toml"
+processed = "data/processed/canonical_rte_listeria.csv"
+reports = "reports/rte_listeria"
+registry = "artifacts/registry_rte_listeria"
 
 # Chemical models, trained only from a Person A model-ready handoff (src/models/chemical.py). Separate from the
 # pathogen models in every way: target, registry, reports, API output. Never combined into one probability.
@@ -71,11 +97,12 @@ subsample = 0.8
 colsample_bytree = 0.8
 
 [selection]
-# The model with the best validation PR-AUC wins, except that every model within tie_tolerance of the best counts
-# as tied, and a tie goes to the earliest name in `preference` (cheapest to explain per request and to ship to
-# LinuxONE). 0.005 is about 10x the gap that made a 400-tree forest beat XGBoost on Campylobacter validation
-# (0.4359 vs 0.4354), while the backtest ranked them the other way (0.4024 vs 0.4025).
-tie_tolerance = 0.005
+# The model with the best validation PR-AUC wins unless the validation data cannot tell it apart from another
+# model: tied = the paired-bootstrap 95% CI of (leader - model) PR-AUC includes 0 (`bootstrap` resamples). A tie
+# goes to the earliest name in `preference`: cheapest to explain per request, and explainable on s390x without the
+# shap package. Replaced (2026-10-17) a fixed 0.005 tolerance, which was meaningless for rare targets: beef STEC
+# validation PR-AUCs are ~0.01, where 0.005 is half the score.
+bootstrap = 1000
 preference = ["xgboost", "logistic_regression", "random_forest"]
 
 [threshold]
