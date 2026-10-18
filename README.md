@@ -266,4 +266,14 @@ tests/              Offline data pipeline-focused tests
 - [reports/data_leakage_audit.md](reports/data_leakage_audit.md)
 - [reports/m8_validation.json](reports/m8_validation.json)
 
+Generation/reading requires Python 3.11+ standard library (SQLite for upstream cleaning), UTF-8 CSV/JSON and no native data wheels. Local Python 3.11.17 and 3.14.7 are supported. Actual IBM Z LinuxONE/s390x execution is **not tested**. See [final validation](reports/m8_validation.json) for measured tests and portability limits.
+
+## License
+
+This repository is licensed under the **PolyForm Noncommercial License 1.0.0**.  
+See [/LICENSE](LICENSE) for the full terms.
+
+=======
+
 For the full concept narrative/specification, see [tracefront_project_summary.md](tracefront_project_summary.md).
+
