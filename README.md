@@ -240,3 +240,8 @@ X_records, y_values, identifiers = load_model_ready(Path.cwd())
 The existing `food-risk-ml` contract is for FSIS/Salmonella and does not accept this chemical task. Person B must use a separate chemical adapter; never rename this target to Salmonella or pesticide exceedance. Only fit preprocessing on training rows. Biological and cold-chain training remain blocked.
 
 Generation/reading requires Python 3.11+ standard library (SQLite for upstream cleaning), UTF-8 CSV/JSON and no native data wheels. Local Python 3.11.17 and 3.14.7 are supported. Actual IBM Z LinuxONE/s390x execution is **not tested**. See [final validation](reports/m8_validation.json) for measured tests and portability limits.
+
+## License
+
+This repository is licensed under the **PolyForm Noncommercial License 1.0.0**.  
+See [/LICENSE](LICENSE) for the full terms.
