@@ -1,5 +1,7 @@
 # Tracefront
 
+![Tracefront Logo](assets/tracefront-logo.png)
+
 Real-time AI decision support for food safety incidents. See [tracefront_project_summary.md](tracefront_project_summary.md) for the full spec.
 
 **To run it, start with [SETUP.md](SETUP.md).**
