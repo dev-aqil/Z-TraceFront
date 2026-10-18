@@ -1,7 +1,7 @@
 # TraceFront
 
 <p align="center">
-  <img src="assets/tracefront-logo.png" alt="TraceFront logo" width="220" />
+  <img src="assets/tracefront-logo.png" alt="TraceFront logo" width="1600" />
 </p>
 
 <p align="center"><strong>Real-time AI-assisted decision support for food safety incidents.</strong></p>
