@@ -20,7 +20,9 @@ Endpoints:
 - `GET /api/health`
 - `GET /api/batches`, `POST /api/batches`
 - `GET/POST /api/organizations`, `/api/shipments`, `/api/batch-relationships`
-- `GET /api/trace?batch_ids=<id>&batch_ids=<id>` — ingredients, related products, shipment locations and shared-ingredient ranking
+- `GET /api/trace?batch_ids=<id>&batch_ids=<id>` — ingredients, related products, shipment locations, shared-ingredient ranking, and every organization that made or handled a traced lot with its quantities
+- `POST /api/records/import` — load organizations, lots, ingredient links and shipments from one CSV/XLSX/JSON file; start from `frontend/public/trace_records_template.csv`
+- `GET /api/organizations/{id}/lots` — the lots to investigate when the lead is a company rather than a lot
 - `POST /api/demo/seed` — idempotent synthetic trace scenario; preserves existing records
 - `POST /api/decisions` — record an officer's approve/reject on the trace's containment recommendation (simulated hold)
 - `POST /api/analyses`, `GET /api/analyses/{id}/findings`, `GET /api/analyses/{id}/distribution` — database-backed upload results

@@ -12,6 +12,11 @@ def build_batch_graph(db: Session) -> nx.DiGraph:
     return g
 
 
+def creates_cycle(g: nx.DiGraph, parent: int, child: int) -> bool:
+    """Would the ingredient link parent -> child make a lot one of its own ingredients?"""
+    return parent == child or (parent in g and child in g and nx.has_path(g, child, parent))
+
+
 def trace_backward(db: Session, batch_id: int) -> list[int]:
     """Ancestors of batch_id: where did it come from."""
     g = build_batch_graph(db)

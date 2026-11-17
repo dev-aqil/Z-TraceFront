@@ -8,6 +8,7 @@ from sqlalchemy import text
 from app.analysis import router as analysis_router
 from app.database import Base, engine, get_db
 from app.models import Batch, BatchLot, LabResult, Organization, SensorReading, Shipment
+from app.records import router as records_router
 from app.risk import rule_based_risk_score
 from app.schemas import (
     BatchCreate,
@@ -30,6 +31,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(analysis_router)
+app.include_router(records_router)
 app.include_router(trace_router)
 
 

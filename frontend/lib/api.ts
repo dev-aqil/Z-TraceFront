@@ -19,9 +19,17 @@ export type TraceShipment = {
   from_name: string; to_name: string; quantity: number; quantity_unit: string | null; status: string;
   departed_at: string | null; eta: string | null;
 };
+export type Organization = { organization_id: number; name: string; type: string };
+// Quantities are per lot and unit. remaining = received − sent on; null where the lot was made, because production
+// quantity is not recorded.
+export type TraceOrganization = Organization & {
+  produced_batch_ids: number[];
+  holdings: { batch_id: number; unit: string | null; received: number; incoming: number; sent: number; remaining: number | null; used_in: number[] }[];
+};
 export type TraceDocument = {
   selected_batch_ids: number[]; upstream: number[]; downstream: number[]; related: number[];
   batches: TraceBatch[]; edges: [number, number][]; shipments: TraceShipment[];
+  organizations: TraceOrganization[]; // everyone who made or handled a traced lot, suppliers first
   source_ranking: { batch_id: number; matched_batch_ids: number[]; flagged_product_count: number; total_distance: number }[];
   lab_results: LabResult[];
   positive_elsewhere: (LabResult & { batch: TraceBatch })[]; // positives this selection does not reach
@@ -120,7 +128,17 @@ export type StoredRun = { result: SampleRun; labels: Record<string, string>; tal
 const json = { method: "POST", headers: { "Content-Type": "application/json" } };
 export const getTraceBatches = () => request<TraceBatch[]>(`${API_URL}/api/trace/batches`);
 export const traceLots = (ids: number[]) => request<TraceDocument>(`${API_URL}/api/trace?${ids.map((id) => `batch_ids=${id}`).join("&")}`);
-export const seedTraceDemo = () => request<{ selected_batch_ids: number[]; synthetic: boolean }>(`${API_URL}/api/demo/seed`, { ...json, body: "{}" });
+export const getOrganizations = () => request<Organization[]>(`${API_URL}/api/organizations`);
+// The lots to investigate when the lead is a company: what it made, or handled without making something from it.
+export const getOrganizationLots = (id: number) =>
+  request<{ organization: Organization; lots: TraceBatch[]; total: number }>(`${API_URL}/api/organizations/${id}/lots`);
+export type ImportResult = { rows: number; created: Record<string, number>; existing: Record<string, number> };
+export function importRecords(file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  return request<ImportResult>(`${API_URL}/api/records/import`, { method: "POST", body: form });
+}
+export const seedTraceDemo =() => request<{ selected_batch_ids: number[]; synthetic: boolean }>(`${API_URL}/api/demo/seed`, { ...json, body: "{}" });
 export const recordDecision = (body: { batch_ids: number[]; scope: HoldScope; decision: Decision["decision"]; officer: string; reason: string; analysis_id: string | null }) =>
   request<Decision>(`${API_URL}/api/decisions`, { ...json, body: JSON.stringify(body) });
 // Display form of a sample field. The models need the raw value (the beef models lower-case their text), so this is

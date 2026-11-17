@@ -442,6 +442,8 @@ Returns `200` in the same shape as 3.4, with `sample_id: null` and `actual: null
 | GET | `/api/lots/resolve?lot_code=RM-402` | Optional `organization_id`. Returns a batch; unknown 404, ambiguous 409. No route-name inference. |
 | GET | `/api/trace?batch_ids=910042&batch_ids=910091` | Investigate 1–20 selected batch IDs. See response below. Unknown batch 404; empty/oversize input 422. |
 | GET | `/api/batches/{id}/trace` | Same rich response plus `batch_id`. Keeps legacy `upstream` and `downstream` arrays. |
+| POST | `/api/records/import` | Multipart `file` (`.csv`, `.xlsx`, `.json`, up to 10 MB). Loads many records at once; see "Record import" below. Returns 200 with `rows`, `created` and `existing` counts per kind. Any bad row returns 400 naming the rows, and nothing is stored. |
+| GET | `/api/organizations/{id}/lots` | Lots to investigate when the lead is a company: the lots it made, plus lots it received or sent on without making something from them (`relation`: `produced` / `handled`). Ingredients it used are left out, because tracing its products reaches them. Newest first; `limit` 1–200, default 20; `total` shows when the list was cut short. Unknown organization 404. |
 | POST | `/api/decisions` | Body: `batch_ids` (1–20, the selection under investigation), `scope` (`targeted`/`extended`), `decision` (`approved`/`rejected`), `officer`, `reason` (both non-blank). The server recomputes the held lots and shipments from stored records; the client never sends them. Returns 201 with `decision_id`, `scope`, `decision`, `batch_ids`, `shipment_ids`, `officer`, `reason`, `decided_at`, `analysis_id`. Optional `analysis_id` links the decision to the upload that started it (stored in `decision_sources`); an unknown analysis returns 404. Unknown batch 404, invalid input 422. Append-only: nothing is updated or deleted. |
 | POST | `/api/demo/seed` | No body required. Adds fixed synthetic rows idempotently, refusing conflicting reserved IDs with 409 and rolling back the whole seed. Returns `synthetic`, `selected_batch_ids`, `second_batch_id`, `shared_ingredient_id`, `message`. Never resets or deletes data. |
 
@@ -453,6 +455,7 @@ Trace response fields:
 - `batches`: full catalog records for all included lots/products.
 - `edges`: directed `[parent_batch_id, child_batch_id]` pairs.
 - `shipments`: movements of included batches with origin/destination names, external codes, units, status and timestamps. These are not current-inventory totals.
+- `organizations`: every organization that made or handled an included lot, suppliers first, then factories, warehouses and stores. Each has `organization_id`, `name`, `type`, `produced_batch_ids` and `holdings`, one per lot and unit: `received` (delivered to it), `incoming` (sent to it but not delivered), `sent` (in transit or delivered onward), `remaining` and `used_in` (products it made from that lot). `remaining` is `received − sent`: stock that may still be on site, was used in production or was sold. It is `null` where the lot was made, because production quantity is not stored; a negative value means the site sent on more than its recorded receipts. A `held` shipment counts as neither sent nor received.
 - `source_ranking`: upstream lots ordered by count of selected descendants, then summed shortest-path distance, then ID. Each row includes `batch_id`, `matched_batch_ids`, `flagged_product_count`, `total_distance`. A count is not a probability or causal conclusion.
 - `lab_results`: recorded laboratory evidence, independently of manual selection.
 - `interpretation`: explicit scope of the investigation leads.
@@ -461,5 +464,22 @@ Trace response fields:
 - `decisions`: recorded decisions for exactly this selection, newest first.
 
 The synthetic seed uses 910xxx IDs. CW-42 (`910042`) and CS-91 (`910091`) share L-102 (`910102`). VW-17 is another product using L-102 at the second factory. RM-402 (`910402`, marinated chicken from Food Processing) is a separate ingredient of CW-42 and matches the bundled `supplier_shipments.csv`, including its SHIP-017 movement to Central Kitchen, QSR Group A. Both CW-42 and CS-91 have a `Salmonella (simulated)` positive. Selecting both finished products ranks L-102 first with `flagged_product_count: 2`. Re-running the seed renames rows still holding the first seed version's names (Poultry Supplier, FreshBite Factory KL, Chilled chicken); any other differing value is a 409 conflict.
+
+### Record import
+
+One row per record. The `record` column names the kind, which decides the other columns that are read. Headers are matched loosely, and row order does not matter. `frontend/public/trace_records_template.csv` is a working example.
+
+| `record` | Columns |
+|---|---|
+| `organization` | `name`, `type` (supplier / factory / warehouse / store) |
+| `lot` | `producer`, `lot_code`, `product`, `produced_at` |
+| `ingredient` | `lot_code` (the product), `ingredient_lot_code`, `quantity`; optional `producer`, `ingredient_producer` |
+| `shipment` | `shipment_code`, `lot_code`, `from`, `to`, `quantity`, `unit`, `status` (pending / in_transit / delivered / held); optional `producer`, `departed_at`, `eta` |
+
+- **Matching:** organizations by name (ignoring case), lots by producer and lot code, shipments by sender and shipment code. A record that is already stored is counted under `existing` and left unchanged, so a file can be sent twice and two organizations can describe the same lot.
+- **Producer columns:** may be left out when the lot code belongs to one producer only; otherwise the row is refused as ambiguous.
+- **Dates:** ISO only (`2026-11-01` or `2026-11-01 06:00`). `01/11/2026` is refused rather than guessed as January or November.
+- **Refused:** unknown organizations or lots, ingredient cycles, a second lot on one shipment code, non-positive quantities. One bad row rejects the whole file.
+- **IDs:** assigned as the highest stored ID plus one. Two imports at the same moment can collide; the loser gets 409 and can be sent again.
 
 New lab writes accept only `positive` or `negative`. Distribution upload grouping scopes routes and batch occurrences to their distributor/route, so identical route names do not merge independent suppliers.

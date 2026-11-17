@@ -3,6 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+OrganizationType = Literal["supplier", "factory", "warehouse", "store"]  # in supply-chain order
+ShipmentStatus = Literal["pending", "in_transit", "delivered", "held"]
 
 class OrganizationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -61,7 +63,7 @@ class LabResultOut(LabResultCreate):
 class OrganizationCreate(BaseModel):
     organization_id: int = Field(gt=0)
     name: str = Field(min_length=1, max_length=200, pattern=r"\S")
-    type: Literal["supplier", "factory", "warehouse", "store"]
+    type: OrganizationType
 
 
 class ShipmentCreate(BaseModel):
@@ -72,7 +74,7 @@ class ShipmentCreate(BaseModel):
     to_org_id: int
     quantity: float = Field(gt=0, allow_inf_nan=False)
     quantity_unit: str = Field(min_length=1, max_length=40, pattern=r"\S")
-    status: Literal["pending", "in_transit", "delivered", "held"] = "pending"
+    status: ShipmentStatus = "pending"
     departed_at: datetime | None = None
     eta: datetime | None = None
 

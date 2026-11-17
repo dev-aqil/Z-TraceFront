@@ -1,19 +1,23 @@
 """Stored lot relationships and shipment locations; investigation leads are not proof of cause."""
 
 from datetime import datetime, timezone
+from typing import get_args
 
 import networkx as nx
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.graph import build_batch_graph
+from app.graph import build_batch_graph, creates_cycle
 from app.models import (Analysis, Batch, BatchLot, BatchRelationship, ContainmentDecision, DecisionSource, LabResult,
                         Organization, Shipment, ShipmentManifest, SyntheticBatch)
-from app.schemas import DecisionCreate, OrganizationCreate, OrganizationOut, RelationshipCreate, ShipmentCreate
+from app.schemas import (DecisionCreate, OrganizationCreate, OrganizationOut, OrganizationType, RelationshipCreate,
+                         ShipmentCreate)
 
 router = APIRouter(prefix="/api")
+SUPPLY_ORDER = get_args(OrganizationType)
 
 
 def commit(db: Session):
@@ -99,10 +103,7 @@ def create_relationship(data: RelationshipCreate, db: Session = Depends(get_db))
     graph = build_batch_graph(db)
     if graph.has_edge(data.parent_batch_id, data.child_batch_id):
         raise HTTPException(409, "ingredient relationship already exists")
-    if data.parent_batch_id == data.child_batch_id or (
-        data.child_batch_id in graph and data.parent_batch_id in graph
-        and nx.has_path(graph, data.child_batch_id, data.parent_batch_id)
-    ):
+    if creates_cycle(graph, data.parent_batch_id, data.child_batch_id):
         raise HTTPException(400, "ingredient relationship would create a cycle")
     row = BatchRelationship(**data.model_dump())
     db.add(row)
@@ -160,6 +161,35 @@ def lab_document(lab: LabResult) -> dict:
             "contaminant": lab.contaminant, "result": lab.result}
 
 
+def organization_summary(db: Session, graph: nx.DiGraph, batches: list[dict], shipments: list[dict]) -> list[dict]:
+    """Who made or handled the traced lots, suppliers first, with quantities per lot and unit.
+
+    `remaining` is received minus sent on: stock that may still be on site, was used in production (`used_in`) or was
+    sold. It is None where the lot was made, because production quantity is not recorded.
+    """
+    made = {b["batch_id"]: b["organization_id"] for b in batches}
+    holdings: dict[tuple, dict] = {}
+
+    def holding(org, ship):
+        return holdings.setdefault((org, ship["batch_id"], ship["quantity_unit"]), {"received": 0, "incoming": 0, "sent": 0})
+
+    for ship in shipments:
+        # ponytail: a held shipment counts as neither sent nor arrived; record where it was stopped to place it
+        holding(ship["to_org_id"], ship)["received" if ship["status"] == "delivered" else "incoming"] += ship["quantity"]
+        holding(ship["from_org_id"], ship)["sent"] += ship["quantity"] if ship["status"] in ("in_transit", "delivered") else 0
+    orgs = db.query(Organization).filter(
+        Organization.organization_id.in_(set(made.values()) | {org for org, _, _ in holdings})).all()
+    orgs.sort(key=lambda o: (SUPPLY_ORDER.index(o.type) if o.type in SUPPLY_ORDER else len(SUPPLY_ORDER), o.organization_id))
+    return [{"organization_id": o.organization_id, "name": o.name, "type": o.type,
+             "produced_batch_ids": sorted(batch for batch, org in made.items() if org == o.organization_id),
+             "holdings": [{"batch_id": batch, "unit": unit, **quantities,
+                           "remaining": None if made[batch] == o.organization_id else quantities["received"] - quantities["sent"],
+                           "used_in": sorted(c for c in graph.successors(batch) if made.get(c) == o.organization_id)}
+                          for (org, batch, unit), quantities in sorted(holdings.items(), key=lambda kv: (kv[0][1], kv[0][2] or ""))
+                          if org == o.organization_id]}
+            for o in orgs]
+
+
 def trace_document(db: Session, batch_ids: list[int]) -> dict:
     selected = set(batch_ids)
     for id_ in selected:
@@ -181,7 +211,8 @@ def trace_document(db: Session, batch_ids: list[int]) -> dict:
                         "total_distance": sum(nx.shortest_path_length(graph, id_, id2) for id2 in matched)})
     ranking.sort(key=lambda r: (-r["flagged_product_count"], r["total_distance"], r["batch_id"]))
     shipment_rows = db.query(Shipment).filter(Shipment.batch_id.in_(included)).order_by(Shipment.shipment_id).all()
-    labs = db.query(LabResult).filter(LabResult.batch_id.in_(included)).order_by(LabResult.tested_at, LabResult.lab_result_id)
+    shipments = [shipment_document(db, ship) for ship in shipment_rows]
+    labs =db.query(LabResult).filter(LabResult.batch_id.in_(included)).order_by(LabResult.tested_at, LabResult.lab_result_id)
     decisions = db.query(ContainmentDecision).filter_by(selection=selection_key(selected)).order_by(ContainmentDecision.decision_id.desc())
     # Positives this selection does not reach: the prompt to widen the investigation.
     elsewhere = (db.query(LabResult).filter(LabResult.result == "positive", LabResult.batch_id.notin_(included))
@@ -189,7 +220,8 @@ def trace_document(db: Session, batch_ids: list[int]) -> dict:
     return {"selected_batch_ids": sorted(selected), "upstream": sorted(upstream), "downstream": sorted(downstream),
             "related": sorted(related), "batches": batches,
             "edges": [[a, b] for a, b in sorted(graph.edges) if a in included and b in included],
-            "shipments": [shipment_document(db, ship) for ship in shipment_rows], "source_ranking": ranking,
+            "shipments": shipments, "organizations": organization_summary(db, graph, batches, shipments),
+            "source_ranking": ranking,
             "lab_results": [lab_document(lab) for lab in labs],
             "positive_elsewhere": [{**lab_document(lab), "batch": batch_document(db, db.get(Batch, lab.batch_id))}
                                    for lab in elsewhere],
@@ -201,6 +233,26 @@ def trace_document(db: Session, batch_ids: list[int]) -> dict:
 @router.get("/trace")
 def investigate(batch_ids: list[int] = Query(min_length=1, max_length=20), db: Session = Depends(get_db)):
     return trace_document(db, batch_ids)
+
+
+@router.get("/organizations/{organization_id}/lots")
+def organization_lots(organization_id: int, limit: int = Query(20, ge=1, le=200), db: Session = Depends(get_db)):
+    """Lots to investigate when the lead is a company rather than a lot, newest first: what it made, plus what it
+    received or sent on without making something from it. Ingredients it used are left out, because tracing its
+    products already reaches them. `total` shows when `limit` cut the list short."""
+    org = require(db, Organization, organization_id, "organization")
+    made = {id_ for (id_,) in db.query(Batch.batch_id).filter(Batch.organization_id == organization_id)}
+    moved = {id_ for (id_,) in db.query(Shipment.batch_id).filter(
+        or_(Shipment.from_org_id == organization_id, Shipment.to_org_id == organization_id))}
+    graph = build_batch_graph(db)
+    handled = {id_ for id_ in moved - made if not (id_ in graph and made.intersection(graph.successors(id_)))}
+    # ponytail: the IN list grows with the lots a site has handled; join on shipments once a site passes ~30k lots
+    rows = (db.query(Batch).filter(Batch.batch_id.in_(made | handled))
+            .order_by(Batch.produced_at.desc(), Batch.batch_id.desc()).limit(limit))
+    return {"organization": {"organization_id": org.organization_id, "name": org.name, "type": org.type},
+            "lots": [{**batch_document(db, batch), "relation": "produced" if batch.batch_id in made else "handled"}
+                     for batch in rows],
+            "total": len(made | handled)}
 
 
 @router.post("/decisions", status_code=201)

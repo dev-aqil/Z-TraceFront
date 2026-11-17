@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getFindings, getTraceBatches, recordDecision, seedTraceDemo, traceLots, withAnalysis } from "@/lib/api";
-import type { Decision, HoldScope, TraceBatch, TraceDocument } from "@/lib/api";
+import { getFindings, getOrganizationLots, getOrganizations, getTraceBatches, importRecords, recordDecision, seedTraceDemo, traceLots, withAnalysis } from "@/lib/api";
+import type { Decision, HoldScope, Organization, TraceBatch, TraceDocument } from "@/lib/api";
 import type { DemoFinding } from "../analysis-results/demo-findings";
 
 const code = (batch: TraceBatch) => batch.lot_code ?? `Batch ${batch.batch_id}`;
@@ -120,8 +120,32 @@ function LotNetwork({ trace }: { trace: TraceDocument }) {
   );
 }
 
+const amount = (n: number, unit: string | null) => n ? `${n.toLocaleString()} ${unit ?? "(unit not recorded)"}` : "—";
+
+function NotifyTable({ trace, label }: { trace: TraceDocument; label: (id: number) => string }) {
+  return <section aria-labelledby="notify-heading" className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
+    <h2 id="notify-heading" className="text-lg font-semibold">Who to notify</h2>
+    <p className="mt-1 max-w-4xl text-xs leading-5 text-slate-500">Every company or site that made or handled a lot in this trace, suppliers first. Remaining is what a site received minus what it sent on: that stock may still be there, or it was used in production or sold.</p>
+    <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-xs">
+      <thead className="border-b border-slate-200 text-[10px] uppercase tracking-wide text-slate-500"><tr>{["Company or site", "Lot", "Received", "Not yet arrived", "Sent on", "Remaining"].map((s) => <th key={s} scope="col" className="px-2 py-3 font-semibold">{s}</th>)}</tr></thead>
+      <tbody>{trace.organizations.map((org) => (org.holdings.length ? org.holdings : [null]).map((h, i, rows) => <tr key={`${org.organization_id}-${i}`} className="border-b border-slate-100">
+        {i === 0 && <th scope="rowgroup" rowSpan={rows.length} className="min-w-[180px] px-2 py-3 text-left align-top font-normal"><strong>{org.name}</strong><span className="mt-1 block text-[10px] text-slate-500">{org.type}{!!org.produced_batch_ids.length && ` · made ${org.produced_batch_ids.map(label).join(", ")}`}</span></th>}
+        {!h ? <td colSpan={5} className="px-2 py-3 text-slate-500">No movements recorded</td> : <>
+          <td className="whitespace-nowrap px-2 py-3"><strong>{label(h.batch_id)}</strong>{!!h.used_in.length && <span className="mt-1 block text-[10px] text-slate-500">used in {h.used_in.map(label).join(", ")}</span>}</td>
+          <td className="whitespace-nowrap px-2 py-3 tabular-nums">{amount(h.received, h.unit)}</td>
+          <td className="whitespace-nowrap px-2 py-3 tabular-nums">{amount(h.incoming, h.unit)}</td>
+          <td className="whitespace-nowrap px-2 py-3 tabular-nums">{amount(h.sent, h.unit)}</td>
+          <td className="px-2 py-3 tabular-nums">{h.remaining === null ? <span className="text-slate-500">Made here; amount produced is not recorded</span> : h.remaining < 0 ? <span className="text-amber-800">Sent on more than its recorded receipts</span> : amount(h.remaining, h.unit)}</td>
+        </>}
+      </tr>))}</tbody>
+    </table></div>
+  </section>;
+}
+
 export default function TracePage() {
   const [batches, setBatches] = useState<TraceBatch[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [importing, setImporting] = useState(false);
   const [selected, setSelected] = useState<number[]>([]);
   const [trace, setTrace] = useState<TraceDocument | null>(null);
   const [error, setError] = useState("");
@@ -143,6 +167,7 @@ export default function TracePage() {
       // The banner is context only; if the findings cannot load, the trace still works without it.
       getFindings(analysis).then((findings) => { if (live) setOrigin(findings.find((f) => f.batchId === lot) ?? findings[0] ?? null); }, () => {});
     }
+    getOrganizations().then((orgs) => { if (live) setOrganizations(orgs); }, () => {}); // a failure shows through the batch request below
     getTraceBatches().then((rows) => {
       if (!live) return;
       setBatches(rows);
@@ -176,8 +201,9 @@ export default function TracePage() {
     setSeeding(true); setError("");
     try {
       const result = await seedTraceDemo();
-      const rows = await getTraceBatches();
+      const [rows, orgs] = await Promise.all([getTraceBatches(), getOrganizations()]);
       setBatches(rows);
+      setOrganizations(orgs);
       setNotice("Synthetic scenario loaded: lot links, movements and lab results are simulated. Existing records were preserved.");
       // Arriving from an upload, stay on its lot instead of jumping to the scenario's default selection.
       const lot = new URLSearchParams(window.location.search).get("lot");
@@ -185,6 +211,30 @@ export default function TracePage() {
       setSelected(matches.length === 1 ? [matches[0].batch_id] : result.selected_batch_ids);
     } catch (e) { setError((e as Error).message); }
     finally { setSeeding(false); }
+  }
+
+  async function importFile(file: File) {
+    setImporting(true); setError(""); setNotice("");
+    try {
+      const { created, existing } = await importRecords(file);
+      const [rows, orgs] = await Promise.all([getTraceBatches(), getOrganizations()]);
+      setBatches(rows);
+      setOrganizations(orgs);
+      const added = Object.entries(created).filter(([, n]) => n).map(([kind, n]) => `${n} ${kind}`).join(", ");
+      const known = Object.values(existing).reduce((sum, n) => sum + n, 0);
+      setNotice(`${file.name}: ${added ? `added ${added}` : "nothing new to add"}${known ? `; ${known} record${known === 1 ? " was" : "s were"} already stored and left unchanged` : ""}.`);
+    } catch (e) { setError((e as Error).message); }
+    finally { setImporting(false); }
+  }
+
+  async function startFrom(organizationId: number) {
+    setError("");
+    try {
+      const { organization, lots, total } = await getOrganizationLots(organizationId);
+      setSelected(lots.map((lot) => lot.batch_id));
+      setNotice(!lots.length ? `${organization.name} has no recorded lots to investigate.`
+        : `Investigating ${lots.length === 1 ? "the lot" : `${lots.length} lots`} ${organization.name} made or handled${total > lots.length ? `: the ${lots.length} most recent of ${total}, so select older ones below if needed` : ""}. Ingredients it used appear as upstream lots.`);
+    } catch (e) { setError((e as Error).message); }
   }
 
   function toggle(id: number) {
@@ -208,7 +258,14 @@ export default function TracePage() {
     <div className="mx-auto max-w-screen-2xl px-5 py-7 sm:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div><p className="text-[10px] font-bold uppercase tracking-[0.22em] text-rose-700">TraceFront / Investigation</p><h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Follow the lot. Find the connections.</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Select products under investigation to trace their ingredients and find related stock across factories and receiving sites.</p></div>
-        <button onClick={loadDemo} disabled={seeding || loading} className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50">{seeding ? "Loading scenario…" : "Load synthetic scenario"}</button>
+        <div className="flex flex-wrap items-center gap-3">
+          <a href="/trace_records_template.csv" download className="text-xs font-semibold text-slate-700 underline decoration-slate-300 underline-offset-2 hover:text-rose-700">Download the record template</a>
+          <label className={`rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold focus-within:ring-2 focus-within:ring-slate-900 ${importing || loading ? "opacity-50" : "cursor-pointer hover:border-slate-900"}`}>
+            {importing ? "Importing…" : "Import records"}
+            <input type="file" accept=".csv,.xlsx,.json" disabled={importing || loading} className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) importFile(file); }} />
+          </label>
+          <button onClick={loadDemo} disabled={seeding || loading} className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50">{seeding ? "Loading scenario…" : "Load synthetic scenario"}</button>
+        </div>
       </div>
       {origin && <div className="mt-5 rounded-xl border border-rose-200 bg-white px-4 py-3 text-sm leading-6">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-rose-700">Started from upload finding {origin.id}</p>
@@ -219,6 +276,12 @@ export default function TracePage() {
       {error && <p role="alert" className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</p>}
       <section aria-labelledby="select-heading" className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 id="select-heading" className="text-sm font-semibold">Products under investigation</h2><span className="text-xs text-slate-500">{selected.length} selected · selection does not confirm contamination</span></div>
+        {!!organizations.length && <label className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold">Start from a company or site
+          <select value="" onChange={(e) => { if (e.target.value) startFrom(Number(e.target.value)); }} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-normal">
+            <option value="">Choose one to select its lots…</option>
+            {organizations.map((org) => <option key={org.organization_id} value={org.organization_id}>{org.name} ({org.type})</option>)}
+          </select>
+        </label>}
         {loading ? <p role="status" className="mt-4 text-sm text-slate-500">Loading stored batches…</p> : !batches.length ? <p className="mt-4 text-sm text-slate-600">No batches have been recorded. Load the synthetic scenario to explore a complete trace.</p> : <div className="mt-4 flex max-h-52 flex-wrap gap-2 overflow-y-auto">
           {batches.map((batch) => <label key={batch.batch_id} className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-xs ${selected.includes(batch.batch_id) ? "border-rose-400 bg-rose-50" : "border-slate-200 hover:border-slate-400"}`}>
             <input type="checkbox" checked={selected.includes(batch.batch_id)} onChange={() => toggle(batch.batch_id)} className="accent-rose-600" /><span><strong>{code(batch)}</strong> · {batch.product_name}<span className="mt-0.5 block text-[10px] text-slate-500">{batch.organization_name}{batch.synthetic ? " · simulated" : ""}</span></span>
@@ -237,6 +300,7 @@ export default function TracePage() {
           <button onClick={() => setSelected(positives)} className="mt-3 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700">Investigate all {positives.length} positive products together</button>
         </section>}
         <section aria-label="Stored ingredient and shipment network" className="mt-5 rounded-2xl border border-slate-200 bg-white p-4"><LotNetwork trace={trace} /><p className="mt-3 text-xs leading-5 text-slate-500">Amber: upstream ingredient · Rose: selected product · White: connected product · Blue: recorded shipment destination. Lines reflect stored lot links and movements.</p></section>
+        <NotifyTable trace={trace} label={label} />
         <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(300px,0.8fr)_minmax(0,1.2fr)]">
           <section className="rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-lg font-semibold">Ingredients to investigate</h2><p className="mt-1 text-xs leading-5 text-slate-500">Ranked by how many selected products share the ingredient, then closeness in the lot chain.</p>
             {!trace.source_ranking.length && <p className="mt-4 text-sm text-slate-600">No upstream ingredient links are recorded for this selection.</p>}
