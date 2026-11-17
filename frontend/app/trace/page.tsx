@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getFindings, getOrganizationLots, getOrganizations, getTraceBatches, importRecords, recordDecision, seedTraceDemo, traceLots, withAnalysis } from "@/lib/api";
-import type { Decision, HoldScope, Organization, TraceBatch, TraceDocument } from "@/lib/api";
+import { getFindings, getMe, getOrganizationLots, getOrganizations, getTraceBatches, importRecords, recordDecision, seedTraceDemo, signOut, traceLots, withAnalysis } from "@/lib/api";
+import type { Decision, HoldScope, Me, Organization, TraceBatch, TraceDocument } from "@/lib/api";
 import type { DemoFinding } from "../analysis-results/demo-findings";
 
 const code = (batch: TraceBatch) => batch.lot_code ?? `Batch ${batch.batch_id}`;
@@ -16,23 +16,22 @@ const SCOPES: Record<HoldScope, [title: string, description: string]> = {
 // Shipments covered by the latest decision for this selection, if it approved a hold.
 const heldBy = (trace: TraceDocument) => new Set(trace.decisions[0]?.decision === "approved" ? trace.decisions[0].shipment_ids : []);
 
-function DecisionPanel({ trace, label, analysisId, onRecorded }: { trace: TraceDocument; label: (id: number) => string; analysisId: string | null; onRecorded: (d: Decision) => void }) {
+function DecisionPanel({ trace, label, analysisId, officer, onRecorded }: { trace: TraceDocument; label: (id: number) => string; analysisId: string | null; officer: string; onRecorded: (d: Decision) => void }) {
   const { recommended, basis, note, options } = trace.containment;
   // With no upstream lots both options hold the same stock; offer one choice rather than two identical ones.
   const same = options.targeted.shipment_ids.join() === options.extended.shipment_ids.join() && options.targeted.batch_ids.join() === options.extended.batch_ids.join();
   const scopes: HoldScope[] = same ? ["targeted"] : ["targeted", "extended"];
   const [scope, setScope] = useState<HoldScope>(recommended);
-  const [officer, setOfficer] = useState("");
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const codeOf = (id: number) => trace.shipments.find((s) => s.shipment_id === id)?.shipment_code ?? String(id);
 
   async function decide(decision: Decision["decision"]) {
-    if (!officer.trim() || !reason.trim()) return setError("Enter the officer name and a reason before recording a decision.");
+    if (!reason.trim()) return setError("Enter a reason before recording a decision.");
     setSaving(true); setError("");
     try {
-      onRecorded(await recordDecision({ batch_ids: trace.selected_batch_ids, scope, decision, officer: officer.trim(), reason: reason.trim(), analysis_id: analysisId }));
+      onRecorded(await recordDecision({ batch_ids: trace.selected_batch_ids, scope, decision, reason: reason.trim(), analysis_id: analysisId }));
       setReason("");
     } catch (e) { setError((e as Error).message); }
     finally { setSaving(false); }
@@ -56,10 +55,8 @@ function DecisionPanel({ trace, label, analysisId, onRecorded }: { trace: TraceD
         })}
         {same && <p className="text-[11px] text-slate-500">No upstream ingredient is recorded for this selection, so an extended hold would cover the same stock.</p>}
       </fieldset>
-      <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <label className="text-xs font-semibold">Officer<input value={officer} onChange={(e) => setOfficer(e.target.value)} required maxLength={100} autoComplete="name" className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal" /></label>
-        <label className="text-xs font-semibold">Reason<textarea value={reason} onChange={(e) => setReason(e.target.value)} required maxLength={500} rows={2} className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal" /></label>
-      </div>
+      <label className="mt-4 block text-xs font-semibold">Reason<textarea value={reason} onChange={(e) => setReason(e.target.value)} required maxLength={500} rows={2} className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal" /></label>
+      <p className="mt-2 text-xs text-slate-500">The decision is recorded under your account, {officer}.</p>
       {error && <p role="alert" className="mt-3 text-sm text-rose-800">{error}</p>}
       <div className="mt-4 flex flex-wrap gap-3">
         <button type="submit" value="approved" disabled={saving} className="rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50">Approve {SCOPES[scope][0].toLowerCase()}</button>
@@ -146,6 +143,8 @@ export default function TracePage() {
   const [batches, setBatches] = useState<TraceBatch[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [importing, setImporting] = useState(false);
+  const [me, setMe] = useState<Me | null>(null);
+  const regulator = me?.role === "regulator"; // the server enforces this; here it only hides controls that would be refused
   const [selected, setSelected] = useState<number[]>([]);
   const [trace, setTrace] = useState<TraceDocument | null>(null);
   const [error, setError] = useState("");
@@ -167,7 +166,9 @@ export default function TracePage() {
       // The banner is context only; if the findings cannot load, the trace still works without it.
       getFindings(analysis).then((findings) => { if (live) setOrigin(findings.find((f) => f.batchId === lot) ?? findings[0] ?? null); }, () => {});
     }
-    getOrganizations().then((orgs) => { if (live) setOrganizations(orgs); }, () => {}); // a failure shows through the batch request below
+    // Failures of these two show through the batch request below, which also sends a signed-out visitor to sign in.
+    getMe().then((user) => { if (live) setMe(user); }, () => {});
+    getOrganizations().then((orgs) => { if (live) setOrganizations(orgs); }, () => {});
     getTraceBatches().then((rows) => {
       if (!live) return;
       setBatches(rows);
@@ -178,7 +179,7 @@ export default function TracePage() {
         setSelected([matches[0].batch_id]);
         if (analysis && matches[0].synthetic) setNotice(`Lot ${lot} from your upload matches a stored lot. Its ingredient links, later movements and lab results come from the simulated scenario.`);
       }
-      else if (lot) setNotice(matches.length ? `Lot ${lot} belongs to more than one producer. Select the producer below.` : `Lot ${lot} has no stored ingredient links yet. Load the synthetic scenario to connect it, or select a known batch.`);
+      else if (lot) setNotice(matches.length ? `Lot ${lot} belongs to more than one producer. Select the producer below.` : `Lot ${lot} is not among the stored lots you can see. Import its records, or select a known lot below.`);
       setLoading(false);
     }, (e: Error) => { if (live) { setError(e.message); setLoading(false); } });
     return () => { live = false; };
@@ -253,7 +254,11 @@ export default function TracePage() {
   return <main className="min-h-dvh bg-[#f7f9fb] text-[#0d293b]">
     <header className="border-b border-slate-200 bg-white"><div className="mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-5 sm:px-8">
       <Link href="/" aria-label="TraceFront home"><Image src="/tracefront-logo-black.png" alt="TraceFront" width={140} height={50} className="h-11 w-auto" /></Link>
-      <Link href={back} className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold hover:border-slate-900">← Back</Link>
+      <div className="flex items-center gap-3 text-xs">
+        {me && <><span className="hidden text-slate-600 sm:inline"><strong className="text-[#0d293b]">{me.name}</strong> · {me.organization_name ?? "Ministry of Health"}</span>
+          <button onClick={() => signOut().finally(() => window.location.assign("/login"))} className="rounded-full border border-slate-300 px-4 py-2 font-semibold hover:border-slate-900">Sign out</button></>}
+        <Link href={back} className="rounded-full border border-slate-300 px-4 py-2 font-semibold hover:border-slate-900">← Back</Link>
+      </div>
     </div></header>
     <div className="mx-auto max-w-screen-2xl px-5 py-7 sm:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -264,7 +269,7 @@ export default function TracePage() {
             {importing ? "Importing…" : "Import records"}
             <input type="file" accept=".csv,.xlsx,.json" disabled={importing || loading} className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) importFile(file); }} />
           </label>
-          <button onClick={loadDemo} disabled={seeding || loading} className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50">{seeding ? "Loading scenario…" : "Load synthetic scenario"}</button>
+          {regulator && <button onClick={loadDemo} disabled={seeding || loading} className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50">{seeding ? "Loading scenario…" : "Load synthetic scenario"}</button>}
         </div>
       </div>
       {origin && <div className="mt-5 rounded-xl border border-rose-200 bg-white px-4 py-3 text-sm leading-6">
@@ -276,13 +281,14 @@ export default function TracePage() {
       {error && <p role="alert" className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</p>}
       <section aria-labelledby="select-heading" className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 id="select-heading" className="text-sm font-semibold">Products under investigation</h2><span className="text-xs text-slate-500">{selected.length} selected · selection does not confirm contamination</span></div>
-        {!!organizations.length && <label className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold">Start from a company or site
+        {regulator && !!organizations.length && <label className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold">Start from a company or site
           <select value="" onChange={(e) => { if (e.target.value) startFrom(Number(e.target.value)); }} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-normal">
             <option value="">Choose one to select its lots…</option>
             {organizations.map((org) => <option key={org.organization_id} value={org.organization_id}>{org.name} ({org.type})</option>)}
           </select>
         </label>}
-        {loading ? <p role="status" className="mt-4 text-sm text-slate-500">Loading stored batches…</p> : !batches.length ? <p className="mt-4 text-sm text-slate-600">No batches have been recorded. Load the synthetic scenario to explore a complete trace.</p> : <div className="mt-4 flex max-h-52 flex-wrap gap-2 overflow-y-auto">
+        {me?.role === "company" && me.organization_id !== null && !!batches.length && <button onClick={() => startFrom(me.organization_id!)} className="mt-3 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold hover:border-slate-900">Select the lots {me.organization_name} made or handled</button>}
+        {loading ? <p role="status" className="mt-4 text-sm text-slate-500">Loading stored batches…</p> : !batches.length ? <p className="mt-4 text-sm text-slate-600">{regulator ? "No batches have been recorded. Import records, or load the synthetic scenario to explore a complete trace." : "No lots are recorded for your organization yet. Import your records to begin."}</p> : <div className="mt-4 flex max-h-52 flex-wrap gap-2 overflow-y-auto">
           {batches.map((batch) => <label key={batch.batch_id} className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-xs ${selected.includes(batch.batch_id) ? "border-rose-400 bg-rose-50" : "border-slate-200 hover:border-slate-400"}`}>
             <input type="checkbox" checked={selected.includes(batch.batch_id)} onChange={() => toggle(batch.batch_id)} className="accent-rose-600" /><span><strong>{code(batch)}</strong> · {batch.product_name}<span className="mt-0.5 block text-[10px] text-slate-500">{batch.organization_name}{batch.synthetic ? " · simulated" : ""}</span></span>
           </label>)}
@@ -313,7 +319,8 @@ export default function TracePage() {
           </section>
         </div>
         {!!trace.lab_results.length && <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-semibold">Recorded laboratory evidence</h2><ul className="mt-3 space-y-2 text-xs">{trace.lab_results.map((lab) => <li key={lab.lab_result_id}><strong>{label(lab.batch_id)}</strong> · {lab.contaminant ?? "Unspecified test"} · <span className={lab.result === "positive" ? "font-semibold text-rose-700" : "text-slate-600"}>{lab.result}</span> · {lab.tested_at.replace("T", " ")}</li>)}</ul></section>}
-        <DecisionPanel key={trace.selected_batch_ids.join(",")} trace={trace} label={label} analysisId={analysisId} onRecorded={(d) => setTrace((t) => t && { ...t, decisions: [d, ...t.decisions] })} />
+        {regulator ? <DecisionPanel key={trace.selected_batch_ids.join(",")} trace={trace} label={label} analysisId={analysisId} officer={me.name} onRecorded={(d) => setTrace((t) => t && { ...t, decisions: [d, ...t.decisions] })} />
+          : me && <p className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600">This view covers the lots your organization made, used or moved, and your own shipments. Holds and recalls are decided and recorded by the Ministry of Health.</p>}
       </>}
     </div>
   </main>;

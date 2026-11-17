@@ -16,15 +16,18 @@ uvicorn app.main:app --reload
 
 API docs at http://localhost:8000/docs; [docs/schema-and-api.md](docs/schema-and-api.md) describes every table and every backend and ML-service route with real example responses. Tables are created automatically on startup from `app/models.py` (matches the ERD in section 14 of the project summary).
 
+Every endpoint except `GET /api/health` and sign-in needs a session. A regulator account sees and writes everything; a company account sees and writes only what its own organization is a party to. Create accounts with `python -m app.auth add-user` ([SETUP.md](SETUP.md), step 4); the rules are in [docs/schema-and-api.md](docs/schema-and-api.md), section 6.
+
 Endpoints:
 - `GET /api/health`
+- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me` — sign in with email and password; the session is an HttpOnly cookie that lasts 12 hours
 - `GET /api/batches`, `POST /api/batches`
 - `GET/POST /api/organizations`, `/api/shipments`, `/api/batch-relationships`
 - `GET /api/trace?batch_ids=<id>&batch_ids=<id>` — ingredients, related products, shipment locations, shared-ingredient ranking, and every organization that made or handled a traced lot with its quantities
 - `POST /api/records/import` — load organizations, lots, ingredient links and shipments from one CSV/XLSX/JSON file; start from `frontend/public/trace_records_template.csv`
 - `GET /api/organizations/{id}/lots` — the lots to investigate when the lead is a company rather than a lot
 - `POST /api/demo/seed` — idempotent synthetic trace scenario; preserves existing records
-- `POST /api/decisions` — record an officer's approve/reject on the trace's containment recommendation (simulated hold)
+- `POST /api/decisions` — record the signed-in officer's approve/reject on the trace's containment recommendation (simulated hold); regulators only
 - `POST /api/analyses`, `GET /api/analyses/{id}/findings`, `GET /api/analyses/{id}/distribution` — database-backed upload results
 - `POST /api/sensor-readings`, `POST /api/lab-results`
 - `GET /api/batches/{id}/trace` — upstream/downstream via `app/graph.py` (NetworkX)
@@ -65,7 +68,7 @@ The network animation preview is at http://localhost:3000/ml-process. The select
 
 ## Not built yet
 
-Live event replay remains pending. Containment decisions are recorded with officer, reason and time, but the hold itself is simulated. Five pathogen models and the SVG distribution/lot visualizations are implemented. Model predictions concern FSIS laboratory samples; cold-chain upload findings use transparent rules, not a trained contamination detector.
+Live event replay remains pending. Containment decisions are recorded with the signed-in officer, reason and time, but the hold itself is simulated. Accounts are created from the command line only: there is no self-service sign-up, password reset or account management screen, and the ML service on port 8100 has no sign-in. Five pathogen models and the SVG distribution/lot visualizations are implemented. Model predictions concern FSIS laboratory samples; cold-chain upload findings use transparent rules, not a trained contamination detector.
 
 ## Offline data pipeline — Person A
 

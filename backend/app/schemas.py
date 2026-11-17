@@ -88,7 +88,6 @@ class RelationshipCreate(BaseModel):
 class DecisionCreate(BaseModel):
     batch_ids: list[int] = Field(min_length=1, max_length=20)
     scope: Literal["targeted", "extended"]
-    decision: Literal["approved", "rejected"]
-    officer: str = Field(min_length=1, max_length=100, pattern=r"\S")
-    reason: str = Field(min_length=1, max_length=500, pattern=r"\S")
+    decision: Literal["approved", "rejected"]  # the officer is the signed-in user, never a name sent by the client
+    reason:str = Field(min_length=1, max_length=500, pattern=r"\S")
     analysis_id: str | None = Field(default=None, max_length=100)  # the upload that led to this decision, if any

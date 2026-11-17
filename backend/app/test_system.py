@@ -6,6 +6,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import subprocess
 import sys
@@ -14,6 +15,8 @@ import time
 import unittest
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+
+PASSWORD = "correct horse battery"
 
 # One company's records as an import file. The ingredient row comes first: row order must not matter.
 CHAIN = [
@@ -42,6 +45,47 @@ class SystemTests(unittest.TestCase):
             sock.bind(("127.0.0.1", 0))
             cls.port = sock.getsockname()[1]
         cls.start()
+        try:
+            cls.add_user("officer@moh.test", "Test Officer", "regulator")
+            cls.cookie = cls.sign_in("officer@moh.test")  # the default caller is a ministry officer
+        except BaseException:  # tearDownClass does not run when setUpClass fails; do not leave the server behind
+            cls.tearDownClass()
+            raise
+
+    @classmethod
+    def database(cls):
+        from sqlalchemy import create_engine
+        return create_engine(cls.env["DATABASE_URL"])
+
+    @classmethod
+    def add_user(cls, email, name, role, organization_id=None):
+        """Accounts are made on the server, never over HTTP, so write to the test database directly."""
+        from sqlalchemy.orm import Session
+        from app.auth import create_user
+        engine = cls.database()
+        try:
+            with Session(engine) as db:
+                create_user(db, email, name, PASSWORD, role, organization_id)
+        finally:
+            engine.dispose()
+
+    @classmethod
+    def sign_in(cls, email):
+        req = Request(f"http://127.0.0.1:{cls.port}/api/auth/login", headers={"Content-Type": "application/json"},
+                      data=json.dumps({"email": email, "password": PASSWORD}).encode())
+        with urlopen(req, timeout=15) as response:
+            return response.headers["Set-Cookie"].split(";")[0]
+
+    def entered_by(self, kind, record_id):
+        from sqlalchemy.orm import Session
+        from app.models import Entry, User
+        engine = self.database()
+        try:
+            with Session(engine) as db:
+                return [email for (email,) in db.query(User.email).join(Entry, Entry.user_id == User.user_id)
+                        .filter(Entry.kind == kind, Entry.record_id == str(record_id))]
+        finally:
+            engine.dispose()
 
     @classmethod
     def start(cls):
@@ -81,29 +125,163 @@ class SystemTests(unittest.TestCase):
         cls.stop()
         cls.temp.cleanup()
 
-    def call(self, path, body=None, *, raw=None, content_type="application/json"):
+    def call(self, path, body=None, *, raw=None, content_type="application/json", method=None, cookie=...):
+        """`cookie` defaults to the ministry officer's session; pass None to call without one."""
         data = json.dumps(body).encode() if body is not None else raw
-        req = Request(f"http://127.0.0.1:{self.port}{path}", data=data,
-                      headers={"Content-Type": content_type})
+        cookie = self.cookie if cookie is ... else cookie
+        req = Request(f"http://127.0.0.1:{self.port}{path}", data=data, method=method,
+                      headers={"Content-Type": content_type, **({"Cookie": cookie} if cookie else {})})
         try:
             with urlopen(req, timeout=15) as response:
                 return response.status, json.load(response)
         except HTTPError as error:
             return error.code, json.load(error)
 
-    def upload(self, csv_text, path="/api/analyses"):
+    def upload(self, csv_text, path="/api/analyses", cookie=...):
         boundary = "tracefront-test-boundary"
         raw = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"sensor.csv\"\r\n"
                f"Content-Type: text/csv\r\n\r\n{csv_text}\r\n--{boundary}--\r\n").encode()
-        return self.call(path, raw=raw, content_type=f"multipart/form-data; boundary={boundary}")
+        return self.call(path, raw=raw, content_type=f"multipart/form-data; boundary={boundary}", cookie=cookie)
 
-    def import_records(self, rows):
+    def import_records(self, rows, cookie=...):
         """Send trace records as one CSV whose columns are the union of the rows' keys."""
         out = io.StringIO()
         writer = csv.DictWriter(out, fieldnames=list(dict.fromkeys(key for row in rows for key in row)), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
-        return self.upload(out.getvalue(), "/api/records/import")
+        return self.upload(out.getvalue(), "/api/records/import", cookie)
+
+    def test_every_route_needs_a_session(self):
+        _, spec = self.call("/openapi.json", cookie=None)
+        open_routes = {("/api/health", "get"), ("/api/auth/login", "post")}
+        checked = 0
+        for path, methods in spec["paths"].items():
+            for method in methods:
+                if (path, method) in open_routes:
+                    continue
+                code, _ = self.call(re.sub(r"\{[^}]+\}", "1", path), method=method.upper(), cookie=None)
+                self.assertEqual(code, 401, f"{method.upper()} {path} answered without a session")
+                checked += 1
+        self.assertGreater(checked, 20)
+        self.assertEqual(self.call("/api/health", cookie=None)[0], 200)
+        self.assertEqual(self.call("/api/auth/me")[1]["role"], "regulator")
+
+    def test_sign_in_rejects_wrong_passwords_then_locks_the_account(self):
+        self.add_user("locked@moh.test", "Locked Officer", "regulator")
+
+        def attempt(password, email="locked@moh.test"):
+            return self.call("/api/auth/login", {"email": email, "password": password}, cookie=None)
+
+        code, wrong = attempt("not the password")
+        self.assertEqual(code, 401)
+        self.assertEqual(attempt(PASSWORD, "nobody@moh.test"), (401, wrong))  # an unknown email looks the same
+        for _ in range(4):
+            attempt("not the password")
+        self.assertEqual(attempt(PASSWORD), (401, wrong))  # five failures: locked, even with the right password
+
+    def test_signing_out_ends_the_session(self):
+        self.add_user("leaver@moh.test", "Leaving Officer", "regulator")
+        cookie = self.sign_in("Leaver@MOH.test")  # the case of an email does not matter
+        self.assertEqual(self.call("/api/auth/me", cookie=cookie)[1]["name"], "Leaving Officer")
+        self.assertEqual(self.call("/api/auth/logout", method="POST", cookie=cookie)[0], 200)
+        self.assertEqual(self.call("/api/auth/me", cookie=cookie)[0], 401)
+
+    def test_a_company_sees_one_step_back_and_one_step_forward(self):
+        self.assertEqual(self.call("/api/demo/seed", {})[0], 200)
+        self.add_user("stock@warehouse-kl.test", "Warehouse Clerk", "company", 910005)
+        self.add_user("qa@central-kitchen.test", "Kitchen QA", "company", 910003)
+        warehouse, kitchen = self.sign_in("stock@warehouse-kl.test"), self.sign_in("qa@central-kitchen.test")
+        self.assertEqual(self.call("/api/auth/me", cookie=warehouse)[1]["organization_name"], "Warehouse KL")
+        self.assertEqual([b["lot_code"] for b in self.call("/api/trace/batches", cookie=warehouse)[1]], ["CW-42"])
+        _, trace = self.call("/api/trace?batch_ids=910042", cookie=warehouse)
+        self.assertEqual((trace["upstream"], trace["related"]), ([], []))  # what went into the wrap is the kitchen's record
+        self.assertEqual({s["shipment_code"] for s in trace["shipments"]}, {"CW-WH", "CW-KL03", "CW-KL04"})
+        partners = ["Central Kitchen, QSR Group A", "Warehouse KL", "Store KL-03", "Store KL-04"]
+        self.assertEqual([org["name"] for org in trace["organizations"]], partners)
+        self.assertEqual((trace["lab_results"], trace["positive_elsewhere"], trace["decisions"]), ([], [], []))
+        self.assertEqual(self.call("/api/trace?batch_ids=910091", cookie=warehouse)[0], 404)  # a lot it never handled
+        self.assertEqual(self.call("/api/lots/resolve?lot_code=L-102", cookie=warehouse)[0], 404)
+        self.assertEqual(self.call("/api/organizations/910004/lots", cookie=warehouse)[0], 404)
+        own_lots = self.call("/api/organizations/910005/lots", cookie=warehouse)[1]["lots"]
+        self.assertEqual([lot["lot_code"] for lot in own_lots], ["CW-42"])
+        self.assertEqual({org["name"] for org in self.call("/api/organizations", cookie=warehouse)[1]}, set(partners))
+        self.assertEqual({s["shipment_code"] for s in self.call("/api/shipments", cookie=warehouse)[1]},
+                         {"CW-WH", "CW-KL03", "CW-KL04"})
+        self.assertEqual(self.call("/api/batch-relationships", cookie=warehouse)[1], [])
+        _, own = self.call("/api/trace?batch_ids=910042", cookie=kitchen)
+        self.assertEqual((own["upstream"], own["related"]), ([910102, 910402], []))  # its ingredients, not other factories' products
+        self.assertEqual([lab["batch_id"] for lab in own["lab_results"]], [910042])  # results on the lot it made
+        self.assertEqual(len(self.call("/api/batch-relationships", cookie=kitchen)[1]), 2)
+
+    def test_a_company_cannot_do_what_only_the_ministry_does(self):
+        self.assertEqual(self.call("/api/demo/seed", {})[0], 200)
+        self.add_user("manager@store-kl03.test", "Store Manager", "company", 910007)
+        store = self.sign_in("manager@store-kl03.test")
+        decision = {"batch_ids": [910042], "scope": "targeted", "decision": "approved", "reason": "Test"}
+        organization = {"organization_id": 880001, "name": "Self-made Regulator", "type": "store"}
+        for path, body in (("/api/demo/seed", {}), ("/api/decisions", decision), ("/api/organizations", organization)):
+            self.assertEqual(self.call(path, body, cookie=store)[0], 403, path)
+
+    def test_a_company_writes_only_records_it_is_party_to(self):
+        wheat = {"record": "lot", "producer": "Party Farm", "lot_code": "PF-1", "product": "Wheat", "produced_at": "2026-11-01"}
+        ship = {"record": "shipment", "shipment_code": "PT-1", "quantity": "5", "unit": "kg", "status": "delivered"}
+        code, _ = self.import_records([  # the ministry sets up three companies and a delivery of wheat to the mill
+            {"record": "organization", "name": "Party Farm", "type": "supplier"},
+            {"record": "organization", "name": "Party Mill", "type": "factory"},
+            {"record": "organization", "name": "Party Bakery", "type": "factory"},
+            wheat,
+            {"record": "lot", "producer": "Party Mill", "lot_code": "PM-1", "product": "Flour", "produced_at": "2026-11-02"},
+            {"record": "lot", "producer": "Party Bakery", "lot_code": "PB-1", "product": "Bread", "produced_at": "2026-11-03"},
+            {**ship, "lot_code": "PF-1", "from": "Party Farm", "to": "Party Mill"}])
+        self.assertEqual(code, 200)
+        ids = {org["name"]: org["organization_id"] for org in self.call("/api/organizations")[1]}
+        self.add_user("qa@party-mill.test", "Mill QA", "company", ids["Party Mill"])
+        mill = self.sign_in("qa@party-mill.test")
+
+        def refused(rows, reason):
+            code, body = self.import_records(rows, cookie=mill)
+            self.assertEqual(code, 400, body)
+            self.assertIn(reason, body["detail"])
+
+        refused([{**ship, "shipment_code": "PT-2", "lot_code": "PM-1", "from": "Party Bakery", "to": "Party Farm"}],
+                "your own organization sent or received")
+        refused([{"record": "ingredient", "lot_code": "PF-1", "ingredient_lot_code": "PM-1", "quantity": "1"}],
+                "lots your own organization made")
+        # A lot it never handled cannot be referred to: it looks the same as a lot that does not exist.
+        refused([{**ship, "shipment_code": "PT-3", "lot_code": "PB-1", "from": "Party Mill", "to": "Party Bakery"}],
+                "unknown lot 'PB-1'")
+        barley = {**wheat, "lot_code": "PF-9", "product": "Barley"}
+        refused([barley], "belongs to another company")  # nothing ties it to the mill
+        code, ok = self.import_records([  # the same lot with its delivery to the mill, and the mill's own lot made from it
+            barley, {**ship, "shipment_code": "PT-4", "lot_code": "PF-9", "from": "Party Farm", "to": "Party Mill"},
+            {"record": "lot", "producer": "Party Mill", "lot_code": "PM-2", "product": "Barley flour", "produced_at": "2026-11-06"},
+            {"record": "ingredient", "lot_code": "PM-2", "ingredient_lot_code": "PF-9", "quantity": "3"}], cookie=mill)
+        self.assertEqual((code, ok.get("created")), (200, {"organizations": 0, "lots": 2, "ingredients": 1, "shipments": 1}), ok)
+        barley_id = self.call("/api/lots/resolve?lot_code=PF-9")[1]["batch_id"]
+        self.assertEqual(self.entered_by("batches", barley_id), ["qa@party-mill.test"])  # the record shows who declared it
+        # Single-record writes follow the same rule.
+        batch = {"batch_id": 770001, "product_name": "Flour", "produced_at": "2026-11-07T00:00:00", "lot_code": "PM-3"}
+        self.assertEqual(self.call("/api/batches", {**batch, "organization_id": ids["Party Bakery"]}, cookie=mill)[0], 403)
+        self.assertEqual(self.call("/api/batches", {**batch, "organization_id": ids["Party Mill"]}, cookie=mill)[0], 201)
+        bread = self.call("/api/lots/resolve?lot_code=PB-1")[1]["batch_id"]
+        lab = {"tested_at": "2026-11-07T00:00:00", "contaminant": "Salmonella", "result": "negative"}
+        self.assertEqual(self.call("/api/lab-results", {**lab, "batch_id": bread}, cookie=mill)[0], 403)
+        self.assertEqual(self.call("/api/lab-results", {**lab, "batch_id": 770001}, cookie=mill)[0], 200)
+        movement = {"shipment_id": 770001, "shipment_code": "PT-5", "from_org_id": ids["Party Mill"],
+                    "to_org_id": ids["Party Bakery"], "quantity": 1, "quantity_unit": "kg"}
+        self.assertEqual(self.call("/api/shipments", {**movement, "batch_id": bread}, cookie=mill)[0], 404)
+        self.assertEqual(self.call("/api/shipments", {**movement, "batch_id": 770001}, cookie=mill)[0], 201)
+
+    def test_an_upload_analysis_is_private_to_the_company_that_made_it(self):
+        self.assertEqual(self.call("/api/demo/seed", {})[0], 200)
+        self.add_user("uploads@store-kl04.test", "Store Uploader", "company", 910008)
+        self.add_user("other@store-jb01.test", "Other Store", "company", 910009)
+        owner, other = self.sign_in("uploads@store-kl04.test"), self.sign_in("other@store-jb01.test")
+        code, made = self.upload("shipment_id,batch_id\nS1,B1\n", cookie=owner)
+        self.assertEqual(code, 201, made)
+        for part in ("findings", "distribution"):
+            path = f"/api/analyses/{made['analysis_id']}/{part}"
+            self.assertEqual([self.call(path, cookie=who)[0] for who in (owner, other, self.cookie)], [200, 404, 200])
 
     def test_import_builds_a_traceable_chain_and_repeating_it_adds_nothing(self):
         code, result = self.import_records(CHAIN)
@@ -231,13 +409,14 @@ class SystemTests(unittest.TestCase):
         self.assertEqual(len(options["extended"]["shipment_ids"]), 9)  # plus lettuce, SHIP-017 and veggie-wrap movements
         _, analysis = self.upload("shipment_id,batch_id\nSHIP-017,RM-402\n")
         body = {"batch_ids": [910091, 910042], "scope": "extended", "decision": "approved",
-                "officer": "Test Officer", "reason": "Shared lettuce lot", "analysis_id": analysis["analysis_id"]}
+                "officer": "Someone Else", "reason": "Shared lettuce lot", "analysis_id": analysis["analysis_id"]}
         code, made = self.call("/api/decisions", body)
         self.assertEqual(code, 201)
         self.assertEqual(made["shipment_ids"], options["extended"]["shipment_ids"])
         self.assertEqual(made["analysis_id"], analysis["analysis_id"])
+        self.assertEqual(made["officer"], "Test Officer")  # the signed-in officer, whatever name the request carried
         self.assertEqual(self.call("/api/decisions", {**body, "analysis_id": "analysis-missing"})[0], 404)
-        self.assertEqual(self.call("/api/decisions", {**body, "officer": " "})[0], 422)
+        self.assertEqual(self.call("/api/decisions", {**body, "reason": " "})[0], 422)
         self.assertEqual(self.call("/api/decisions", {**body, "scope": "everything"})[0], 422)
         self.assertEqual(self.call("/api/decisions", {**body, "batch_ids": [99999999]})[0], 404)
         type(self).stop()

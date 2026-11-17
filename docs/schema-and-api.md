@@ -444,7 +444,7 @@ Returns `200` in the same shape as 3.4, with `sample_id: null` and `actual: null
 | GET | `/api/batches/{id}/trace` | Same rich response plus `batch_id`. Keeps legacy `upstream` and `downstream` arrays. |
 | POST | `/api/records/import` | Multipart `file` (`.csv`, `.xlsx`, `.json`, up to 10 MB). Loads many records at once; see "Record import" below. Returns 200 with `rows`, `created` and `existing` counts per kind. Any bad row returns 400 naming the rows, and nothing is stored. |
 | GET | `/api/organizations/{id}/lots` | Lots to investigate when the lead is a company: the lots it made, plus lots it received or sent on without making something from them (`relation`: `produced` / `handled`). Ingredients it used are left out, because tracing its products reaches them. Newest first; `limit` 1–200, default 20; `total` shows when the list was cut short. Unknown organization 404. |
-| POST | `/api/decisions` | Body: `batch_ids` (1–20, the selection under investigation), `scope` (`targeted`/`extended`), `decision` (`approved`/`rejected`), `officer`, `reason` (both non-blank). The server recomputes the held lots and shipments from stored records; the client never sends them. Returns 201 with `decision_id`, `scope`, `decision`, `batch_ids`, `shipment_ids`, `officer`, `reason`, `decided_at`, `analysis_id`. Optional `analysis_id` links the decision to the upload that started it (stored in `decision_sources`); an unknown analysis returns 404. Unknown batch 404, invalid input 422. Append-only: nothing is updated or deleted. |
+| POST | `/api/decisions` | Body: `batch_ids` (1–20, the selection under investigation), `scope` (`targeted`/`extended`), `decision` (`approved`/`rejected`), `reason` (non-blank). Regulators only; the officer is the signed-in user, and a name sent by the client is ignored. The server recomputes the held lots and shipments from stored records; the client never sends them. Returns 201 with `decision_id`, `scope`, `decision`, `batch_ids`, `shipment_ids`, `officer`, `reason`, `decided_at`, `analysis_id`. Optional `analysis_id` links the decision to the upload that started it (stored in `decision_sources`); an unknown analysis returns 404. Unknown batch 404, invalid input 422. Append-only: nothing is updated or deleted. |
 | POST | `/api/demo/seed` | No body required. Adds fixed synthetic rows idempotently, refusing conflicting reserved IDs with 409 and rolling back the whole seed. Returns `synthetic`, `selected_batch_ids`, `second_batch_id`, `shared_ingredient_id`, `message`. Never resets or deletes data. |
 
 Trace response fields:
@@ -483,3 +483,49 @@ One row per record. The `record` column names the kind, which decides the other 
 - **IDs:** assigned as the highest stored ID plus one. Two imports at the same moment can collide; the loser gets 409 and can be sent again.
 
 New lab writes accept only `positive` or `negative`. Distribution upload grouping scopes routes and batch occurrences to their distributor/route, so identical route names do not merge independent suppliers.
+
+## 6. Accounts and access
+
+Every route except `GET /api/health` and `POST /api/auth/login` returns **401** without a session.
+
+| Method | Path | What it does |
+|---|---|---|
+| POST | `/api/auth/login` | Body: `email`, `password`. Returns the user and sets the `tracefront_session` cookie (HttpOnly, SameSite=Lax, Secure, 12 hours). A wrong email, a wrong password and a locked account all return the same 401. Five failed attempts lock the account for 15 minutes. |
+| POST | `/api/auth/logout` | Ends the session on the server and clears the cookie. |
+| GET | `/api/auth/me` | The signed-in user: `user_id`, `email`, `name`, `role`, `organization_id`, `organization_name`. |
+
+Browser clients must send requests with credentials, and their origin must be listed in `TRACEFRONT_CORS`.
+
+**Tables:** `users` (email, name, scrypt password hash, role, organization, failed-attempt counter and lock time), `user_sessions` (SHA-256 of the cookie value, user, expiry; the cookie value itself is not stored) and `entries` (append-only: which user, acting for which organization, stored which record, and when). Accounts are created with `python -m app.auth add-user` on the server; there is no sign-up route. Sensor readings are not written to `entries`.
+
+**Roles:**
+
+- **`regulator`** (a Ministry of Health officer): reads and writes everything. Only a regulator can record containment decisions, create organizations one at a time, and load the demo scenario.
+- **`company`**: acts for one organization and sees one step back and one step forward.
+
+What a company user can see:
+
+| Data | Rule |
+|---|---|
+| Lots | The lots its organization made, the lots in shipments it sent or received, and the ingredient lots of its own products. |
+| Shipments | Those it sent or received. |
+| Ingredient links | Those of its own products. What another company made from its lots is not shown. |
+| Organizations | Itself, its trading partners and the makers of lots it can see. |
+| Trace | Only lots it can see may be selected, and the result is cut to the rules above. |
+| Lab results | Only on lots it made. `positive_elsewhere` and `decisions` are always empty. |
+| Upload analyses | Those uploaded by its own organization. Uploads made before sign-in existed have no owner and are regulator-only. |
+
+Anything outside these rules answers **404**, exactly like a record that does not exist.
+
+What a company user can write:
+
+| Record | Rule |
+|---|---|
+| Lot | For its own organization. Through a record import it may also declare another company's lot, but only with a shipment to or from itself, or as an ingredient of one of its own lots, in the same file. |
+| Ingredient link | Only for a product its own organization made, from a lot it can see. |
+| Shipment | Only one it sent or received, of a lot it can see. |
+| Lab result | Only on a lot it made. |
+| Sensor reading | Only on a shipment it sent or received. |
+| Organization | Through a record import, to name a trading partner that is not stored yet. |
+
+Import rows can refer only to lots the company can already see or that the same file declares, so a file cannot be used to find out which lots other companies hold. A refused write returns **403**, or **404** where saying more would reveal another company's record.

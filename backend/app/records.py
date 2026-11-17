@@ -12,6 +12,12 @@ code. A row whose record is already stored is counted as existing and left uncha
 twice and two organizations can describe the same lot. Row order does not matter. Any problem rejects the whole file.
 A producer column may be left out when the lot code belongs to one producer only. Dates are ISO (YYYY-MM-DD or
 YYYY-MM-DD HH:MM): 01/11/2026 is refused rather than guessed as January or November.
+
+A regulator may import anything. A company user may import only records its own organization is a party to:
+lots it made, ingredients of those lots, and shipments it sent or received. It may also declare another company's
+lot (the one step back the law asks it to record), but only together with a shipment or ingredient row that ties
+the lot to it. Rows can refer only to lots the company can already see or that the file itself declares, so a file
+cannot be used to find out which lots other companies hold.
 """
 
 import math
@@ -25,12 +31,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.analysis import MAX_UPLOAD_BYTES, read_frame, text
+from app.auth import current_user, log_entry, scope
 from app.database import get_db
 from app.graph import build_batch_graph, creates_cycle
-from app.models import Batch, BatchLot, BatchRelationship, Organization, Shipment, ShipmentManifest
+from app.models import Batch, BatchLot, BatchRelationship, Organization, Shipment, ShipmentManifest, User
 from app.schemas import OrganizationType, ShipmentStatus
 
-router = APIRouter(prefix="/api/records")
+router = APIRouter(prefix="/api/records", dependencies=[Depends(current_user)])
 
 MAX_PROBLEMS = 20  # listed in one error message
 
@@ -75,7 +82,7 @@ def when(row: dict, field: str) -> datetime | None:
 
 
 @router.post("/import")
-def import_records(file: UploadFile, db: Session = Depends(get_db)):
+def import_records(file: UploadFile, user: User = Depends(current_user), db: Session = Depends(get_db)):
     raw = file.file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "file is larger than 10 MB")
@@ -96,13 +103,19 @@ def import_records(file: UploadFile, db: Session = Depends(get_db)):
     for lot in db.query(BatchLot):
         lots.setdefault(lot.lot_code, {})[lot.organization_id] = lot.batch_id
     manifests = {(m.from_org_id, m.shipment_code): m.shipment_id for m in db.query(ShipmentManifest)}
+    maker = {batch: producer for producers in lots.values() for producer, batch in producers.items()}
     graph = build_batch_graph(db)
     ids = {model: count((db.query(func.max(key)).scalar() or 0) + 1) for model, key in
            ((Organization, Organization.organization_id), (Batch, Batch.batch_id), (Shipment, Shipment.shipment_id))}
+    company = user.role != "regulator"
+    visible = scope(db, user)  # the lots a company's rows may refer to (None: any); its own lot rows add to it
+    untied: dict[int, int] = {}  # another company's lot created by this file -> its row, until a row ties it to the importer
 
-    def add(record):
+    def add(record, logged=False):
         db.add(record)
         db.flush()  # parents must exist before the rows that reference them
+        if logged:
+            log_entry(db, user, record)
 
     def org_id(row, field):
         name = need(row, field)
@@ -120,52 +133,65 @@ def import_records(file: UploadFile, db: Session = Depends(get_db)):
             found = [producers[producer]] if producer in producers else []
         else:
             found = list(producers.values())
+        if visible is not None:  # a lot the company cannot see is reported exactly like one that does not exist
+            found = [batch for batch in found if batch in visible]
         if len(found) != 1:
             raise RowError(f"unknown lot {code!r}; add a lot row for it" if not found else
                            f"lot code {code!r} belongs to {len(found)} producers; fill in {producer_field}")
         return found[0]
 
-    # Each handler returns True when it stored a new record, False when the record was already there.
-    def organization(row):
+    # Each handler takes a row and its number, and returns True when it stored a new record, False when it was there.
+    def organization(row, n):
         name, kind = need(row, "name"), choice(row, "type", get_args(OrganizationType))
         if name.casefold() in orgs:
             return False
         new = Organization(organization_id=next(ids[Organization]), name=name, type=kind)
-        add(new)
+        add(new, logged=True)
         orgs[name.casefold()] = [new.organization_id]
         return True
 
-    def lot_row(row):
+    def lot_row(row, n):
         producer, code, product = org_id(row, "producer"), need(row, "lot_code"), need(row, "product")
         need(row, "produced_at")
         made = when(row, "produced_at")
-        if producer in lots.get(code, {}):
-            return False
-        batch = Batch(batch_id=next(ids[Batch]), product_name=product, organization_id=producer,
-                      produced_at=made, status="normal")
-        add(batch)
-        add(BatchLot(batch_id=batch.batch_id, organization_id=producer, lot_code=code))
-        lots.setdefault(code, {})[producer] = batch.batch_id
-        return True
+        stored = lots.get(code, {}).get(producer)
+        if stored is None:
+            batch = Batch(batch_id=next(ids[Batch]), product_name=product, organization_id=producer,
+                          produced_at=made, status="normal")
+            add(batch, logged=True)
+            add(BatchLot(batch_id=batch.batch_id, organization_id=producer, lot_code=code))
+            lots.setdefault(code, {})[producer] = batch.batch_id
+            maker[batch.batch_id] = producer
+            if company and producer != user.organization_id:
+                untied[batch.batch_id] = n
+        if visible is not None:
+            visible.add(lots[code][producer])  # named with its producer and code, so later rows may refer to it
+        return stored is None
 
-    def ingredient(row):
+    def ingredient(row, n):
         child, parent = batch_id(row), batch_id(row, "ingredient_lot_code", "ingredient_producer")
         used = amount(row)
+        if company and maker[child] != user.organization_id:
+            raise RowError("you can record ingredients only for lots your own organization made")
+        untied.pop(parent, None)
         if graph.has_edge(parent, child):
             return False
         if creates_cycle(graph, parent, child):
             raise RowError("this link would create a cycle: a lot cannot be an ingredient of itself or of its own ingredients")
         graph.add_edge(parent, child)
-        add(BatchRelationship(parent_batch_id=parent, child_batch_id=child, quantity_used=used))
+        add(BatchRelationship(parent_batch_id=parent, child_batch_id=child, quantity_used=used), logged=True)
         return True
 
-    def shipment(row):
+    def shipment(row, n):
         code, batch = need(row, "shipment_code"), batch_id(row)
         sender, receiver = org_id(row, "from"), org_id(row, "to")
         quantity, unit, status = amount(row), need(row, "unit"), choice(row, "status", get_args(ShipmentStatus))
         departed, eta = when(row, "departed_at"), when(row, "eta")
         if sender == receiver:
             raise RowError("from and to are the same organization")
+        if company and user.organization_id not in (sender, receiver):
+            raise RowError("you can record only shipments your own organization sent or received")
+        untied.pop(batch, None)
         stored = manifests.get((sender, code))
         if stored is not None:
             if db.get(Shipment, stored).batch_id != batch:
@@ -175,7 +201,7 @@ def import_records(file: UploadFile, db: Session = Depends(get_db)):
             return False
         ship = Shipment(shipment_id=next(ids[Shipment]), batch_id=batch, from_org_id=sender, to_org_id=receiver,
                         quantity=quantity, status=status, departed_at=departed, eta=eta)
-        add(ship)
+        add(ship, logged=True)
         add(ShipmentManifest(shipment_id=ship.shipment_id, from_org_id=sender, shipment_code=code, quantity_unit=unit))
         manifests[(sender, code)] = ship.shipment_id
         return True
@@ -193,9 +219,12 @@ def import_records(file: UploadFile, db: Session = Depends(get_db)):
                 if kinds[n] != kind:
                     continue
                 try:
-                    (created if handle(row) else existing)[names[kind]] += 1
+                    (created if handle(row, n) else existing)[names[kind]] += 1
                 except RowError as error:
                     problems.append((n, str(error)))
+        problems += [(n, "this lot belongs to another company. You can add it only with a shipment to or from your "
+                         "organization, or as an ingredient of one of your own lots, in the same file")
+                     for n in untied.values()]
         if problems:
             problems.sort()
             more = f"; and {len(problems) - MAX_PROBLEMS} more" if len(problems) > MAX_PROBLEMS else ""

@@ -53,18 +53,32 @@ const TIMEOUT_MS = 20000;
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const origin = new URL(url).origin;
   const service = origin === new URL(ML_URL).origin ? "ML service" : "backend API";
+  const backend = url.startsWith(API_URL);
   let response: Response;
   try {
-    response = await fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
+    // The session cookie goes to the backend only; the ML service has no accounts.
+    response = await fetch(url, { ...init, credentials: backend ? "include" : "same-origin", signal: AbortSignal.timeout(TIMEOUT_MS) });
   } catch (e) {
     throw new Error((e as Error).name === "TimeoutError"
       ? `The ${service} at ${origin} did not respond within ${TIMEOUT_MS / 1000} seconds. Check the SSH tunnel and try again.`
       : `Cannot reach the ${service} at ${origin}. Check that the SSH tunnel (backend/demo-tunnel.ps1) is running.`);
   }
+  if (response.status === 401 && backend && !url.startsWith(`${API_URL}/api/auth/`)) {
+    // No session, or it ended: sign in and come back. The caller stays pending while the page leaves.
+    window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    return new Promise<T>(() => {});
+  }
   const body = await response.json().catch(() => null);
   if (!response.ok) throw new Error(typeof body?.detail === "string" ? body.detail : `Request failed (${response.status}).`);
   return body as T;
 }
+
+// A regulator is a Ministry of Health officer and has no organization; a company user acts for one.
+export type Me = { user_id: number; email: string; name: string; role: "regulator" | "company"; organization_id: number | null; organization_name: string | null };
+export const signIn = (email: string, password: string) =>
+  request<Me>(`${API_URL}/api/auth/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+export const signOut = () => request<unknown>(`${API_URL}/api/auth/logout`, { method: "POST" });
+export const getMe = () => request<Me>(`${API_URL}/api/auth/me`);
 
 // Work starts on the upload page and the ML process animation waits for it, then goes to the href it resolves to.
 // Client-side navigation keeps this module, and the promise, alive between pages.
@@ -139,7 +153,8 @@ export function importRecords(file: File) {
   return request<ImportResult>(`${API_URL}/api/records/import`, { method: "POST", body: form });
 }
 export const seedTraceDemo =() => request<{ selected_batch_ids: number[]; synthetic: boolean }>(`${API_URL}/api/demo/seed`, { ...json, body: "{}" });
-export const recordDecision = (body: { batch_ids: number[]; scope: HoldScope; decision: Decision["decision"]; officer: string; reason: string; analysis_id: string | null }) =>
+// The officer on a decision is the signed-in user; the server ignores any name sent with it.
+export const recordDecision = (body: { batch_ids: number[]; scope: HoldScope; decision: Decision["decision"]; reason: string; analysis_id: string | null }) =>
   request<Decision>(`${API_URL}/api/decisions`, { ...json, body: JSON.stringify(body) });
 // Display form of a sample field. The models need the raw value (the beef models lower-case their text), so this is
 // for showing only: states in capitals, text fields capitalised, the "__unknown__" placeholder as "not recorded".

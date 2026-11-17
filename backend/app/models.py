@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, JSON, String, UniqueConstraint
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, JSON, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -124,3 +124,38 @@ class DecisionSource(Base):
 
     decision_id = Column(Integer, ForeignKey("containment_decisions.decision_id"), primary_key=True)
     analysis_id = Column(String, ForeignKey("analyses.analysis_id"), nullable=False)
+
+
+class User(Base):
+    """A person who signs in. A company user acts for one organization; a regulator has none."""
+    __tablename__ = "users"
+
+    user_id = Column(Integer, primary_key=True)
+    email = Column(String, nullable=False, unique=True)  # stored in lower case
+    name = Column(String, nullable=False)
+    password_hash = Column(String, nullable=False)
+    role = Column(String, nullable=False)  # regulator | company
+    organization_id = Column(Integer, ForeignKey("organizations.organization_id"), nullable=True)
+    failed_logins = Column(Integer, nullable=False, default=0)
+    locked_until = Column(DateTime(timezone=True), nullable=True)
+
+
+class UserSession(Base):
+    __tablename__ = "user_sessions"
+
+    token_hash = Column(String, primary_key=True)  # SHA-256 of the cookie value; the value itself is never stored
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+
+
+class Entry(Base):
+    """Append-only record of who stored which record, and for which organization they acted at the time."""
+    __tablename__ = "entries"
+    __table_args__ = (Index("ix_entries_record", "kind", "record_id"),)
+
+    entry_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    organization_id = Column(Integer, ForeignKey("organizations.organization_id"), nullable=True)  # null: a regulator
+    kind = Column(String, nullable=False)  # the table the record is in
+    record_id = Column(String, nullable=False)
+    entered_at = Column(DateTime(timezone=True), nullable=False)
