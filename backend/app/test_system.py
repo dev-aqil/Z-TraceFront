@@ -492,6 +492,103 @@ class SystemTests(unittest.TestCase):
         finally:
             engine.dispose()
 
+    def test_live_readings_raise_alerts_as_they_arrive(self):
+        self.assertEqual(self.call("/api/demo/seed", {})[0], 200)
+        ship = 910009  # SHIP-017: chilled chicken from Food Processing to Central Kitchen, limit 4 °C
+
+        def send(time, temperature, cookie=...):
+            return self.call("/api/sensor-readings", {"shipment_id": ship, "timestamp": f"2026-10-17T{time}:00Z",
+                                                      "temperature": temperature}, cookie=cookie)
+
+        def watch(cookie=...):
+            return next((m for m in self.call("/api/monitor", cookie=cookie)[1] if m["shipment"]["shipment_id"] == ship), None)
+
+        self.assertIsNone(watch())  # nothing is monitored until a reading arrives
+        code, first = send("06:00", 2.8)
+        self.assertEqual(code, 200, first)
+        state = watch()
+        self.assertEqual((state["level"], state["limit_c"], state["profile"], state["latest"]["temperature"], state["lot"]["lot_code"]),
+                         ("ok", 4.0, "poultry_chilled", 2.8, "RM-402"))
+        send("06:10", 4.6)
+        state = watch()
+        self.assertEqual((state["level"], [alert["rule"] for alert in state["alerts"]]), ("excursion", ["EXCURSION"]))
+        # The same reading sent again, even written in another time zone, is stored once.
+        self.assertEqual(send("06:00", 2.8)[1], first)
+        again = {"shipment_id": ship, "timestamp": "2026-10-17T14:00:00+08:00", "temperature": 2.8}
+        self.assertEqual(self.call("/api/sensor-readings", again)[1], first)
+        self.assertEqual(len(watch()["readings"]), 2)
+        send("06:20", 3.0)
+        self.assertEqual(watch()["level"], "recovered")  # back in range, but it was warm: the evidence stays
+        for minute in range(30, 180, 10):  # two and a half hours at 8 °C
+            send(f"{6 + minute // 60:02d}:{minute % 60:02d}", 8.0)
+        state = watch()
+        self.assertEqual(state["level"], "critical")
+        self.assertIn("CRITICAL", [alert["rule"] for alert in state["alerts"]])
+        self.assertGreaterEqual(state["minutes_in_danger_zone"], 120)
+        self.assertEqual(state["peak"]["temperature"], 8.0)
+        send("09:10", 2.0)
+        self.assertEqual(watch()["level"], "critical")  # cooling down again does not undo the time spent warm
+        self.assertEqual(send("06:05", 3.0)[0], 200)  # a reading that arrives late is put in its place, not refused
+        self.assertEqual([reading["at"][11:16] for reading in watch()["readings"]][:3], ["06:00", "06:05", "06:10"])
+        absurd = {"shipment_id": ship, "timestamp": "2026-10-17T10:00:00Z", "temperature": 1e9}
+        self.assertEqual(self.call("/api/sensor-readings", absurd)[0], 422)
+        # A company watches only the shipments it sent or received.
+        self.add_user("monitor@central-kitchen.test", "Kitchen Monitor", "company", 910003)
+        self.add_user("monitor@warehouse-kl.test", "Warehouse Monitor", "company", 910005)
+        kitchen, warehouse = self.sign_in("monitor@central-kitchen.test"), self.sign_in("monitor@warehouse-kl.test")
+        self.assertEqual(watch(kitchen)["level"], "critical")
+        self.assertIsNone(watch(warehouse))
+        self.assertEqual(send("11:00", 3.0, cookie=warehouse)[0], 404)
+
+    def test_a_quiet_sensor_is_flagged_and_each_shipment_keeps_its_own_limit(self):
+        from datetime import timedelta, timezone
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        base = [{"record": "organization", "name": "Quiet Freezer", "type": "factory"},
+                {"record": "organization", "name": "Quiet Shop", "type": "store"},
+                {"record": "lot", "producer": "Quiet Freezer", "lot_code": "ICE-1", "product": "Frozen prawns", "produced_at": "2026-11-01"}]
+        ship = {"record": "shipment", "lot_code": "ICE-1", "from": "Quiet Freezer", "to": "Quiet Shop", "quantity": "10",
+                "unit": "kg", "profile": "frozen"}
+        code, bad = self.import_records(base + [{**ship, "shipment_code": "ICE-S0", "status": "in_transit", "profile": "lukewarm"}])
+        self.assertEqual(code, 400, bad)
+        self.assertIn("profile 'lukewarm'", bad["detail"])
+        code, _ = self.import_records(base + [{**ship, "shipment_code": "ICE-S1", "status": "in_transit"},
+                                              {**ship, "shipment_code": "ICE-S2", "status": "delivered"}])
+        self.assertEqual(code, 200)
+        ids = {s["shipment_code"]: s["shipment_id"] for s in self.call("/api/shipments")[1]}
+        for shipment_code in ("ICE-S1", "ICE-S2"):
+            for minutes_ago, temperature in ((50, -20.0), (40, -12.0)):
+                reading = {"shipment_id": ids[shipment_code], "temperature": temperature,
+                           "timestamp": (now - timedelta(minutes=minutes_ago)).isoformat()}
+                self.assertEqual(self.call("/api/sensor-readings", reading)[0], 200)
+        watched = {m["shipment"]["shipment_code"]: m for m in self.call("/api/monitor")[1]}
+        moving, arrived = watched["ICE-S1"], watched["ICE-S2"]
+        self.assertEqual((moving["profile"], moving["limit_c"], moving["level"]), ("frozen", -18.0, "excursion"))
+        self.assertTrue(39 <= moving["silent_minutes"] <= 42, moving["silent_minutes"])  # in transit, nothing for 40 minutes
+        self.assertIsNone(arrived["silent_minutes"])  # delivered: no further reading is expected
+
+    def test_only_simulated_readings_can_be_cleared(self):
+        self.assertEqual(self.call("/api/demo/seed", {})[0], 200)
+        late = {"shipment_id": 910009, "timestamp": "2026-10-18T00:00:00Z", "temperature": 2.0}
+        self.assertEqual(self.call("/api/sensor-readings", late)[0], 200)
+        self.add_user("clearer@central-kitchen.test", "Kitchen Clearer", "company", 910003)
+        kitchen = self.sign_in("clearer@central-kitchen.test")
+        self.assertEqual(self.call("/api/monitor/910009/readings", method="DELETE", cookie=kitchen)[0], 403)
+        code, cleared = self.call("/api/monitor/910009/readings", method="DELETE")
+        self.assertEqual(code, 200, cleared)
+        self.assertGreaterEqual(cleared["deleted"], 1)
+        self.assertNotIn(910009, [m["shipment"]["shipment_id"] for m in self.call("/api/monitor")[1]])
+        code, _ = self.import_records([  # a shipment a company really recorded
+            {"record": "organization", "name": "Real Dairy", "type": "factory"},
+            {"record": "organization", "name": "Real Shop", "type": "store"},
+            {"record": "lot", "producer": "Real Dairy", "lot_code": "RD-1", "product": "Milk", "produced_at": "2026-11-01"},
+            {"record": "shipment", "shipment_code": "RD-S1", "lot_code": "RD-1", "from": "Real Dairy", "to": "Real Shop",
+             "quantity": "10", "unit": "litres", "status": "delivered"}])
+        self.assertEqual(code, 200)
+        real = next(s["shipment_id"] for s in self.call("/api/shipments")[1] if s["shipment_code"] == "RD-S1")
+        self.assertEqual(self.call("/api/sensor-readings", {**late, "shipment_id": real})[0], 200)
+        self.assertEqual(self.call(f"/api/monitor/{real}/readings", method="DELETE")[0], 409)
+        self.assertIn(real, [m["shipment"]["shipment_id"] for m in self.call("/api/monitor")[1]])
+
     def test_seed_and_cross_factory_trace(self):
         self.assertEqual(self.call("/api/demo/seed", {})[0], 200)
         self.assertEqual(self.call("/api/demo/seed", {})[0], 200)

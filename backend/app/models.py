@@ -101,6 +101,7 @@ class ShipmentManifest(Base):
     from_org_id = Column(Integer, ForeignKey("organizations.organization_id"), nullable=False)
     shipment_code = Column(String, nullable=False)
     quantity_unit = Column(String, nullable=False)
+    cold_chain_profile = Column(String, nullable=True)  # a cold_chain_rules.toml profile; None = the default
 
 
 class SyntheticBatch(Base):

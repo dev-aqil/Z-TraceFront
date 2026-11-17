@@ -16,7 +16,9 @@ LEGACY = {("organizations", 910002): {"name": "Poultry Supplier"},
           ("organizations", 910003): {"name": "FreshBite Factory KL"},
           ("batches", 910402): {"product_name": "Chilled chicken"},
           # v3 records the unit of each ingredient quantity; earlier seeds stored none.
-          **{("batch_relationships", id_): {"quantity_unit": None} for id_ in range(910001, 910005)}}
+          **{("batch_relationships", id_): {"quantity_unit": None} for id_ in range(910001, 910005)},
+          # v4 gives SHIP-017 its cold-chain profile; earlier seeds left it at the default.
+          ("shipment_manifests", 910009): {"cold_chain_profile": None}}
 
 
 def seed_demo(db):
@@ -72,7 +74,8 @@ def seed_demo(db):
             ensure(Shipment, index, batch_id=batch, from_org_id=from_, to_org_id=to, quantity=float(quantity),
                    status=status, departed_at=datetime(2026, 10, 17, 6) if status != "pending" else None,
                    eta=datetime(2026, 10, 17, 9))
-            ensure(ShipmentManifest, index, from_org_id=from_, shipment_code=code, quantity_unit=unit)
+            ensure(ShipmentManifest, index, from_org_id=from_, shipment_code=code, quantity_unit=unit,
+                   cold_chain_profile="poultry_chilled" if code == "SHIP-017" else None)
         # The salad has no chicken, so its positive points past the RM-402 excursion to the shared lettuce lot.
         for id_, batch, hour in [(910001, WRAP, 8), (910002, SALAD, 10)]:
             ensure(LabResult, id_, batch_id=batch, tested_at=datetime(2026, 10, 17, hour),

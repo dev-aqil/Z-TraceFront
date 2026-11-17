@@ -194,7 +194,9 @@ if __name__ == "__main__":
             if len(matches) != 1:
                 sys.exit(f"{len(matches)} stored organizations are named {args.organization!r}; one is needed")
             organization_id = matches[0].organization_id
-        password = getpass.getpass("Password: ") if sys.stdin.isatty() else sys.stdin.readline().rstrip("\r\n")
+        # PowerShell pipes text with a byte-order mark first; kept, it would make the password impossible to type.
+        password = (getpass.getpass("Password: ") if sys.stdin.isatty()
+                    else sys.stdin.readline().rstrip("\r\n").removeprefix("﻿"))
         try:
             made = create_user(session, args.email, args.name, password, args.role, organization_id)
         except ValueError as error:

@@ -170,6 +170,22 @@ export function importRecords(file: File) {
   form.append("file", file);
   return request<ImportResult>(`${API_URL}/api/records/import`, { method: "POST", body: form });
 }
+// Live cold-chain monitoring (backend/app/monitor.py). Times are ISO with a UTC offset. silent_minutes is null once a
+// shipment is delivered: no further reading is expected.
+export type MonitorLevel = "critical" | "excursion" | "recovered" | "ok";
+export type MonitorAlert = { rule: "EXCURSION" | "CRITICAL" | "DATA_GAP"; time: string; message: string; source: string };
+export type Monitored = {
+  shipment: TraceShipment; lot: TraceBatch; profile: string; profile_name: string; limit_c: number; level: MonitorLevel;
+  latest: { temperature: number; at: string }; peak: { temperature: number; at: string };
+  minutes_above_limit: number; minutes_in_danger_zone: number; data_gaps: number;
+  silent_minutes: number | null; max_gap_minutes: number;
+  alerts: MonitorAlert[]; readings: { at: string; temperature: number }[];
+};
+export const getMonitor = () => request<Monitored[]>(`${API_URL}/api/monitor`);
+export const sendReading = (shipment_id: number, timestamp: string, temperature: number) =>
+  request<unknown>(`${API_URL}/api/sensor-readings`, { ...json, body: JSON.stringify({ shipment_id, timestamp, temperature }) });
+export const clearReadings = (shipmentId: number) =>
+  request<{ deleted: number }>(`${API_URL}/api/monitor/${shipmentId}/readings`, { method: "DELETE" });
 export const seedTraceDemo =() => request<{ selected_batch_ids: number[]; synthetic: boolean }>(`${API_URL}/api/demo/seed`, { ...json, body: "{}" });
 // The officer on a decision is the signed-in user; the server ignores any name sent with it.
 export const recordDecision = (body: { batch_ids: number[]; scope: HoldScope; decision: Decision["decision"]; reason: string; analysis_id: string | null }) =>

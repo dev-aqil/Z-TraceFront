@@ -6,7 +6,10 @@ One row per record. The `record` column names its kind, which decides the other 
                 [registration_no, address, contact_name, email, phone]
   lot           producer, lot_code, product, produced_at
   ingredient    lot_code [producer], ingredient_lot_code [ingredient_producer], quantity [unit]
-  shipment      shipment_code, lot_code [producer], from, to, quantity, unit, status [departed_at, eta]
+  shipment      shipment_code, lot_code [producer], from, to, quantity, unit, status [departed_at, eta, profile]
+
+A shipment's profile is its cold-chain limit (food-risk-ml configs/cold_chain_rules.toml, e.g. poultry_chilled or
+frozen); without one, live sensor readings are checked against the FDA Food Code 5 °C limit.
 
 Organizations are matched by name (ignoring case), lots by producer and lot code, shipments by sender and shipment
 code. A row whose record is already stored is counted as existing and left unchanged, so the same file can be sent
@@ -36,7 +39,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.analysis import MAX_UPLOAD_BYTES, read_frame, text
+from app.analysis import MAX_UPLOAD_BYTES, RULES, read_frame, text
 from app.auth import current_user, log_entry, scope
 from app.database import get_db
 from app.graph import build_batch_graph, creates_cycle
@@ -218,6 +221,7 @@ def import_records(file: UploadFile, user: User = Depends(current_user), db: Ses
         sender, receiver = org_id(row, "from"), org_id(row, "to")
         quantity, unit, status = amount(row), need(row, "unit"), choice(row, "status", get_args(ShipmentStatus))
         departed, eta = when(row, "departed_at"), when(row, "eta")
+        profile = choice(row, "profile", tuple(RULES["profiles"])) if row.get("profile") is not None else None
         if sender == receiver:
             raise RowError("from and to are the same organization")
         if company and user.organization_id not in (sender, receiver):
@@ -235,7 +239,8 @@ def import_records(file: UploadFile, user: User = Depends(current_user), db: Ses
         ship = Shipment(shipment_id=next(ids[Shipment]), batch_id=batch, from_org_id=sender, to_org_id=receiver,
                         quantity=quantity, status=status, departed_at=departed, eta=eta)
         add(ship, logged=True)
-        add(ShipmentManifest(shipment_id=ship.shipment_id, from_org_id=sender, shipment_code=code, quantity_unit=unit))
+        add(ShipmentManifest(shipment_id=ship.shipment_id, from_org_id=sender, shipment_code=code, quantity_unit=unit,
+                             cold_chain_profile=profile))
         manifests[(sender, code)] = ship.shipment_id
         return True
 

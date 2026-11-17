@@ -9,6 +9,7 @@ from app.analysis import router as analysis_router
 from app.auth import current_user, log_entry, router as auth_router
 from app.database import Base, add_missing_columns, engine, get_db
 from app.holds import router as holds_router
+from app.monitor import router as monitor_router
 from app.models import Batch, BatchLot, LabResult, Organization, SensorReading, Shipment, User
 from app.records import router as records_router
 from app.risk import rule_based_risk_score
@@ -37,6 +38,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(analysis_router)
 app.include_router(holds_router)
+app.include_router(monitor_router)
 app.include_router(records_router)
 app.include_router(trace_router)
 
@@ -78,6 +80,14 @@ def ingest_sensor_reading(reading: SensorReadingCreate, user: User = Depends(cur
     ship = db.get(Shipment, reading.shipment_id)
     if ship is None or (user.role != "regulator" and user.organization_id not in (ship.from_org_id, ship.to_org_id)):
         raise HTTPException(404, f"shipment {reading.shipment_id} not found")
+    # Loggers resend after a dropped connection: the same instant is one reading, stored once.
+    # ponytail: check-then-insert; add a unique (shipment_id, timestamp) index if two loggers feed one shipment
+    stored = db.query(SensorReading).filter_by(shipment_id=reading.shipment_id, timestamp=reading.timestamp).first()
+    if stored is not None:
+        if (stored.temperature, stored.humidity) != (reading.temperature, reading.humidity):
+            raise HTTPException(409, f"a different reading is already stored for shipment {reading.shipment_id} "
+                                     f"at {reading.timestamp.isoformat()} UTC")
+        return stored
     db_reading = SensorReading(**reading.model_dump())
     db.add(db_reading)  # not written to the entry log: readings arrive by the thousand
     commit(db)

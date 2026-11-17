@@ -31,6 +31,7 @@ Endpoints:
 - `GET /api/holds`, `POST /api/holds/{id}/acknowledge`, `POST /api/holds/{id}/release` — holds in force, an affected company confirming it has seen one, and an officer lifting one
 - `POST /api/analyses`, `GET /api/analyses/{id}/findings`, `GET /api/analyses/{id}/distribution` — database-backed upload results
 - `POST /api/sensor-readings`, `POST /api/lab-results`
+- `GET /api/monitor`, `DELETE /api/monitor/{shipment_id}/readings` — live cold-chain state of every shipment with readings, checked against the shipment's own limit; clearing works on synthetic demo shipments only
 - `GET /api/batches/{id}/trace` — upstream/downstream via `app/graph.py` (NetworkX)
 - `GET /api/shipments/{id}/risk` — rule-based priority score (`app/risk.py`); swap for a trained XGBoost/GBM model later
 
@@ -61,6 +62,8 @@ Upload page at http://localhost:3000. CSV/XLSX/JSON uploads are analyzed by the 
 
 Lot investigation is at http://localhost:3000/trace, linked from the start and distribution screens. From an upload, **Trace related lots** opens RM-402 with the finding that led there. Loading the labelled synthetic scenario links it to CW-42 and flags a second positive, CS-91, that the chicken cannot explain; investigating both positives together ranks the lettuce lot L-102 first because both products used it. The view includes other connected products and shipment destinations across both factories. Unmapped uploaded lot codes are reported explicitly; ingredient relationships are never inferred from a route label. Lot codes are unique per producer, while existing integer batch IDs remain unchanged.
 
+Live shipments are at http://localhost:3000/monitor, linked from the trace page. Each shipment that has sent a temperature reading shows its level (in range, above limit, back in range, critical), its readings against its limit, its alerts and a warning when the logger of a moving shipment goes quiet. The page refreshes every 5 seconds. An officer can replay SHIP-017 from the sample file reading by reading and clear the simulated readings afterwards.
+
 For the final presentation, stop the development server, run `npm run build`, then `npm start` from `frontend/`. Do not build while `next dev` is running. `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_ML_URL` are embedded at build time and default to the two localhost tunnel ports.
 
 Design workspace at http://localhost:3000/design. It maps the two HTML mockups into six separate Next.js screens and keeps the original mockups under `frontend/design/reference/`. Page one and the step-two overlay demo are implemented; the later screens are design drafts.
@@ -69,7 +72,7 @@ The network animation preview is at http://localhost:3000/ml-process. The select
 
 ## Not built yet
 
-Live event replay remains pending. An approved decision puts its lots on hold until an officer lifts it, and each affected company sees the hold when it signs in and acknowledges it; nothing is sent by email or SMS, and the system does not stop stock physically. A shipment still carries one lot (number mixed loads `S1-A`, `S1-B`), and there are no GS1 identifiers. New optional columns are added to existing tables at start-up; any other schema change still needs a migration tool. Accounts are created from the command line only: there is no self-service sign-up, password reset or account management screen, and the ML service on port 8100 has no sign-in. Five pathogen models and the SVG distribution/lot visualizations are implemented. Model predictions concern FSIS laboratory samples; cold-chain upload findings use transparent rules, not a trained contamination detector.
+Live readings arrive over HTTP only (no MQTT or logger vendor integration), and alerts show on the monitor page without email or SMS. An approved decision puts its lots on hold until an officer lifts it, and each affected company sees the hold when it signs in and acknowledges it; nothing is sent by email or SMS, and the system does not stop stock physically. A shipment still carries one lot (number mixed loads `S1-A`, `S1-B`), and there are no GS1 identifiers. New optional columns are added to existing tables at start-up; any other schema change still needs a migration tool. Accounts are created from the command line only: there is no self-service sign-up, password reset or account management screen, and the ML service on port 8100 has no sign-in. Five pathogen models and the SVG distribution/lot visualizations are implemented. Model predictions concern FSIS laboratory samples; cold-chain upload findings use transparent rules, not a trained contamination detector.
 
 ## Offline data pipeline — Person A
 

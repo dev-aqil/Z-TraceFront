@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Literal, get_args
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 OrganizationType = Literal["supplier", "factory", "warehouse", "store"]  # in supply-chain order
 ShipmentStatus = Literal["pending", "in_transit", "delivered", "held"]
@@ -54,8 +54,15 @@ class BatchCreate(BaseModel):
 class SensorReadingCreate(BaseModel):
     shipment_id: int
     timestamp: datetime
-    temperature: float | None = None
-    humidity: float | None = None
+    # Bounds catch a broken sensor or a unit mix-up; no food shipment is monitored outside them.
+    temperature: float | None = Field(default=None, ge=-60, le=80, allow_inf_nan=False)
+    humidity: float | None = Field(default=None, ge=0, le=100, allow_inf_nan=False)
+
+    @field_validator("timestamp")
+    @classmethod
+    def as_utc(cls, value: datetime) -> datetime:
+        """Stored as naive UTC. A time without a zone is taken as UTC."""
+        return value.astimezone(timezone.utc).replace(tzinfo=None) if value.tzinfo else value
 
 
 class SensorReadingOut(SensorReadingCreate):

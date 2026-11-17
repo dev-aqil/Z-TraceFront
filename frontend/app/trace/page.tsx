@@ -264,6 +264,7 @@ export default function TracePage() {
       <div className="flex items-center gap-3 text-xs">
         {me && <><span className="hidden text-slate-600 sm:inline"><strong className="text-[#0d293b]">{me.name}</strong> · {me.organization_name ?? "Ministry of Health"}</span>
           <button onClick={() => signOut().finally(() => window.location.assign("/login"))} className="rounded-full border border-slate-300 px-4 py-2 font-semibold hover:border-slate-900">Sign out</button></>}
+        <Link href="/monitor" className="rounded-full border border-slate-300 px-4 py-2 font-semibold hover:border-slate-900">Live shipments</Link>
         <Link href={back} className="rounded-full border border-slate-300 px-4 py-2 font-semibold hover:border-slate-900">← Back</Link>
       </div>
     </div></header>

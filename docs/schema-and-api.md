@@ -146,9 +146,11 @@ Returns `201`:
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `shipment_id` | integer | yes | must already exist in `shipments` |
-| `timestamp` | datetime | yes | |
-| `temperature` | number | no | °C |
-| `humidity` | number | no | % RH |
+| `timestamp` | datetime | yes | stored as UTC; a time without a zone is taken as UTC |
+| `temperature` | number | no | °C, −60 to 80 (outside it: 422) |
+| `humidity` | number | no | % RH, 0 to 100 |
+
+The same shipment and instant is one reading: sending it again returns the stored row, and different values for an instant already stored return 409. See section 8.
 
 ```json
 {"shipment_id": 17, "timestamp": "2026-10-17T06:30:00", "temperature": 13.2, "humidity": 70}
@@ -548,4 +550,30 @@ A hold affects the organizations that made a held lot, or sent or received a shi
 
 **Ingredient units.** `batch_relationships.quantity_unit` is optional. In the trace's `organizations` block each holding has `used`: what the site put into its own products, counted only where the link's unit equals the shipments' unit. `remaining` is `received − sent − used`.
 
+**Shipment profile.** `shipment_manifests.cold_chain_profile` is optional: one of the profiles in `food-risk-ml/configs/cold_chain_rules.toml` (`poultry_chilled` 4 °C, `red_meat_chilled` 7 °C, `offal_chilled` 3 °C, `tcs_food_us` 5 °C, `frozen` −18 °C). A shipment without one is checked against `tcs_food_us`. Set it with the optional `profile` column of a shipment row in a record import; an unknown profile rejects the file.
+
 **Schema changes.** At start-up the backend adds any optional column that a model declares and its table lacks (`app.database.add_missing_columns`). It only adds nullable columns. Renaming or retyping a column, dropping a constraint or rewriting data needs a migration tool and a rehearsal on a copy of the database.
+
+## 8. Live cold-chain monitoring
+
+Loggers post readings to `POST /api/sensor-readings` (section 2.4). Nothing is computed when a reading arrives: each request to the monitor replays the shipment's stored readings in time order through the food-risk-ml `ColdChainMonitor`, so a reading that arrives late is put in its place rather than refused. These are published rules, not a learned model.
+
+| Method | Path | What it does |
+|---|---|---|
+| GET | `/api/monitor` | Every shipment with at least one temperature reading that the user may see (a company: shipments it sent or received), most urgent first. |
+| DELETE | `/api/monitor/{shipment_id}/readings` | Regulators only (company: 403). Deletes the readings of a synthetic demo shipment and returns `{"deleted": n}`. A real shipment returns 409: its readings are evidence. |
+
+Each monitor item:
+
+| Field | Meaning |
+|---|---|
+| `shipment`, `lot` | the shipment and batch documents |
+| `profile`, `profile_name`, `limit_c` | the shipment's cold-chain profile and its upper limit in °C |
+| `level` | `ok` (every reading within the limit), `excursion` (latest reading above it), `recovered` (within it again, but it was above it), `critical` (USDA danger-zone time used up: 120 min between 4.4 and 60 °C, or 60 min above 32.2 °C). Critical never goes back. |
+| `latest`, `peak` | `{temperature, at}` |
+| `minutes_above_limit`, `minutes_in_danger_zone`, `data_gaps` | totals so far; an interval longer than 15 minutes between readings is a gap and is not counted |
+| `silent_minutes`, `max_gap_minutes` | minutes since the last reading for a pending or in-transit shipment (null once delivered); more than `max_gap_minutes` means nobody is watching the load |
+| `alerts` | `[{rule, time, message, source}]`, rule `EXCURSION`, `CRITICAL` or `DATA_GAP`, with the regulation or guidance it comes from |
+| `readings` | `[{at, temperature}]` in time order; times are ISO with a UTC offset |
+
+The page at `/monitor` polls this every 5 seconds. Its simulated replay sends the 20 SHIP-017 readings of `frontend/public/supplier_shipments.csv` one by one; the demo seed gives SHIP-017 the `poultry_chilled` profile.

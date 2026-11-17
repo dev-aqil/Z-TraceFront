@@ -101,6 +101,9 @@ Yes. The evidence is in `food-risk-ml/reports/linuxone_evidence/`:
 **Why not just recall everything?**
 The two hold options make the trade-off visible: 5 shipments for the targeted hold against 9 for the extended one. A broad recall pulls stock that no evidence links to the incident.
 
+**Does it only work on files sent afterwards?**
+No. Open **Live shipments** from the trace page header and click **Replay SHIP-017**. The 20 readings arrive one every 1.5 seconds: the card turns "Above limit" at 4.1 °C and "Critical" once the load has spent 2 hours in the danger zone, and it stays critical when the truck cools again. Say "the replay is simulated; a real logger posts to the same endpoint". Click **Clear simulated readings** afterwards. Before presenting, run the replay once so the page is compiled, then clear it.
+
 **Is the temperature rule made up?**
 No. The rules cite their sources: Regulation (EC) No 853/2004 for chilled poultry, and the USDA danger zone of 4.4–60 °C with a 2-hour limit.
 
