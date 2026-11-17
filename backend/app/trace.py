@@ -1,8 +1,6 @@
 """Stored lot relationships and shipment locations; investigation leads are not proof of cause."""
 
 from datetime import datetime, timezone
-from typing import get_args
-
 import networkx as nx
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
@@ -11,14 +9,14 @@ from sqlalchemy.orm import Session
 from app.auth import current_user, log_entry, party, regulator, scope
 from app.database import get_db
 from app.graph import build_batch_graph, creates_cycle
-from app.models import (Analysis, Batch, BatchLot, BatchRelationship, ContainmentDecision, DecisionSource, LabResult,
-                        Organization, Shipment, ShipmentManifest, SyntheticBatch, User)
-from app.schemas import (DecisionCreate, OrganizationCreate, OrganizationOut, OrganizationType, RelationshipCreate,
-                         ShipmentCreate)
+from app.holds import held_batches, holds_changed
+from app.models import (Analysis, Batch, BatchLot, BatchRelationship, ContainmentDecision, DecisionSource, HoldRelease,
+                        LabResult, Organization, Shipment, ShipmentManifest, SyntheticBatch, User)
+from app.schemas import (DecisionCreate, OrganizationCreate, OrganizationOut, RelationshipCreate, ShipmentCreate,
+                         supply_rank)
 
 # Every route needs a signed-in user. What a company user may see and write is decided per route with app.auth.scope.
 router = APIRouter(prefix="/api", dependencies=[Depends(current_user)])
-SUPPLY_ORDER = get_args(OrganizationType)
 
 
 def commit(db: Session):
@@ -42,7 +40,8 @@ def batch_document(db: Session, batch: Batch) -> dict:
     return {"batch_id": batch.batch_id, "lot_code": lot.lot_code if lot else None,
             "product_name": batch.product_name, "organization_id": batch.organization_id,
             "organization_name": org.name, "organization_type": org.type,
-            "produced_at": batch.produced_at, "status": batch.status, "synthetic": db.get(SyntheticBatch, batch.batch_id) is not None}
+            "produced_at": batch.produced_at, "status": batch.status, "on_hold": batch.batch_id in held_batches(db),
+            "synthetic": db.get(SyntheticBatch, batch.batch_id) is not None}
 
 
 def shipment_document(db: Session, ship: Shipment) -> dict:
@@ -52,7 +51,8 @@ def shipment_document(db: Session, ship: Shipment) -> dict:
             "from_name": require(db, Organization, ship.from_org_id, "organization").name,
             "to_name": require(db, Organization, ship.to_org_id, "organization").name,
             "quantity": ship.quantity, "quantity_unit": manifest.quantity_unit if manifest else None,
-            "status": ship.status, "departed_at": ship.departed_at, "eta": ship.eta}
+            "status": ship.status, "on_hold": ship.batch_id in held_batches(db),
+            "departed_at": ship.departed_at, "eta": ship.eta}
 
 
 def visible_batches(db: Session, user: User):
@@ -128,7 +128,7 @@ def relationships(user: User = Depends(current_user), db: Session = Depends(get_
         query = (query.join(Batch, Batch.batch_id == BatchRelationship.child_batch_id)
                  .filter(Batch.organization_id == user.organization_id))
     return [{"id": r.id, "parent_batch_id": r.parent_batch_id, "child_batch_id": r.child_batch_id,
-             "quantity_used": r.quantity_used} for r in query]
+             "quantity_used": r.quantity_used, "quantity_unit": r.quantity_unit} for r in query]
 
 
 @router.post("/batch-relationships", status_code=201)
@@ -138,13 +138,15 @@ def create_relationship(data: RelationshipCreate, user: User = Depends(current_u
         if product is None or product.organization_id != user.organization_id:
             raise HTTPException(403, "you can record ingredients only for lots your own organization made")
         require_visible(db, user, data.parent_batch_id)
-    require(db, Batch, data.parent_batch_id, "batch")
-    require(db, Batch, data.child_batch_id, "batch")
+    ingredient = require(db, Batch, data.parent_batch_id, "batch")
+    made = require(db, Batch, data.child_batch_id, "batch")
     graph = build_batch_graph(db)
     if graph.has_edge(data.parent_batch_id, data.child_batch_id):
         raise HTTPException(409, "ingredient relationship already exists")
     if creates_cycle(graph, data.parent_batch_id, data.child_batch_id):
         raise HTTPException(400, "ingredient relationship would create a cycle")
+    if ingredient.produced_at > made.produced_at:
+        raise HTTPException(400, "the ingredient lot was produced after the lot it is said to be in")
     row = BatchRelationship(**data.model_dump())
     db.add(row)
     db.flush()
@@ -189,7 +191,8 @@ def containment(selected, downstream, included, shipment_rows, ranking, batches)
              "anything made from them.")
     return {"recommended": "extended" if shared else "targeted", "basis": basis,
             "options": {"targeted": option(selected | downstream), "extended": option(included)},
-            "note": "Simulated action: an approval is recorded, but no hold is sent to any site."}
+            "note": "Approving puts these lots on hold. Each affected site sees the hold when it signs in and is asked "
+                    "to acknowledge it. Nothing is sent by email or SMS."}
 
 
 def decision_document(db: Session, d: ContainmentDecision) -> dict:
@@ -197,7 +200,8 @@ def decision_document(db: Session, d: ContainmentDecision) -> dict:
     source = db.get(DecisionSource, d.decision_id)
     return {"decision_id": d.decision_id, "scope": d.scope, "decision": d.decision, "batch_ids": d.batch_ids,
             "shipment_ids": d.shipment_ids, "officer": d.officer, "reason": d.reason, "decided_at": at.isoformat(),
-            "analysis_id": source.analysis_id if source else None}
+            "analysis_id": source.analysis_id if source else None,
+            "lifted": db.get(HoldRelease, d.decision_id) is not None}
 
 
 def lab_document(lab: LabResult) -> dict:
@@ -206,29 +210,35 @@ def lab_document(lab: LabResult) -> dict:
 
 
 def organization_summary(db: Session, graph: nx.DiGraph, batches: list[dict], shipments: list[dict]) -> list[dict]:
-    """Who made or handled the traced lots, suppliers first, with quantities per lot and unit.
+    """Who made or handled the traced lots, suppliers first, with contact details and quantities per lot and unit.
 
-    `remaining` is received minus sent on: stock that may still be on site, was used in production (`used_in`) or was
-    sold. It is None where the lot was made, because production quantity is not recorded.
+    `used` is what the organization put into its own products (`used_in`), counted only where the ingredient link
+    carries the same unit as the shipments. `remaining` is received minus sent on minus used: stock that may still be
+    on site or was sold. It is None where the lot was made, because production quantity is not recorded.
     """
     made = {b["batch_id"]: b["organization_id"] for b in batches}
     holdings: dict[tuple, dict] = {}
 
     def holding(org, ship):
-        return holdings.setdefault((org, ship["batch_id"], ship["quantity_unit"]), {"received": 0, "incoming": 0, "sent": 0})
+        return holdings.setdefault((org, ship["batch_id"], ship["quantity_unit"]),
+                                   {"received": 0, "incoming": 0, "sent": 0, "used": 0})
 
     for ship in shipments:
-        # ponytail: a held shipment counts as neither sent nor arrived; record where it was stopped to place it
+        # ponytail: a shipment with status "held" counts as neither sent nor arrived; record where it stopped to place it
         holding(ship["to_org_id"], ship)["received" if ship["status"] == "delivered" else "incoming"] += ship["quantity"]
         holding(ship["from_org_id"], ship)["sent"] += ship["quantity"] if ship["status"] in ("in_transit", "delivered") else 0
-    orgs = db.query(Organization).filter(
-        Organization.organization_id.in_(set(made.values()) | {org for org, _, _ in holdings})).all()
-    orgs.sort(key=lambda o: (SUPPLY_ORDER.index(o.type) if o.type in SUPPLY_ORDER else len(SUPPLY_ORDER), o.organization_id))
-    return [{"organization_id": o.organization_id, "name": o.name, "type": o.type,
+    for (org, batch, unit), quantities in holdings.items():
+        products = {child: link for child, link in graph[batch].items() if made.get(child) == org}
+        quantities["used"] = sum(link["quantity_used"] for link in products.values() if unit and link.get("unit") == unit)
+        quantities["remaining"] = (None if made[batch] == org else
+                                   quantities["received"] - quantities["sent"] - quantities["used"])
+        quantities["used_in"] = sorted(products)
+    orgs = sorted(db.query(Organization).filter(
+        Organization.organization_id.in_(set(made.values()) | {org for org, _, _ in holdings})),
+        key=lambda o: (supply_rank(o.type), o.organization_id))
+    return [{**OrganizationOut.model_validate(o).model_dump(),
              "produced_batch_ids": sorted(batch for batch, org in made.items() if org == o.organization_id),
-             "holdings": [{"batch_id": batch, "unit": unit, **quantities,
-                           "remaining": None if made[batch] == o.organization_id else quantities["received"] - quantities["sent"],
-                           "used_in": sorted(c for c in graph.successors(batch) if made.get(c) == o.organization_id)}
+             "holdings": [{"batch_id": batch, "unit": unit, **quantities}
                           for (org, batch, unit), quantities in sorted(holdings.items(), key=lambda kv: (kv[0][1], kv[0][2] or ""))
                           if org == o.organization_id]}
             for o in orgs]
@@ -309,7 +319,7 @@ def organization_lots(organization_id: int, limit: int = Query(20, ge=1, le=200)
     # ponytail: the IN list grows with the lots a site has handled; join on shipments once a site passes ~30k lots
     rows = (db.query(Batch).filter(Batch.batch_id.in_(made | handled))
             .order_by(Batch.produced_at.desc(), Batch.batch_id.desc()).limit(limit))
-    return {"organization": {"organization_id": org.organization_id, "name": org.name, "type": org.type},
+    return {"organization": OrganizationOut.model_validate(org).model_dump(),
             "lots": [{**batch_document(db, batch), "relation": "produced" if batch.batch_id in made else "handled"}
                      for batch in rows],
             "total": len(made | handled)}
@@ -330,6 +340,7 @@ def decide(data: DecisionCreate, user: User = Depends(regulator), db: Session = 
     if data.analysis_id:
         db.add(DecisionSource(decision_id=row.decision_id, analysis_id=data.analysis_id))
     commit(db)
+    holds_changed(db)
     return decision_document(db, row)
 
 

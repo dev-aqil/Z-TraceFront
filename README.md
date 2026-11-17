@@ -27,7 +27,8 @@ Endpoints:
 - `POST /api/records/import` — load organizations, lots, ingredient links and shipments from one CSV/XLSX/JSON file; start from `frontend/public/trace_records_template.csv`
 - `GET /api/organizations/{id}/lots` — the lots to investigate when the lead is a company rather than a lot
 - `POST /api/demo/seed` — idempotent synthetic trace scenario; preserves existing records
-- `POST /api/decisions` — record the signed-in officer's approve/reject on the trace's containment recommendation (simulated hold); regulators only
+- `POST /api/decisions` — record the signed-in officer's approve/reject on the trace's containment recommendation; an approval puts the lots on hold; regulators only
+- `GET /api/holds`, `POST /api/holds/{id}/acknowledge`, `POST /api/holds/{id}/release` — holds in force, an affected company confirming it has seen one, and an officer lifting one
 - `POST /api/analyses`, `GET /api/analyses/{id}/findings`, `GET /api/analyses/{id}/distribution` — database-backed upload results
 - `POST /api/sensor-readings`, `POST /api/lab-results`
 - `GET /api/batches/{id}/trace` — upstream/downstream via `app/graph.py` (NetworkX)
@@ -68,7 +69,7 @@ The network animation preview is at http://localhost:3000/ml-process. The select
 
 ## Not built yet
 
-Live event replay remains pending. Containment decisions are recorded with the signed-in officer, reason and time, but the hold itself is simulated. Accounts are created from the command line only: there is no self-service sign-up, password reset or account management screen, and the ML service on port 8100 has no sign-in. Five pathogen models and the SVG distribution/lot visualizations are implemented. Model predictions concern FSIS laboratory samples; cold-chain upload findings use transparent rules, not a trained contamination detector.
+Live event replay remains pending. An approved decision puts its lots on hold until an officer lifts it, and each affected company sees the hold when it signs in and acknowledges it; nothing is sent by email or SMS, and the system does not stop stock physically. A shipment still carries one lot (number mixed loads `S1-A`, `S1-B`), and there are no GS1 identifiers. New optional columns are added to existing tables at start-up; any other schema change still needs a migration tool. Accounts are created from the command line only: there is no self-service sign-up, password reset or account management screen, and the ML service on port 8100 has no sign-in. Five pathogen models and the SVG distribution/lot visualizations are implemented. Model predictions concern FSIS laboratory samples; cold-chain upload findings use transparent rules, not a trained contamination detector.
 
 ## Offline data pipeline — Person A
 

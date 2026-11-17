@@ -349,8 +349,8 @@ class SystemTests(unittest.TestCase):
         def holding(name, batch):
             return next(h for h in orgs[name]["holdings"] if h["batch_id"] == batch)
 
-        self.assertEqual(holding("Warehouse KL", 910042), {"batch_id": 910042, "unit": "units", "received": 1200,
-                                                           "incoming": 0, "sent": 700, "remaining": 500, "used_in": []})
+        self.assertEqual(holding("Warehouse KL", 910042), {"batch_id": 910042, "unit": "units", "received": 1200, "incoming": 0,
+                                                           "sent": 700, "used": 0, "remaining": 500, "used_in": []})
         self.assertEqual((holding("Store KL-03", 910042)["received"], holding("Store KL-03", 910042)["incoming"]), (0, 400))
         self.assertEqual(holding("Store KL-04", 910042)["remaining"], 300)
         kitchen = orgs["Central Kitchen, QSR Group A"]
@@ -359,6 +359,7 @@ class SystemTests(unittest.TestCase):
         self.assertEqual((holding(kitchen["name"], 910042)["sent"], holding(kitchen["name"], 910042)["remaining"]), (1200, None))
         lettuce = holding(kitchen["name"], 910102)
         self.assertEqual((lettuce["received"], lettuce["unit"], lettuce["used_in"]), (10, "kg", [910042]))
+        self.assertEqual((lettuce["used"], lettuce["remaining"]), (10, 0))  # all of it went into the wrap
         self.assertEqual(holding("Warehouse JB", 910017)["incoming"], 600)  # pending: not yet there
 
     def test_a_trace_can_start_from_an_organization(self):
@@ -375,6 +376,121 @@ class SystemTests(unittest.TestCase):
         self.assertEqual(lots(910007), [("CW-42", "handled")])
         self.assertEqual(self.call("/api/organizations/910001/lots")[1]["organization"]["name"], "Greenfield Farm")
         self.assertEqual(self.call("/api/organizations/99999999/lots")[0], 404)
+
+    def test_an_approved_hold_reaches_each_affected_site_until_it_is_lifted(self):
+        code, _ = self.import_records([
+            {"record": "organization", "name": "Hold Farm", "type": "supplier"},
+            {"record": "organization", "name": "Hold Shop", "type": "store"},
+            {"record": "organization", "name": "Hold Bystander", "type": "store"},
+            {"record": "lot", "producer": "Hold Farm", "lot_code": "HF-1", "product": "Sprouts", "produced_at": "2026-11-10"},
+            {"record": "shipment", "shipment_code": "HF-S1", "lot_code": "HF-1", "from": "Hold Farm", "to": "Hold Shop",
+             "quantity": "40", "unit": "kg", "status": "delivered"}])
+        self.assertEqual(code, 200)
+        ids = {org["name"]: org["organization_id"] for org in self.call("/api/organizations")[1]}
+        users = {"Hold Farm": "farm@hold.test", "Hold Shop": "shop@hold.test", "Hold Bystander": "bystander@hold.test"}
+        for name, email in users.items():
+            self.add_user(email, f"{name} user", "company", ids[name])
+        farm, shop, bystander = (self.sign_in(email) for email in users.values())
+        lot = self.call("/api/lots/resolve?lot_code=HF-1")[1]
+        self.assertFalse(lot["on_hold"])
+        body = {"batch_ids": [lot["batch_id"]], "scope": "targeted", "decision": "approved", "reason": "Positive sample"}
+        hold = self.call("/api/decisions", body)[1]["decision_id"]
+        rejected = self.call("/api/decisions", {**body, "decision": "rejected"})[1]["decision_id"]
+
+        def holds(cookie=...):
+            return {h["decision_id"]: h for h in self.call("/api/holds", cookie=cookie)[1]}
+
+        self.assertNotIn(rejected, holds())  # a rejected recommendation holds nothing
+        self.assertEqual([(site["name"], site["acknowledged_at"]) for site in holds()[hold]["sites"]],
+                         [("Hold Farm", None), ("Hold Shop", None)])
+        mine = holds(shop)[hold]
+        self.assertEqual(([b["lot_code"] for b in mine["lots"]], mine["reason"], mine["released"]), (["HF-1"], "Positive sample", None))
+        self.assertEqual([site["name"] for site in mine["sites"]], ["Hold Shop"])  # a company is not shown who else is affected
+        self.assertTrue(self.call("/api/trace/batches", cookie=shop)[1][0]["on_hold"])
+        self.assertTrue(self.call(f"/api/trace?batch_ids={lot['batch_id']}", cookie=shop)[1]["shipments"][0]["on_hold"])
+        self.assertEqual(holds(bystander), {})
+        acknowledge = f"/api/holds/{hold}/acknowledge"
+        self.assertEqual(self.call(acknowledge, method="POST", cookie=bystander)[0], 404)
+        self.assertEqual(self.call(acknowledge, method="POST")[0], 403)  # the ministry does not acknowledge its own hold
+        code, done = self.call(acknowledge, method="POST", cookie=shop)
+        self.assertEqual(code, 200, done)
+        self.assertEqual(self.call(acknowledge, method="POST", cookie=shop)[1], done)  # acknowledging twice changes nothing
+        self.assertEqual([(site["name"], bool(site["acknowledged_at"]), site["acknowledged_by"]) for site in holds()[hold]["sites"]],
+                         [("Hold Farm", False, None), ("Hold Shop", True, "Hold Shop user")])
+        lift = f"/api/holds/{hold}/release"
+        self.assertEqual(self.call(lift, {"reason": "Retest negative"}, cookie=farm)[0], 403)
+        self.assertEqual(self.call(f"/api/holds/{rejected}/release", {"reason": "Not a hold"})[0], 409)
+        self.assertEqual(self.call(lift, {"reason": " "})[0], 422)
+        code, lifted = self.call(lift, {"reason": "Retest negative"})
+        self.assertEqual((code, lifted["released"]["reason"], lifted["released"]["officer"]), (200, "Retest negative", "Test Officer"))
+        self.assertEqual(self.call(lift, {"reason": "Again"})[0], 409)
+        self.assertEqual(holds(farm)[hold]["released"]["reason"], "Retest negative")  # each site is told it was lifted
+        self.assertFalse(self.call("/api/lots/resolve?lot_code=HF-1")[1]["on_hold"])
+        self.assertEqual(self.call(acknowledge, method="POST", cookie=farm)[0], 409)  # nothing is left to acknowledge
+
+    def test_contact_details_come_with_an_organization_and_only_it_or_the_ministry_changes_them(self):
+        org = {"record": "organization", "name": "Contact Dairy", "type": "factory", "registration_no": "MOH-PRM-0042",
+               "address": "Lot 5, Jalan Susu, Kluang", "contact_name": "Nur Aina", "email": "qa@contact-dairy.test",
+               "phone": "07-555 0100"}
+        code, made = self.import_records([org, {"record": "organization", "name": "Contact Rival", "type": "factory"}])
+        self.assertEqual((code, made["created"]["organizations"]), (200, 2), made)
+
+        def stored():
+            return next(o for o in self.call("/api/organizations")[1] if o["name"] == "Contact Dairy")
+
+        dairy = stored()
+        self.assertEqual((dairy["registration_no"], dairy["address"], dairy["contact_name"], dairy["contact_email"], dairy["contact_phone"]),
+                         ("MOH-PRM-0042", "Lot 5, Jalan Susu, Kluang", "Nur Aina", "qa@contact-dairy.test", "07-555 0100"))
+        rival_id = next(o["organization_id"] for o in self.call("/api/organizations")[1] if o["name"] == "Contact Rival")
+        self.add_user("qa@contact-dairy.test", "Nur Aina", "company", dairy["organization_id"])
+        self.add_user("qa@contact-rival.test", "Rival QA", "company", rival_id)
+        own, rival = self.sign_in("qa@contact-dairy.test"), self.sign_in("qa@contact-rival.test")
+        code, ignored = self.import_records([{**org, "phone": "000"}], cookie=rival)
+        self.assertEqual((code, ignored["contacts_updated"], stored()["contact_phone"]), (200, 0, "07-555 0100"))  # not its organization
+        code, changed = self.import_records([{**org, "phone": "07-555 0199"}], cookie=own)
+        self.assertEqual((code, changed["contacts_updated"], stored()["contact_phone"]), (200, 1, "07-555 0199"))
+        self.assertEqual(self.import_records([{**org, "email": "not-an-email"}], cookie=own)[0], 400)
+
+    def test_records_that_contradict_the_calendar_are_refused(self):
+        base = [{"record": "organization", "name": "Clock Factory", "type": "factory"},
+                {"record": "organization", "name": "Clock Shop", "type": "store"},
+                {"record": "lot", "producer": "Clock Factory", "lot_code": "CK-OLD", "product": "Jam", "produced_at": "2026-11-01"},
+                {"record": "lot", "producer": "Clock Factory", "lot_code": "CK-NEW", "product": "Fruit", "produced_at": "2026-11-05"}]
+        code, late = self.import_records(base + [
+            {"record": "ingredient", "lot_code": "CK-OLD", "ingredient_lot_code": "CK-NEW", "quantity": "1", "unit": "kg"}])
+        self.assertEqual(code, 400, late)
+        self.assertIn("row 5: ", late["detail"])
+        self.assertIn("produced after", late["detail"])
+        code, early = self.import_records(base + [
+            {"record": "shipment", "shipment_code": "CK-S1", "lot_code": "CK-NEW", "from": "Clock Factory", "to": "Clock Shop",
+             "quantity": "1", "unit": "kg", "status": "delivered", "departed_at": "2026-11-04"}])
+        self.assertEqual(code, 400, early)
+        self.assertIn("before the lot was produced", early["detail"])
+        self.assertEqual(self.import_records(base)[0], 200)
+        old, new = (self.call(f"/api/lots/resolve?lot_code={code}")[1]["batch_id"] for code in ("CK-OLD", "CK-NEW"))
+        link = {"parent_batch_id": new, "child_batch_id": old, "quantity_used": 1, "quantity_unit": "kg"}
+        self.assertEqual(self.call("/api/batch-relationships", link)[0], 400)  # the single-record route checks it too
+        code, forward = self.call("/api/batch-relationships", {**link, "parent_batch_id": old, "child_batch_id": new})
+        self.assertEqual((code, forward["quantity_unit"]), (201, "kg"))
+
+    def test_new_columns_are_added_to_tables_that_already_exist(self):
+        from sqlalchemy import create_engine, inspect, text
+        import app.models  # noqa: F401  (registers the tables)
+        from app.database import add_missing_columns
+        engine = create_engine("sqlite:///" + str(Path(self.temp.name) / "old-schema.db"))
+        try:
+            with engine.begin() as db:  # the organizations table as the first release created it
+                db.execute(text("CREATE TABLE organizations (organization_id INTEGER PRIMARY KEY, "
+                                "name VARCHAR NOT NULL, type VARCHAR NOT NULL)"))
+                db.execute(text("INSERT INTO organizations VALUES (1, 'Old Farm', 'supplier')"))
+            add_missing_columns(engine)
+            add_missing_columns(engine)  # running it again changes nothing
+            self.assertIn("contact_phone", {column["name"] for column in inspect(engine).get_columns("organizations")})
+            with engine.connect() as db:
+                rows = db.execute(text("SELECT name, contact_phone FROM organizations")).all()
+            self.assertEqual([tuple(row) for row in rows], [("Old Farm", None)])
+        finally:
+            engine.dispose()
 
     def test_seed_and_cross_factory_trace(self):
         self.assertEqual(self.call("/api/demo/seed", {})[0], 200)

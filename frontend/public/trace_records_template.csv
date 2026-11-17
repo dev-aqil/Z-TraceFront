@@ -1,11 +1,11 @@
-record,name,type,producer,lot_code,product,produced_at,ingredient_producer,ingredient_lot_code,quantity,unit,shipment_code,from,to,status,departed_at,eta
-organization,Example Farm,supplier,,,,,,,,,,,,,,
-organization,Example Factory,factory,,,,,,,,,,,,,,
-organization,Example Warehouse,warehouse,,,,,,,,,,,,,,
-organization,Example Store,store,,,,,,,,,,,,,,
-lot,,,Example Farm,EX-L1,Lettuce,2026-11-01 06:00,,,,,,,,,,
-lot,,,Example Factory,EX-P1,Garden salad,2026-11-02 08:00,,,,,,,,,,
-ingredient,,,Example Factory,EX-P1,,,Example Farm,EX-L1,25,,,,,,,
-shipment,,,Example Farm,EX-L1,,,,,25,kg,EX-S1,Example Farm,Example Factory,delivered,2026-11-01 09:00,2026-11-01 12:00
-shipment,,,Example Factory,EX-P1,,,,,500,units,EX-S2,Example Factory,Example Warehouse,delivered,2026-11-02 12:00,2026-11-02 15:00
-shipment,,,Example Factory,EX-P1,,,,,200,units,EX-S3,Example Warehouse,Example Store,in_transit,2026-11-03 07:00,2026-11-03 09:00
+record,name,type,registration_no,address,contact_name,email,phone,producer,lot_code,product,produced_at,ingredient_producer,ingredient_lot_code,quantity,unit,shipment_code,from,to,status,departed_at,eta
+organization,Example Farm,supplier,REG-0001,"Lot 12, Jalan Kebun, Cameron Highlands",Farm Manager,farm@example.com,05-555 0101,,,,,,,,,,,,,,
+organization,Example Factory,factory,REG-0002,"5 Jalan Industri, Shah Alam",QA Manager,qa@example.com,03-5555 0102,,,,,,,,,,,,,,
+organization,Example Warehouse,warehouse,,,,,,,,,,,,,,,,,,,
+organization,Example Store,store,,,,,,,,,,,,,,,,,,,
+lot,,,,,,,,Example Farm,EX-L1,Lettuce,2026-11-01 06:00,,,,,,,,,,
+lot,,,,,,,,Example Factory,EX-P1,Garden salad,2026-11-02 08:00,,,,,,,,,,
+ingredient,,,,,,,,Example Factory,EX-P1,,,Example Farm,EX-L1,25,kg,,,,,,
+shipment,,,,,,,,Example Farm,EX-L1,,,,,25,kg,EX-S1,Example Farm,Example Factory,delivered,2026-11-01 09:00,2026-11-01 12:00
+shipment,,,,,,,,Example Factory,EX-P1,,,,,500,units,EX-S2,Example Factory,Example Warehouse,delivered,2026-11-02 12:00,2026-11-02 15:00
+shipment,,,,,,,,Example Factory,EX-P1,,,,,200,units,EX-S3,Example Warehouse,Example Store,in_transit,2026-11-03 07:00,2026-11-03 09:00

@@ -10,21 +10,34 @@ type Evidence = { source_record_id: string; field: string; observed_value: numbe
 type ApiFinding = { finding_id: string; batch_id: string; shipment_id: string | null; anomaly_type: string; severity: string; summary: string; evidence: Evidence[] };
 export type GraphNode = { id: string; kind: "root" | "route" | "batch" | "recipient"; label: string; detail?: string | null; flagged?: boolean };
 export type Graph = { nodes: GraphNode[]; edges: [string, string][] };
+// on_hold: under an approved containment decision that has not been lifted.
 export type TraceBatch = {
   batch_id: number; lot_code: string | null; product_name: string; organization_id: number;
-  organization_name: string; organization_type: string; produced_at: string; status: string; synthetic: boolean;
+  organization_name: string; organization_type: string; produced_at: string; status: string; on_hold: boolean; synthetic: boolean;
 };
 export type TraceShipment = {
   shipment_id: number; shipment_code: string; batch_id: number; from_org_id: number; to_org_id: number;
-  from_name: string; to_name: string; quantity: number; quantity_unit: string | null; status: string;
+  from_name: string; to_name: string; quantity: number; quantity_unit: string | null; status: string; on_hold: boolean;
   departed_at: string | null; eta: string | null;
 };
-export type Organization = { organization_id: number; name: string; type: string };
-// Quantities are per lot and unit. remaining = received − sent on; null where the lot was made, because production
-// quantity is not recorded.
+export type Organization = {
+  organization_id: number; name: string; type: string;
+  registration_no: string | null; address: string | null; contact_name: string | null; contact_email: string | null; contact_phone: string | null;
+};
+// Quantities are per lot and unit. used = what the site put into its own products, counted where the ingredient link
+// has the same unit. remaining = received − sent on − used; null where the lot was made, because production quantity
+// is not recorded.
 export type TraceOrganization = Organization & {
   produced_batch_ids: number[];
-  holdings: { batch_id: number; unit: string | null; received: number; incoming: number; sent: number; remaining: number | null; used_in: number[] }[];
+  holdings: { batch_id: number; unit: string | null; received: number; incoming: number; sent: number; used: number; remaining: number | null; used_in: number[] }[];
+};
+// An approved decision holds its lots until an officer lifts it. A company gets only the held lots it can see and its
+// own entry in sites; an officer gets every affected site and whether it has acknowledged.
+export type Hold = {
+  decision_id: number; scope: HoldScope; officer: string; reason: string; decided_at: string;
+  released: { officer: string; reason: string; released_at: string } | null;
+  lots: TraceBatch[];
+  sites: (Organization & { acknowledged_at: string | null; acknowledged_by: string | null })[];
 };
 export type TraceDocument = {
   selected_batch_ids: number[]; upstream: number[]; downstream: number[]; related: number[];
@@ -45,6 +58,7 @@ export type HoldScope = "targeted" | "extended";
 export type Decision = {
   decision_id: number; scope: HoldScope; decision: "approved" | "rejected"; batch_ids: number[];
   shipment_ids: number[]; officer: string; reason: string; decided_at: string; analysis_id: string | null;
+  lifted: boolean; // an approved hold that an officer has since lifted
 };
 export type Check = { check: string; label: string; fields: string[]; shipments_checked: number; shipments_total: number };
 
@@ -146,7 +160,11 @@ export const getOrganizations = () => request<Organization[]>(`${API_URL}/api/or
 // The lots to investigate when the lead is a company: what it made, or handled without making something from it.
 export const getOrganizationLots = (id: number) =>
   request<{ organization: Organization; lots: TraceBatch[]; total: number }>(`${API_URL}/api/organizations/${id}/lots`);
-export type ImportResult = { rows: number; created: Record<string, number>; existing: Record<string, number> };
+export const getHolds = () => request<Hold[]>(`${API_URL}/api/holds`);
+export const acknowledgeHold = (id: number) => request<Hold>(`${API_URL}/api/holds/${id}/acknowledge`, { method: "POST" });
+export const releaseHold = (id: number, reason: string) =>
+  request<Hold>(`${API_URL}/api/holds/${id}/release`, { ...json, body: JSON.stringify({ reason }) });
+export type ImportResult = { rows: number; created: Record<string, number>; existing: Record<string, number>; contacts_updated: number };
 export function importRecords(file: File) {
   const form = new FormData();
   form.append("file", file);

@@ -425,10 +425,10 @@ Returns `200` in the same shape as 3.4, with `sample_id: null` and `actual: null
 ## 4. Remaining limits
 
 1. Upload findings persist, but an upload does not invent producer records, ingredient links or lab results. External lot codes must resolve to exactly one stored producer's batch; ambiguous matches require an organization choice.
-2. One batch per shipment remains the MVP contract. Legacy shipment rows have no unit until a manifest is provided; new shipments require an explicit unit. Ingredient `quantity_used` retains its legacy unspecified unit and is not used for inventory arithmetic.
+2. One batch per shipment remains the MVP contract. Legacy shipment rows have no unit until a manifest is provided; new shipments require an explicit unit. An ingredient `quantity_used` is subtracted from what a site holds only when it was stored with a unit that matches the shipments' unit; earlier links have none.
 3. `/risk` retains the legacy flat 7 °C rule; uploads use per-product profiles. It is not used to rank shared ingredients.
 4. The models predict FSIS sample positivity; they do not predict an uploaded batch's contamination probability. Predictions are not stored, and the chemical model has no endpoint.
-5. Containment decisions are recorded, but the hold itself is simulated: no shipment status changes and nothing is sent to a site. Live replay is still pending. Trace selection is an investigation input, not laboratory confirmation.
+5. An approved containment decision puts its lots on hold until an officer lifts it (section 7). The hold is a record that affected companies see and acknowledge: no shipment status changes, nothing is sent by email or SMS, and stock is not stopped physically. Live replay is still pending. Trace selection is an investigation input, not laboratory confirmation.
 
 ## 5. Stored traceability API
 
@@ -442,7 +442,7 @@ Returns `200` in the same shape as 3.4, with `sample_id: null` and `actual: null
 | GET | `/api/lots/resolve?lot_code=RM-402` | Optional `organization_id`. Returns a batch; unknown 404, ambiguous 409. No route-name inference. |
 | GET | `/api/trace?batch_ids=910042&batch_ids=910091` | Investigate 1–20 selected batch IDs. See response below. Unknown batch 404; empty/oversize input 422. |
 | GET | `/api/batches/{id}/trace` | Same rich response plus `batch_id`. Keeps legacy `upstream` and `downstream` arrays. |
-| POST | `/api/records/import` | Multipart `file` (`.csv`, `.xlsx`, `.json`, up to 10 MB). Loads many records at once; see "Record import" below. Returns 200 with `rows`, `created` and `existing` counts per kind. Any bad row returns 400 naming the rows, and nothing is stored. |
+| POST | `/api/records/import` | Multipart `file` (`.csv`, `.xlsx`, `.json`, up to 10 MB). Loads many records at once; see "Record import" below. Returns 200 with `rows`, `created` and `existing` counts per kind, and `contacts_updated`. Any bad row returns 400 naming the rows, and nothing is stored. |
 | GET | `/api/organizations/{id}/lots` | Lots to investigate when the lead is a company: the lots it made, plus lots it received or sent on without making something from them (`relation`: `produced` / `handled`). Ingredients it used are left out, because tracing its products reaches them. Newest first; `limit` 1–200, default 20; `total` shows when the list was cut short. Unknown organization 404. |
 | POST | `/api/decisions` | Body: `batch_ids` (1–20, the selection under investigation), `scope` (`targeted`/`extended`), `decision` (`approved`/`rejected`), `reason` (non-blank). Regulators only; the officer is the signed-in user, and a name sent by the client is ignored. The server recomputes the held lots and shipments from stored records; the client never sends them. Returns 201 with `decision_id`, `scope`, `decision`, `batch_ids`, `shipment_ids`, `officer`, `reason`, `decided_at`, `analysis_id`. Optional `analysis_id` links the decision to the upload that started it (stored in `decision_sources`); an unknown analysis returns 404. Unknown batch 404, invalid input 422. Append-only: nothing is updated or deleted. |
 | POST | `/api/demo/seed` | No body required. Adds fixed synthetic rows idempotently, refusing conflicting reserved IDs with 409 and rolling back the whole seed. Returns `synthetic`, `selected_batch_ids`, `second_batch_id`, `shared_ingredient_id`, `message`. Never resets or deletes data. |
@@ -459,7 +459,7 @@ Trace response fields:
 - `source_ranking`: upstream lots ordered by count of selected descendants, then summed shortest-path distance, then ID. Each row includes `batch_id`, `matched_batch_ids`, `flagged_product_count`, `total_distance`. A count is not a probability or causal conclusion.
 - `lab_results`: recorded laboratory evidence, independently of manual selection.
 - `interpretation`: explicit scope of the investigation leads.
-- `containment`: `recommended` scope, a `basis` sentence, a `note` that the action is simulated, and `options.targeted` / `options.extended`, each with `batch_ids` and `shipment_ids`. Targeted = the selection and products made from it; extended = every lot in the trace. Extended is recommended only when the top-ranked ingredient is shared by more than one selected product.
+- `containment`: `recommended` scope, a `basis` sentence, a `note` on what approving does, and `options.targeted` / `options.extended`, each with `batch_ids` and `shipment_ids`. Targeted = the selection and products made from it; extended = every lot in the trace. Extended is recommended only when the top-ranked ingredient is shared by more than one selected product.
 - `positive_elsewhere`: up to 10 positive lab results on batches outside this trace, newest first, each with its full `batch` record. These are the products the selection does not explain.
 - `decisions`: recorded decisions for exactly this selection, newest first.
 
@@ -471,15 +471,17 @@ One row per record. The `record` column names the kind, which decides the other 
 
 | `record` | Columns |
 |---|---|
-| `organization` | `name`, `type` (supplier / factory / warehouse / store) |
+| `organization` | `name`, `type` (supplier / factory / warehouse / store); optional `registration_no`, `address`, `contact_name`, `email`, `phone` |
 | `lot` | `producer`, `lot_code`, `product`, `produced_at` |
-| `ingredient` | `lot_code` (the product), `ingredient_lot_code`, `quantity`; optional `producer`, `ingredient_producer` |
+| `ingredient` | `lot_code` (the product), `ingredient_lot_code`, `quantity`; optional `unit`, `producer`, `ingredient_producer` |
 | `shipment` | `shipment_code`, `lot_code`, `from`, `to`, `quantity`, `unit`, `status` (pending / in_transit / delivered / held); optional `producer`, `departed_at`, `eta` |
 
 - **Matching:** organizations by name (ignoring case), lots by producer and lot code, shipments by sender and shipment code. A record that is already stored is counted under `existing` and left unchanged, so a file can be sent twice and two organizations can describe the same lot.
 - **Producer columns:** may be left out when the lot code belongs to one producer only; otherwise the row is refused as ambiguous.
 - **Dates:** ISO only (`2026-11-01` or `2026-11-01 06:00`). `01/11/2026` is refused rather than guessed as January or November.
-- **Refused:** unknown organizations or lots, ingredient cycles, a second lot on one shipment code, non-positive quantities. One bad row rejects the whole file.
+- **Contact details:** the one thing an import changes on a stored record. An organization's own user or a regulator can send its row again with new details; anyone else's values are ignored. `contacts_updated` counts the organizations changed.
+- **Ingredient units:** give an ingredient `quantity` the same `unit` as that lot's shipments. Only then is it subtracted from what the site still holds; a quantity with no unit is stored but not subtracted.
+- **Refused:** unknown organizations or lots, ingredient cycles, an ingredient lot produced after the lot it went into, a shipment that departs before its lot was produced, a second lot on one shipment code, non-positive quantities. One bad row rejects the whole file.
 - **IDs:** assigned as the highest stored ID plus one. Two imports at the same moment can collide; the loser gets 409 and can be sent again.
 
 New lab writes accept only `positive` or `negative`. Distribution upload grouping scopes routes and batch occurrences to their distributor/route, so identical route names do not merge independent suppliers.
@@ -529,3 +531,21 @@ What a company user can write:
 | Organization | Through a record import, to name a trading partner that is not stored yet. |
 
 Import rows can refer only to lots the company can already see or that the same file declares, so a file cannot be used to find out which lots other companies hold. A refused write returns **403**, or **404** where saying more would reveal another company's record.
+
+## 7. Holds, contact details and schema changes
+
+**Holds.** An approved containment decision keeps its lots on hold until an officer lifts it. Nothing is written to the lots or shipments: `on_hold` on every batch and shipment document is worked out from the decisions and their releases, so the append-only decision history stays the single record. Recording past movements of a held lot is still allowed, because an investigation needs them.
+
+| Method | Path | What it does |
+|---|---|---|
+| GET | `/api/holds` | Holds in force first, then lifted ones, newest first. Each has `decision_id`, `scope`, `officer`, `reason`, `decided_at`, `released` (null, or `officer`, `reason`, `released_at`), `lots` and `sites`. A regulator gets every hold and every affected site with its contact details, `acknowledged_at` and `acknowledged_by`. A company gets only the holds that affect it, the held lots it can see, and its own entry in `sites`. |
+| POST | `/api/holds/{decision_id}/acknowledge` | A company confirms it has seen the hold. Repeating it changes nothing. Regulators get 403; a company the hold does not affect gets 404; a lifted hold returns 409. |
+| POST | `/api/holds/{decision_id}/release` | Body: `reason` (non-blank). Regulators only. Lifts the hold and records the officer and time. A rejected decision or an already lifted hold returns 409. |
+
+A hold affects the organizations that made a held lot, or sent or received a shipment of one. Trace `decisions` carry `lifted`. Tables: `hold_releases` (one per lifted decision) and `hold_acknowledgements` (one per decision and organization).
+
+**Contact details.** `organizations` has five optional columns: `registration_no`, `address`, `contact_name`, `contact_email`, `contact_phone`. They appear on every organization document, including the trace's `organizations` block and a hold's `sites`. A company sees them only for organizations it can already see.
+
+**Ingredient units.** `batch_relationships.quantity_unit` is optional. In the trace's `organizations` block each holding has `used`: what the site put into its own products, counted only where the link's unit equals the shipments' unit. `remaining` is `received − sent − used`.
+
+**Schema changes.** At start-up the backend adds any optional column that a model declares and its table lacks (`app.database.add_missing_columns`). It only adds nullable columns. Renaming or retyping a column, dropping a constraint or rewriting data needs a migration tool and a rehearsal on a copy of the database.

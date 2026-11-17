@@ -3,13 +3,18 @@
 One row per record. The `record` column names its kind, which decides the other columns that are read:
 
   organization  name, type (supplier | factory | warehouse | store)
+                [registration_no, address, contact_name, email, phone]
   lot           producer, lot_code, product, produced_at
-  ingredient    lot_code [producer], ingredient_lot_code [ingredient_producer], quantity
+  ingredient    lot_code [producer], ingredient_lot_code [ingredient_producer], quantity [unit]
   shipment      shipment_code, lot_code [producer], from, to, quantity, unit, status [departed_at, eta]
 
 Organizations are matched by name (ignoring case), lots by producer and lot code, shipments by sender and shipment
 code. A row whose record is already stored is counted as existing and left unchanged, so the same file can be sent
-twice and two organizations can describe the same lot. Row order does not matter. Any problem rejects the whole file.
+twice and two organizations can describe the same lot. The one exception is an organization's contact details, which
+the organization itself or the ministry can change by sending its row again. Row order does not matter. Any problem
+rejects the whole file. An ingredient lot must not be newer than the lot it went into, and a shipment must not leave
+before its lot was produced. Give ingredient quantities the same unit as the shipments, or they cannot be subtracted
+from what a site still holds.
 A producer column may be left out when the lot code belongs to one producer only. Dates are ISO (YYYY-MM-DD or
 YYYY-MM-DD HH:MM): 01/11/2026 is refused rather than guessed as January or November.
 
@@ -26,6 +31,7 @@ from itertools import count
 from typing import get_args
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from pydantic import ValidationError
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -35,11 +41,14 @@ from app.auth import current_user, log_entry, scope
 from app.database import get_db
 from app.graph import build_batch_graph, creates_cycle
 from app.models import Batch, BatchLot, BatchRelationship, Organization, Shipment, ShipmentManifest, User
-from app.schemas import OrganizationType, ShipmentStatus
+from app.schemas import OrganizationContact, OrganizationType, ShipmentStatus
 
 router = APIRouter(prefix="/api/records", dependencies=[Depends(current_user)])
 
 MAX_PROBLEMS = 20  # listed in one error message
+# Optional columns on an organization row -> the stored contact field.
+CONTACT_COLUMNS = {"registration_no": "registration_no", "address": "address", "contact_name": "contact_name",
+                   "email": "contact_email", "phone": "contact_phone"}
 
 
 class RowError(Exception):
@@ -104,6 +113,8 @@ def import_records(file: UploadFile, user: User = Depends(current_user), db: Ses
         lots.setdefault(lot.lot_code, {})[lot.organization_id] = lot.batch_id
     manifests = {(m.from_org_id, m.shipment_code): m.shipment_id for m in db.query(ShipmentManifest)}
     maker = {batch: producer for producers in lots.values() for producer, batch in producers.items()}
+    made_at = dict(db.query(Batch.batch_id, Batch.produced_at).all())
+    contacts_updated: set[int] = set()
     graph = build_batch_graph(db)
     ids = {model: count((db.query(func.max(key)).scalar() or 0) + 1) for model, key in
            ((Organization, Organization.organization_id), (Batch, Batch.batch_id), (Shipment, Shipment.shipment_id))}
@@ -143,12 +154,29 @@ def import_records(file: UploadFile, user: User = Depends(current_user), db: Ses
     # Each handler takes a row and its number, and returns True when it stored a new record, False when it was there.
     def organization(row, n):
         name, kind = need(row, "name"), choice(row, "type", get_args(OrganizationType))
-        if name.casefold() in orgs:
-            return False
-        new = Organization(organization_id=next(ids[Organization]), name=name, type=kind)
-        add(new, logged=True)
-        orgs[name.casefold()] = [new.organization_id]
-        return True
+        details = {field: row[column] for column, field in CONTACT_COLUMNS.items() if row.get(column) is not None}
+        try:
+            OrganizationContact(**details)
+        except ValidationError as error:
+            column = next(c for c, field in CONTACT_COLUMNS.items() if field == error.errors()[0]["loc"][0])
+            raise RowError(f"{column} {row[column]!r} is not valid") from None
+        stored = orgs.get(name.casefold())
+        if stored is None:
+            new = Organization(organization_id=next(ids[Organization]), name=name, type=kind, **details)
+            add(new, logged=True)
+            orgs[name.casefold()] = [new.organization_id]
+            return True
+        # Contact details are the one thing an import changes on a stored record, and only the organization itself
+        # or the ministry may change them. Anyone else's values are ignored.
+        if details and len(stored) == 1 and (not company or stored[0] == user.organization_id):
+            org = db.get(Organization, stored[0])
+            changed = {field: value for field, value in details.items() if getattr(org, field) != value}
+            for field, value in changed.items():
+                setattr(org, field, value)
+            if changed:
+                log_entry(db, user, org)
+                contacts_updated.add(org.organization_id)
+        return False
 
     def lot_row(row, n):
         producer, code, product = org_id(row, "producer"), need(row, "lot_code"), need(row, "product")
@@ -161,7 +189,7 @@ def import_records(file: UploadFile, user: User = Depends(current_user), db: Ses
             add(batch, logged=True)
             add(BatchLot(batch_id=batch.batch_id, organization_id=producer, lot_code=code))
             lots.setdefault(code, {})[producer] = batch.batch_id
-            maker[batch.batch_id] = producer
+            maker[batch.batch_id], made_at[batch.batch_id] = producer, made
             if company and producer != user.organization_id:
                 untied[batch.batch_id] = n
         if visible is not None:
@@ -178,8 +206,11 @@ def import_records(file: UploadFile, user: User = Depends(current_user), db: Ses
             return False
         if creates_cycle(graph, parent, child):
             raise RowError("this link would create a cycle: a lot cannot be an ingredient of itself or of its own ingredients")
+        if made_at[parent] > made_at[child]:
+            raise RowError("the ingredient lot was produced after the lot it is said to be in")
         graph.add_edge(parent, child)
-        add(BatchRelationship(parent_batch_id=parent, child_batch_id=child, quantity_used=used), logged=True)
+        add(BatchRelationship(parent_batch_id=parent, child_batch_id=child, quantity_used=used,
+                              quantity_unit=row.get("unit")), logged=True)
         return True
 
     def shipment(row, n):
@@ -191,6 +222,8 @@ def import_records(file: UploadFile, user: User = Depends(current_user), db: Ses
             raise RowError("from and to are the same organization")
         if company and user.organization_id not in (sender, receiver):
             raise RowError("you can record only shipments your own organization sent or received")
+        if departed is not None and departed < made_at[batch]:
+            raise RowError("departed_at is before the lot was produced")
         untied.pop(batch, None)
         stored = manifests.get((sender, code))
         if stored is not None:
@@ -238,4 +271,4 @@ def import_records(file: UploadFile, user: User = Depends(current_user), db: Ses
         db.rollback()
         raise HTTPException(409, "the import conflicts with records stored at the same moment; nothing was imported, "
                                  "send the file again") from error
-    return {"rows": len(rows), "created": created, "existing": existing}
+    return {"rows": len(rows), "created": created, "existing": existing, "contacts_updated": len(contacts_updated)}

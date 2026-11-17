@@ -67,7 +67,7 @@ Then:
 - **Click:** type a reason, then **Approve extended hold**. The officer is the signed-in account.
 - **Show:**
   - The decision history: who, when, why, and the link back to the upload.
-  - The held shipments are marked "Hold approved · simulated".
+  - The held lots and shipments are marked "on hold", and **Holds in force** lists the sites still to acknowledge.
   - Refresh the page: the decision is still there.
 - **Say:** "The system recommends; a person decides; the record survives."
 

@@ -10,6 +10,12 @@ class Organization(Base):
     organization_id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     type = Column(String, nullable=False)  # supplier | factory | warehouse | store
+    # Who to reach about a hold. Added after the first release, so all optional (see database.add_missing_columns).
+    registration_no = Column(String, nullable=True)  # the premises or company registration number
+    address = Column(String, nullable=True)
+    contact_name = Column(String, nullable=True)
+    contact_email = Column(String, nullable=True)
+    contact_phone = Column(String, nullable=True)
 
 
 class Batch(Base):
@@ -31,6 +37,7 @@ class BatchRelationship(Base):
     parent_batch_id = Column(Integer, ForeignKey("batches.batch_id"), nullable=False)
     child_batch_id = Column(Integer, ForeignKey("batches.batch_id"), nullable=False)
     quantity_used = Column(Float, nullable=False)
+    quantity_unit = Column(String, nullable=True)  # null on links stored before units were recorded
 
 
 class Shipment(Base):
@@ -116,6 +123,26 @@ class ContainmentDecision(Base):
     officer = Column(String, nullable=False)
     reason = Column(String, nullable=False)
     decided_at = Column(DateTime(timezone=True), nullable=False)
+
+
+class HoldRelease(Base):
+    """An approved decision holds its lots until an officer lifts it. Decisions themselves are never changed."""
+    __tablename__ = "hold_releases"
+
+    decision_id = Column(Integer, ForeignKey("containment_decisions.decision_id"), primary_key=True)
+    officer = Column(String, nullable=False)
+    reason = Column(String, nullable=False)
+    released_at = Column(DateTime(timezone=True), nullable=False)
+
+
+class HoldAcknowledgement(Base):
+    """An affected organization confirming it has seen a hold."""
+    __tablename__ = "hold_acknowledgements"
+
+    decision_id = Column(Integer, ForeignKey("containment_decisions.decision_id"), primary_key=True)
+    organization_id = Column(Integer, ForeignKey("organizations.organization_id"), primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    acknowledged_at = Column(DateTime(timezone=True), nullable=False)
 
 
 class DecisionSource(Base):

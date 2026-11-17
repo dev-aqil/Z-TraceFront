@@ -1,12 +1,28 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field
 
 OrganizationType = Literal["supplier", "factory", "warehouse", "store"]  # in supply-chain order
 ShipmentStatus = Literal["pending", "in_transit", "delivered", "held"]
 
-class OrganizationOut(BaseModel):
+
+def supply_rank(kind: str) -> int:
+    """Position in the chain, suppliers first. An unknown type sorts last."""
+    order = get_args(OrganizationType)
+    return order.index(kind) if kind in order else len(order)
+
+
+class OrganizationContact(BaseModel):
+    """Who to reach about a hold. All optional: many organizations were stored before these existed."""
+    registration_no: str | None = Field(default=None, max_length=100)
+    address: str | None = Field(default=None, max_length=500)
+    contact_name: str | None = Field(default=None, max_length=200)
+    contact_email: str | None = Field(default=None, max_length=320, pattern=r"^\S+@\S+$")
+    contact_phone: str | None = Field(default=None, max_length=50)
+
+
+class OrganizationOut(OrganizationContact):
     model_config = ConfigDict(from_attributes=True)
 
     organization_id: int
@@ -23,6 +39,7 @@ class BatchOut(BaseModel):
     produced_at: datetime
     status: str
     lot_code: str | None = None
+    on_hold: bool = False  # under an approved containment decision that has not been lifted
 
 
 class BatchCreate(BaseModel):
@@ -60,7 +77,7 @@ class LabResultOut(LabResultCreate):
     lab_result_id: int
 
 
-class OrganizationCreate(BaseModel):
+class OrganizationCreate(OrganizationContact):
     organization_id: int = Field(gt=0)
     name: str = Field(min_length=1, max_length=200, pattern=r"\S")
     type: OrganizationType
@@ -83,6 +100,11 @@ class RelationshipCreate(BaseModel):
     parent_batch_id: int
     child_batch_id: int
     quantity_used: float = Field(gt=0, allow_inf_nan=False)
+    quantity_unit: str | None = Field(default=None, min_length=1, max_length=40, pattern=r"\S")
+
+
+class HoldReleaseCreate(BaseModel):
+    reason: str = Field(min_length=1, max_length=500, pattern=r"\S")
 
 
 class DecisionCreate(BaseModel):

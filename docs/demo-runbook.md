@@ -28,7 +28,7 @@ The backend and ML services bind to `127.0.0.1` on LinuxONE as `tracefront-backe
 6. RM-402 (marinated chicken) went into CW-42 (chicken wrap), which shipped to Warehouse KL and two stores. CW-42 has a simulated Salmonella positive, so the chicken excursion looks like the explanation. Only one hold option is shown, because with no upstream lot an extended hold would cover the same stock.
 7. The amber panel shows a second positive the selection does not explain: CS-91, a Caesar salad with no chicken in it. Click **Investigate all 2 positive products together**.
 8. With CW-42 and CS-91 selected, L-102 (lettuce) ranks first, shared by 2 of 2 products; RM-402 drops to 1 of 2. The recommendation changes to an extended hold covering VW-17 too, which has not tested positive. The count is evidence of a shared lot, not a probability or proof of contamination.
-9. In **Containment decision**, enter a reason, then approve. The decision is recorded under the signed-in officer's account. The decision appears in the history with a link back to the upload, and the held shipments are marked "Hold approved · simulated". Decisions are append-only, so a previous rehearsal's decision stays in the history.
+9. In **Containment decision**, enter a reason, then approve. The decision is recorded under the signed-in officer's account. The decision appears in the history with a link back to the upload, the held lots and shipments are marked "on hold", and **Holds in force** at the top lists the sites that have not acknowledged yet. Decisions are append-only, so a previous rehearsal's decision stays in the history.
 10. Refresh the trace URL to verify the selection is restored. For uploaded results, restart the backend and reopen the same `?analysis=...` URL to verify persistence.
 
 The seed includes ingredient movements in kg and finished-product shipments in units. Shipment rows are movement records, not current warehouse stock; do not sum repeated movements into inventory or prevented-exposure claims. One batch per shipment remains the MVP limit.
@@ -50,4 +50,4 @@ The HTTP integration suite starts its own isolated API/database, enforces foreig
 
 Frontend: `frontend/node_modules/.bin/tsc --noEmit --incremental false` and a production build while no development server is running. A restricted Windows sandbox can prevent Next.js from detecting TypeScript through `realpath`; use a normal terminal if that environment-specific error appears.
 
-Hold execution is simulated: approving records the decision but changes no shipment status. Live sensor replay remains pending.
+A hold is a record, not a physical stop: approving marks the lots on hold and shows the hold to each affected company when it signs in, but nothing is sent by email or SMS and no shipment status changes. A hold from a rehearsal stays in force until you lift it under **Holds in force**. Live sensor replay remains pending.

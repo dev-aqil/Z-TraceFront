@@ -7,7 +7,8 @@ from sqlalchemy import text
 
 from app.analysis import router as analysis_router
 from app.auth import current_user, log_entry, router as auth_router
-from app.database import Base, engine, get_db
+from app.database import Base, add_missing_columns, engine, get_db
+from app.holds import router as holds_router
 from app.models import Batch, BatchLot, LabResult, Organization, SensorReading, Shipment, User
 from app.records import router as records_router
 from app.risk import rule_based_risk_score
@@ -22,6 +23,7 @@ from app.schemas import (
 from app.trace import batch_document, commit, require, router as trace_router, trace_document, visible_batches
 
 Base.metadata.create_all(bind=engine)
+add_missing_columns()
 
 app = FastAPI(title="Tracefront API")
 
@@ -34,6 +36,7 @@ app.add_middleware(
 )
 app.include_router(auth_router)
 app.include_router(analysis_router)
+app.include_router(holds_router)
 app.include_router(records_router)
 app.include_router(trace_router)
 

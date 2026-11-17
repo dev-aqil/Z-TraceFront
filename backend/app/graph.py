@@ -8,7 +8,7 @@ def build_batch_graph(db: Session) -> nx.DiGraph:
     """Directed graph: edge parent_batch -> child_batch (ingredient -> product)."""
     g = nx.DiGraph()
     for rel in db.query(BatchRelationship).all():
-        g.add_edge(rel.parent_batch_id, rel.child_batch_id, quantity_used=rel.quantity_used)
+        g.add_edge(rel.parent_batch_id, rel.child_batch_id, quantity_used=rel.quantity_used, unit=rel.quantity_unit)
     return g
 
 

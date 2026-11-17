@@ -14,7 +14,9 @@ WRAP, SALAD, LETTUCE = 910042, 910091, 910102
 # v2 renamed them to match the bundled supplier_shipments.csv, so an uploaded RM-402 finding lands on the same lot.
 LEGACY = {("organizations", 910002): {"name": "Poultry Supplier"},
           ("organizations", 910003): {"name": "FreshBite Factory KL"},
-          ("batches", 910402): {"product_name": "Chilled chicken"}}
+          ("batches", 910402): {"product_name": "Chilled chicken"},
+          # v3 records the unit of each ingredient quantity; earlier seeds stored none.
+          **{("batch_relationships", id_): {"quantity_unit": None} for id_ in range(910001, 910005)}}
 
 
 def seed_demo(db):
@@ -53,7 +55,8 @@ def seed_demo(db):
         for index, (parent, child, quantity) in enumerate([
             (LETTUCE, WRAP, 10.0), (LETTUCE, SALAD, 15.0), (LETTUCE, 910017, 8.0), (910402, WRAP, 20.0),
         ], 910001):
-            ensure(BatchRelationship, index, parent_batch_id=parent, child_batch_id=child, quantity_used=quantity)
+            ensure(BatchRelationship, index, parent_batch_id=parent, child_batch_id=child, quantity_used=quantity,
+                   quantity_unit="kg")
         # Ingredient transport to both factories, followed by product transport to warehouses and stores.
         for index, (batch, from_, to, quantity, status, code, unit) in enumerate([
             (LETTUCE, 910001, 910003, 10, "delivered", "T17-KL", "kg"),
