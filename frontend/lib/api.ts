@@ -10,18 +10,39 @@ type Evidence = { source_record_id: string; field: string; observed_value: numbe
 type ApiFinding = { finding_id: string; batch_id: string; shipment_id: string | null; anomaly_type: string; severity: string; summary: string; evidence: Evidence[] };
 export type GraphNode = { id: string; kind: "root" | "route" | "batch" | "recipient"; label: string; detail?: string | null; flagged?: boolean };
 export type Graph = { nodes: GraphNode[]; edges: [string, string][] };
+// on_hold: under an approved containment decision that has not been lifted.
 export type TraceBatch = {
   batch_id: number; lot_code: string | null; product_name: string; organization_id: number;
-  organization_name: string; organization_type: string; produced_at: string; status: string; synthetic: boolean;
+  organization_name: string; organization_type: string; produced_at: string; status: string; on_hold: boolean; synthetic: boolean;
 };
 export type TraceShipment = {
   shipment_id: number; shipment_code: string; batch_id: number; from_org_id: number; to_org_id: number;
-  from_name: string; to_name: string; quantity: number; quantity_unit: string | null; status: string;
+  from_name: string; to_name: string; quantity: number; quantity_unit: string | null; status: string; on_hold: boolean;
   departed_at: string | null; eta: string | null;
+};
+export type Organization = {
+  organization_id: number; name: string; type: string;
+  registration_no: string | null; address: string | null; contact_name: string | null; contact_email: string | null; contact_phone: string | null;
+};
+// Quantities are per lot and unit. used = what the site put into its own products, counted where the ingredient link
+// has the same unit. remaining = received − sent on − used; null where the lot was made, because production quantity
+// is not recorded.
+export type TraceOrganization = Organization & {
+  produced_batch_ids: number[];
+  holdings: { batch_id: number; unit: string | null; received: number; incoming: number; sent: number; used: number; remaining: number | null; used_in: number[] }[];
+};
+// An approved decision holds its lots until an officer lifts it. A company gets only the held lots it can see and its
+// own entry in sites; an officer gets every affected site and whether it has acknowledged.
+export type Hold = {
+  decision_id: number; scope: HoldScope; officer: string; reason: string; decided_at: string;
+  released: { officer: string; reason: string; released_at: string } | null;
+  lots: TraceBatch[];
+  sites: (Organization & { acknowledged_at: string | null; acknowledged_by: string | null })[];
 };
 export type TraceDocument = {
   selected_batch_ids: number[]; upstream: number[]; downstream: number[]; related: number[];
   batches: TraceBatch[]; edges: [number, number][]; shipments: TraceShipment[];
+  organizations: TraceOrganization[]; // everyone who made or handled a traced lot, suppliers first
   source_ranking: { batch_id: number; matched_batch_ids: number[]; flagged_product_count: number; total_distance: number }[];
   lab_results: LabResult[];
   positive_elsewhere: (LabResult & { batch: TraceBatch })[]; // positives this selection does not reach
@@ -37,6 +58,7 @@ export type HoldScope = "targeted" | "extended";
 export type Decision = {
   decision_id: number; scope: HoldScope; decision: "approved" | "rejected"; batch_ids: number[];
   shipment_ids: number[]; officer: string; reason: string; decided_at: string; analysis_id: string | null;
+  lifted: boolean; // an approved hold that an officer has since lifted
 };
 export type Check = { check: string; label: string; fields: string[]; shipments_checked: number; shipments_total: number };
 
@@ -45,18 +67,32 @@ const TIMEOUT_MS = 20000;
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const origin = new URL(url).origin;
   const service = origin === new URL(ML_URL).origin ? "ML service" : "backend API";
+  const backend = url.startsWith(API_URL);
   let response: Response;
   try {
-    response = await fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
+    // The session cookie goes to the backend only; the ML service has no accounts.
+    response = await fetch(url, { ...init, credentials: backend ? "include" : "same-origin", signal: AbortSignal.timeout(TIMEOUT_MS) });
   } catch (e) {
     throw new Error((e as Error).name === "TimeoutError"
       ? `The ${service} at ${origin} did not respond within ${TIMEOUT_MS / 1000} seconds. Check the SSH tunnel and try again.`
       : `Cannot reach the ${service} at ${origin}. Check that the SSH tunnel (backend/demo-tunnel.ps1) is running.`);
   }
+  if (response.status === 401 && backend && !url.startsWith(`${API_URL}/api/auth/`)) {
+    // No session, or it ended: sign in and come back. The caller stays pending while the page leaves.
+    window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    return new Promise<T>(() => {});
+  }
   const body = await response.json().catch(() => null);
   if (!response.ok) throw new Error(typeof body?.detail === "string" ? body.detail : `Request failed (${response.status}).`);
   return body as T;
 }
+
+// A regulator is a Ministry of Health officer and has no organization; a company user acts for one.
+export type Me = { user_id: number; email: string; name: string; role: "regulator" | "company"; organization_id: number | null; organization_name: string | null };
+export const signIn = (email: string, password: string) =>
+  request<Me>(`${API_URL}/api/auth/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+export const signOut = () => request<unknown>(`${API_URL}/api/auth/logout`, { method: "POST" });
+export const getMe = () => request<Me>(`${API_URL}/api/auth/me`);
 
 // Work starts on the upload page and the ML process animation waits for it, then goes to the href it resolves to.
 // Client-side navigation keeps this module, and the promise, alive between pages.
@@ -120,8 +156,39 @@ export type StoredRun = { result: SampleRun; labels: Record<string, string>; tal
 const json = { method: "POST", headers: { "Content-Type": "application/json" } };
 export const getTraceBatches = () => request<TraceBatch[]>(`${API_URL}/api/trace/batches`);
 export const traceLots = (ids: number[]) => request<TraceDocument>(`${API_URL}/api/trace?${ids.map((id) => `batch_ids=${id}`).join("&")}`);
-export const seedTraceDemo = () => request<{ selected_batch_ids: number[]; synthetic: boolean }>(`${API_URL}/api/demo/seed`, { ...json, body: "{}" });
-export const recordDecision = (body: { batch_ids: number[]; scope: HoldScope; decision: Decision["decision"]; officer: string; reason: string; analysis_id: string | null }) =>
+export const getOrganizations = () => request<Organization[]>(`${API_URL}/api/organizations`);
+// The lots to investigate when the lead is a company: what it made, or handled without making something from it.
+export const getOrganizationLots = (id: number) =>
+  request<{ organization: Organization; lots: TraceBatch[]; total: number }>(`${API_URL}/api/organizations/${id}/lots`);
+export const getHolds = () => request<Hold[]>(`${API_URL}/api/holds`);
+export const acknowledgeHold = (id: number) => request<Hold>(`${API_URL}/api/holds/${id}/acknowledge`, { method: "POST" });
+export const releaseHold = (id: number, reason: string) =>
+  request<Hold>(`${API_URL}/api/holds/${id}/release`, { ...json, body: JSON.stringify({ reason }) });
+export type ImportResult = { rows: number; created: Record<string, number>; existing: Record<string, number>; contacts_updated: number };
+export function importRecords(file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  return request<ImportResult>(`${API_URL}/api/records/import`, { method: "POST", body: form });
+}
+// Live cold-chain monitoring (backend/app/monitor.py). Times are ISO with a UTC offset. silent_minutes is null once a
+// shipment is delivered: no further reading is expected.
+export type MonitorLevel = "critical" | "excursion" | "recovered" | "ok";
+export type MonitorAlert = { rule: "EXCURSION" | "CRITICAL" | "DATA_GAP"; time: string; message: string; source: string };
+export type Monitored = {
+  shipment: TraceShipment; lot: TraceBatch; profile: string; profile_name: string; limit_c: number; level: MonitorLevel;
+  latest: { temperature: number; at: string }; peak: { temperature: number; at: string };
+  minutes_above_limit: number; minutes_in_danger_zone: number; data_gaps: number;
+  silent_minutes: number | null; max_gap_minutes: number;
+  alerts: MonitorAlert[]; readings: { at: string; temperature: number }[];
+};
+export const getMonitor = () => request<Monitored[]>(`${API_URL}/api/monitor`);
+export const sendReading = (shipment_id: number, timestamp: string, temperature: number) =>
+  request<unknown>(`${API_URL}/api/sensor-readings`, { ...json, body: JSON.stringify({ shipment_id, timestamp, temperature }) });
+export const clearReadings = (shipmentId: number) =>
+  request<{ deleted: number }>(`${API_URL}/api/monitor/${shipmentId}/readings`, { method: "DELETE" });
+export const seedTraceDemo =() => request<{ selected_batch_ids: number[]; synthetic: boolean }>(`${API_URL}/api/demo/seed`, { ...json, body: "{}" });
+// The officer on a decision is the signed-in user; the server ignores any name sent with it.
+export const recordDecision = (body: { batch_ids: number[]; scope: HoldScope; decision: Decision["decision"]; reason: string; analysis_id: string | null }) =>
   request<Decision>(`${API_URL}/api/decisions`, { ...json, body: JSON.stringify(body) });
 // Display form of a sample field. The models need the raw value (the beef models lower-case their text), so this is
 // for showing only: states in capitals, text fields capitalised, the "__unknown__" placeholder as "not recorded".

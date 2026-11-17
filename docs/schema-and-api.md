@@ -146,9 +146,11 @@ Returns `201`:
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `shipment_id` | integer | yes | must already exist in `shipments` |
-| `timestamp` | datetime | yes | |
-| `temperature` | number | no | °C |
-| `humidity` | number | no | % RH |
+| `timestamp` | datetime | yes | stored as UTC; a time without a zone is taken as UTC |
+| `temperature` | number | no | °C, −60 to 80 (outside it: 422) |
+| `humidity` | number | no | % RH, 0 to 100 |
+
+The same shipment and instant is one reading: sending it again returns the stored row, and different values for an instant already stored return 409. See section 8.
 
 ```json
 {"shipment_id": 17, "timestamp": "2026-10-17T06:30:00", "temperature": 13.2, "humidity": 70}
@@ -425,10 +427,10 @@ Returns `200` in the same shape as 3.4, with `sample_id: null` and `actual: null
 ## 4. Remaining limits
 
 1. Upload findings persist, but an upload does not invent producer records, ingredient links or lab results. External lot codes must resolve to exactly one stored producer's batch; ambiguous matches require an organization choice.
-2. One batch per shipment remains the MVP contract. Legacy shipment rows have no unit until a manifest is provided; new shipments require an explicit unit. Ingredient `quantity_used` retains its legacy unspecified unit and is not used for inventory arithmetic.
+2. One batch per shipment remains the MVP contract. Legacy shipment rows have no unit until a manifest is provided; new shipments require an explicit unit. An ingredient `quantity_used` is subtracted from what a site holds only when it was stored with a unit that matches the shipments' unit; earlier links have none.
 3. `/risk` retains the legacy flat 7 °C rule; uploads use per-product profiles. It is not used to rank shared ingredients.
 4. The models predict FSIS sample positivity; they do not predict an uploaded batch's contamination probability. Predictions are not stored, and the chemical model has no endpoint.
-5. Containment decisions are recorded, but the hold itself is simulated: no shipment status changes and nothing is sent to a site. Live replay is still pending. Trace selection is an investigation input, not laboratory confirmation.
+5. An approved containment decision puts its lots on hold until an officer lifts it (section 7). The hold is a record that affected companies see and acknowledge: no shipment status changes, nothing is sent by email or SMS, and stock is not stopped physically. Live replay is still pending. Trace selection is an investigation input, not laboratory confirmation.
 
 ## 5. Stored traceability API
 
@@ -442,7 +444,9 @@ Returns `200` in the same shape as 3.4, with `sample_id: null` and `actual: null
 | GET | `/api/lots/resolve?lot_code=RM-402` | Optional `organization_id`. Returns a batch; unknown 404, ambiguous 409. No route-name inference. |
 | GET | `/api/trace?batch_ids=910042&batch_ids=910091` | Investigate 1–20 selected batch IDs. See response below. Unknown batch 404; empty/oversize input 422. |
 | GET | `/api/batches/{id}/trace` | Same rich response plus `batch_id`. Keeps legacy `upstream` and `downstream` arrays. |
-| POST | `/api/decisions` | Body: `batch_ids` (1–20, the selection under investigation), `scope` (`targeted`/`extended`), `decision` (`approved`/`rejected`), `officer`, `reason` (both non-blank). The server recomputes the held lots and shipments from stored records; the client never sends them. Returns 201 with `decision_id`, `scope`, `decision`, `batch_ids`, `shipment_ids`, `officer`, `reason`, `decided_at`, `analysis_id`. Optional `analysis_id` links the decision to the upload that started it (stored in `decision_sources`); an unknown analysis returns 404. Unknown batch 404, invalid input 422. Append-only: nothing is updated or deleted. |
+| POST | `/api/records/import` | Multipart `file` (`.csv`, `.xlsx`, `.json`, up to 10 MB). Loads many records at once; see "Record import" below. Returns 200 with `rows`, `created` and `existing` counts per kind, and `contacts_updated`. Any bad row returns 400 naming the rows, and nothing is stored. |
+| GET | `/api/organizations/{id}/lots` | Lots to investigate when the lead is a company: the lots it made, plus lots it received or sent on without making something from them (`relation`: `produced` / `handled`). Ingredients it used are left out, because tracing its products reaches them. Newest first; `limit` 1–200, default 20; `total` shows when the list was cut short. Unknown organization 404. |
+| POST | `/api/decisions` | Body: `batch_ids` (1–20, the selection under investigation), `scope` (`targeted`/`extended`), `decision` (`approved`/`rejected`), `reason` (non-blank). Regulators only; the officer is the signed-in user, and a name sent by the client is ignored. The server recomputes the held lots and shipments from stored records; the client never sends them. Returns 201 with `decision_id`, `scope`, `decision`, `batch_ids`, `shipment_ids`, `officer`, `reason`, `decided_at`, `analysis_id`. Optional `analysis_id` links the decision to the upload that started it (stored in `decision_sources`); an unknown analysis returns 404. Unknown batch 404, invalid input 422. Append-only: nothing is updated or deleted. |
 | POST | `/api/demo/seed` | No body required. Adds fixed synthetic rows idempotently, refusing conflicting reserved IDs with 409 and rolling back the whole seed. Returns `synthetic`, `selected_batch_ids`, `second_batch_id`, `shared_ingredient_id`, `message`. Never resets or deletes data. |
 
 Trace response fields:
@@ -453,13 +457,123 @@ Trace response fields:
 - `batches`: full catalog records for all included lots/products.
 - `edges`: directed `[parent_batch_id, child_batch_id]` pairs.
 - `shipments`: movements of included batches with origin/destination names, external codes, units, status and timestamps. These are not current-inventory totals.
+- `organizations`: every organization that made or handled an included lot, suppliers first, then factories, warehouses and stores. Each has `organization_id`, `name`, `type`, `produced_batch_ids` and `holdings`, one per lot and unit: `received` (delivered to it), `incoming` (sent to it but not delivered), `sent` (in transit or delivered onward), `remaining` and `used_in` (products it made from that lot). `remaining` is `received − sent`: stock that may still be on site, was used in production or was sold. It is `null` where the lot was made, because production quantity is not stored; a negative value means the site sent on more than its recorded receipts. A `held` shipment counts as neither sent nor received.
 - `source_ranking`: upstream lots ordered by count of selected descendants, then summed shortest-path distance, then ID. Each row includes `batch_id`, `matched_batch_ids`, `flagged_product_count`, `total_distance`. A count is not a probability or causal conclusion.
 - `lab_results`: recorded laboratory evidence, independently of manual selection.
 - `interpretation`: explicit scope of the investigation leads.
-- `containment`: `recommended` scope, a `basis` sentence, a `note` that the action is simulated, and `options.targeted` / `options.extended`, each with `batch_ids` and `shipment_ids`. Targeted = the selection and products made from it; extended = every lot in the trace. Extended is recommended only when the top-ranked ingredient is shared by more than one selected product.
+- `containment`: `recommended` scope, a `basis` sentence, a `note` on what approving does, and `options.targeted` / `options.extended`, each with `batch_ids` and `shipment_ids`. Targeted = the selection and products made from it; extended = every lot in the trace. Extended is recommended only when the top-ranked ingredient is shared by more than one selected product.
 - `positive_elsewhere`: up to 10 positive lab results on batches outside this trace, newest first, each with its full `batch` record. These are the products the selection does not explain.
 - `decisions`: recorded decisions for exactly this selection, newest first.
 
 The synthetic seed uses 910xxx IDs. CW-42 (`910042`) and CS-91 (`910091`) share L-102 (`910102`). VW-17 is another product using L-102 at the second factory. RM-402 (`910402`, marinated chicken from Food Processing) is a separate ingredient of CW-42 and matches the bundled `supplier_shipments.csv`, including its SHIP-017 movement to Central Kitchen, QSR Group A. Both CW-42 and CS-91 have a `Salmonella (simulated)` positive. Selecting both finished products ranks L-102 first with `flagged_product_count: 2`. Re-running the seed renames rows still holding the first seed version's names (Poultry Supplier, FreshBite Factory KL, Chilled chicken); any other differing value is a 409 conflict.
 
+### Record import
+
+One row per record. The `record` column names the kind, which decides the other columns that are read. Headers are matched loosely, and row order does not matter. `frontend/public/trace_records_template.csv` is a working example.
+
+| `record` | Columns |
+|---|---|
+| `organization` | `name`, `type` (supplier / factory / warehouse / store); optional `registration_no`, `address`, `contact_name`, `email`, `phone` |
+| `lot` | `producer`, `lot_code`, `product`, `produced_at` |
+| `ingredient` | `lot_code` (the product), `ingredient_lot_code`, `quantity`; optional `unit`, `producer`, `ingredient_producer` |
+| `shipment` | `shipment_code`, `lot_code`, `from`, `to`, `quantity`, `unit`, `status` (pending / in_transit / delivered / held); optional `producer`, `departed_at`, `eta` |
+
+- **Matching:** organizations by name (ignoring case), lots by producer and lot code, shipments by sender and shipment code. A record that is already stored is counted under `existing` and left unchanged, so a file can be sent twice and two organizations can describe the same lot.
+- **Producer columns:** may be left out when the lot code belongs to one producer only; otherwise the row is refused as ambiguous.
+- **Dates:** ISO only (`2026-11-01` or `2026-11-01 06:00`). `01/11/2026` is refused rather than guessed as January or November.
+- **Contact details:** the one thing an import changes on a stored record. An organization's own user or a regulator can send its row again with new details; anyone else's values are ignored. `contacts_updated` counts the organizations changed.
+- **Ingredient units:** give an ingredient `quantity` the same `unit` as that lot's shipments. Only then is it subtracted from what the site still holds; a quantity with no unit is stored but not subtracted.
+- **Refused:** unknown organizations or lots, ingredient cycles, an ingredient lot produced after the lot it went into, a shipment that departs before its lot was produced, a second lot on one shipment code, non-positive quantities. One bad row rejects the whole file.
+- **IDs:** assigned as the highest stored ID plus one. Two imports at the same moment can collide; the loser gets 409 and can be sent again.
+
 New lab writes accept only `positive` or `negative`. Distribution upload grouping scopes routes and batch occurrences to their distributor/route, so identical route names do not merge independent suppliers.
+
+## 6. Accounts and access
+
+Every route except `GET /api/health` and `POST /api/auth/login` returns **401** without a session.
+
+| Method | Path | What it does |
+|---|---|---|
+| POST | `/api/auth/login` | Body: `email`, `password`. Returns the user and sets the `tracefront_session` cookie (HttpOnly, SameSite=Lax, Secure, 12 hours). A wrong email, a wrong password and a locked account all return the same 401. Five failed attempts lock the account for 15 minutes. |
+| POST | `/api/auth/logout` | Ends the session on the server and clears the cookie. |
+| GET | `/api/auth/me` | The signed-in user: `user_id`, `email`, `name`, `role`, `organization_id`, `organization_name`. |
+
+Browser clients must send requests with credentials, and their origin must be listed in `TRACEFRONT_CORS`.
+
+**Tables:** `users` (email, name, scrypt password hash, role, organization, failed-attempt counter and lock time), `user_sessions` (SHA-256 of the cookie value, user, expiry; the cookie value itself is not stored) and `entries` (append-only: which user, acting for which organization, stored which record, and when). Accounts are created with `python -m app.auth add-user` on the server; there is no sign-up route. Sensor readings are not written to `entries`.
+
+**Roles:**
+
+- **`regulator`** (a Ministry of Health officer): reads and writes everything. Only a regulator can record containment decisions, create organizations one at a time, and load the demo scenario.
+- **`company`**: acts for one organization and sees one step back and one step forward.
+
+What a company user can see:
+
+| Data | Rule |
+|---|---|
+| Lots | The lots its organization made, the lots in shipments it sent or received, and the ingredient lots of its own products. |
+| Shipments | Those it sent or received. |
+| Ingredient links | Those of its own products. What another company made from its lots is not shown. |
+| Organizations | Itself, its trading partners and the makers of lots it can see. |
+| Trace | Only lots it can see may be selected, and the result is cut to the rules above. |
+| Lab results | Only on lots it made. `positive_elsewhere` and `decisions` are always empty. |
+| Upload analyses | Those uploaded by its own organization. Uploads made before sign-in existed have no owner and are regulator-only. |
+
+Anything outside these rules answers **404**, exactly like a record that does not exist.
+
+What a company user can write:
+
+| Record | Rule |
+|---|---|
+| Lot | For its own organization. Through a record import it may also declare another company's lot, but only with a shipment to or from itself, or as an ingredient of one of its own lots, in the same file. |
+| Ingredient link | Only for a product its own organization made, from a lot it can see. |
+| Shipment | Only one it sent or received, of a lot it can see. |
+| Lab result | Only on a lot it made. |
+| Sensor reading | Only on a shipment it sent or received. |
+| Organization | Through a record import, to name a trading partner that is not stored yet. |
+
+Import rows can refer only to lots the company can already see or that the same file declares, so a file cannot be used to find out which lots other companies hold. A refused write returns **403**, or **404** where saying more would reveal another company's record.
+
+## 7. Holds, contact details and schema changes
+
+**Holds.** An approved containment decision keeps its lots on hold until an officer lifts it. Nothing is written to the lots or shipments: `on_hold` on every batch and shipment document is worked out from the decisions and their releases, so the append-only decision history stays the single record. Recording past movements of a held lot is still allowed, because an investigation needs them.
+
+| Method | Path | What it does |
+|---|---|---|
+| GET | `/api/holds` | Holds in force first, then lifted ones, newest first. Each has `decision_id`, `scope`, `officer`, `reason`, `decided_at`, `released` (null, or `officer`, `reason`, `released_at`), `lots` and `sites`. A regulator gets every hold and every affected site with its contact details, `acknowledged_at` and `acknowledged_by`. A company gets only the holds that affect it, the held lots it can see, and its own entry in `sites`. |
+| POST | `/api/holds/{decision_id}/acknowledge` | A company confirms it has seen the hold. Repeating it changes nothing. Regulators get 403; a company the hold does not affect gets 404; a lifted hold returns 409. |
+| POST | `/api/holds/{decision_id}/release` | Body: `reason` (non-blank). Regulators only. Lifts the hold and records the officer and time. A rejected decision or an already lifted hold returns 409. |
+
+A hold affects the organizations that made a held lot, or sent or received a shipment of one. Trace `decisions` carry `lifted`. Tables: `hold_releases` (one per lifted decision) and `hold_acknowledgements` (one per decision and organization).
+
+**Contact details.** `organizations` has five optional columns: `registration_no`, `address`, `contact_name`, `contact_email`, `contact_phone`. They appear on every organization document, including the trace's `organizations` block and a hold's `sites`. A company sees them only for organizations it can already see.
+
+**Ingredient units.** `batch_relationships.quantity_unit` is optional. In the trace's `organizations` block each holding has `used`: what the site put into its own products, counted only where the link's unit equals the shipments' unit. `remaining` is `received − sent − used`.
+
+**Shipment profile.** `shipment_manifests.cold_chain_profile` is optional: one of the profiles in `food-risk-ml/configs/cold_chain_rules.toml` (`poultry_chilled` 4 °C, `red_meat_chilled` 7 °C, `offal_chilled` 3 °C, `tcs_food_us` 5 °C, `frozen` −18 °C). A shipment without one is checked against `tcs_food_us`. Set it with the optional `profile` column of a shipment row in a record import; an unknown profile rejects the file.
+
+**Schema changes.** At start-up the backend adds any optional column that a model declares and its table lacks (`app.database.add_missing_columns`). It only adds nullable columns. Renaming or retyping a column, dropping a constraint or rewriting data needs a migration tool and a rehearsal on a copy of the database.
+
+## 8. Live cold-chain monitoring
+
+Loggers post readings to `POST /api/sensor-readings` (section 2.4). Nothing is computed when a reading arrives: each request to the monitor replays the shipment's stored readings in time order through the food-risk-ml `ColdChainMonitor`, so a reading that arrives late is put in its place rather than refused. These are published rules, not a learned model.
+
+| Method | Path | What it does |
+|---|---|---|
+| GET | `/api/monitor` | Every shipment with at least one temperature reading that the user may see (a company: shipments it sent or received), most urgent first. |
+| DELETE | `/api/monitor/{shipment_id}/readings` | Regulators only (company: 403). Deletes the readings of a synthetic demo shipment and returns `{"deleted": n}`. A real shipment returns 409: its readings are evidence. |
+
+Each monitor item:
+
+| Field | Meaning |
+|---|---|
+| `shipment`, `lot` | the shipment and batch documents |
+| `profile`, `profile_name`, `limit_c` | the shipment's cold-chain profile and its upper limit in °C |
+| `level` | `ok` (every reading within the limit), `excursion` (latest reading above it), `recovered` (within it again, but it was above it), `critical` (USDA danger-zone time used up: 120 min between 4.4 and 60 °C, or 60 min above 32.2 °C). Critical never goes back. |
+| `latest`, `peak` | `{temperature, at}` |
+| `minutes_above_limit`, `minutes_in_danger_zone`, `data_gaps` | totals so far; an interval longer than 15 minutes between readings is a gap and is not counted |
+| `silent_minutes`, `max_gap_minutes` | minutes since the last reading for a pending or in-transit shipment (null once delivered); more than `max_gap_minutes` means nobody is watching the load |
+| `alerts` | `[{rule, time, message, source}]`, rule `EXCURSION`, `CRITICAL` or `DATA_GAP`, with the regulation or guidance it comes from |
+| `readings` | `[{at, temperature}]` in time order; times are ISO with a UTC offset |
+
+The page at `/monitor` polls this every 5 seconds. Its simulated replay sends the 20 SHIP-017 readings of `frontend/public/supplier_shipments.csv` one by one; the demo seed gives SHIP-017 the `poultry_chilled` profile.

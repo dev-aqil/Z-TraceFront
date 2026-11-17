@@ -23,13 +23,14 @@ import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
+from app.auth import current_user, log_entry
 from app.database import get_db
-from app.models import Analysis
+from app.models import Analysis, Entry, User
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "food-risk-ml"))
 from src.coldchain.rules import ColdChainMonitor, load_rules  # noqa: E402
 
-router = APIRouter(prefix="/api/analyses")
+router = APIRouter(prefix="/api/analyses", dependencies=[Depends(current_user)])
 
 RULES = load_rules()
 MODEL_VERSION = "cold-chain-rules-1"
@@ -69,7 +70,8 @@ def parse(col: pd.Series, convert) -> pd.Series:
     return out
 
 
-def read_table(filename: str, raw: bytes) -> pd.DataFrame:
+def read_frame(filename: str, raw: bytes, aliases: dict = ALIASES) -> pd.DataFrame:
+    """Parse an uploaded file and normalise its headers ("Batch ID" -> batch_id). Cells are left as read."""
     readers = {".csv": lambda b: pd.read_csv(b, dtype=str),
                ".xlsx": lambda b: pd.read_excel(b, dtype=str),
                ".json": lambda b: pd.read_json(b, orient="records", dtype=False, convert_dates=False)}
@@ -81,11 +83,16 @@ def read_table(filename: str, raw: bytes) -> pd.DataFrame:
     except Exception as e:  # each parser raises its own error types for malformed files
         raise HTTPException(400, f"could not read the {ext} file: {e}") from e
 
-    cols = [ALIASES.get(n, n) for n in (re.sub(r"[^a-z0-9]+", "_", str(c).lower()).strip("_") for c in df.columns)]
+    cols = [aliases.get(n, n) for n in (re.sub(r"[^a-z0-9]+", "_", str(c).lower()).strip("_") for c in df.columns)]
     if len(set(cols)) != len(cols):
         raise HTTPException(400, f"duplicate columns after normalising headers: {cols}")
     df.columns = cols
-    missing = [c for c in ("shipment_id", "batch_id") if c not in df]
+    return df
+
+
+def read_table(filename: str, raw: bytes) -> pd.DataFrame:
+    df = read_frame(filename, raw)
+    missing =[c for c in ("shipment_id", "batch_id") if c not in df]
     if missing:
         raise HTTPException(400, f"missing column(s): {', '.join(missing)}")
     if df.empty:
@@ -247,15 +254,19 @@ def distribution(df: pd.DataFrame, findings: list[dict]) -> dict:
     return {"nodes": list(nodes.values()), "edges": [list(e) for e in edges]}
 
 
-def stored(db: Session, analysis_id: str) -> Analysis:
+def stored(db: Session, analysis_id: str, user: User) -> Analysis:
+    """An upload is read by the organization that made it and by regulators. Uploads from before sign-in existed have
+    no recorded owner, so only regulators read those."""
     analysis = db.get(Analysis, analysis_id)
-    if analysis is None:
+    allowed = user.role == "regulator" or db.query(Entry).filter_by(
+        kind=Analysis.__tablename__, record_id=analysis_id, organization_id=user.organization_id).first() is not None
+    if analysis is None or not allowed:
         raise HTTPException(404, "analysis not found")
     return analysis
 
 
 @router.post("", status_code=201)
-def create_analysis(file: UploadFile, db: Session = Depends(get_db)):
+def create_analysis(file: UploadFile, user: User = Depends(current_user), db: Session = Depends(get_db)):
     raw = file.file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "file is larger than 10 MB")
@@ -263,21 +274,23 @@ def create_analysis(file: UploadFile, db: Session = Depends(get_db)):
     df, findings = analyse(dataset_id, raw)
     analysis_id = f"analysis-{uuid4().hex[:12]}"
     generated_at = datetime.now(timezone.utc)
-    db.add(Analysis(analysis_id=analysis_id, dataset_id=dataset_id, generated_at=generated_at,
-                    findings={"schema_version": "1.0", "analysis_id": analysis_id, "dataset_id": dataset_id,
-                              "generated_at": generated_at.isoformat(), "model_version": MODEL_VERSION,
-                              "findings": findings, "checks": coverage(df)},
-                    distribution={"analysis_id": analysis_id, **distribution(df, findings)}))
+    analysis = Analysis(analysis_id=analysis_id, dataset_id=dataset_id, generated_at=generated_at,
+                        findings={"schema_version": "1.0", "analysis_id": analysis_id, "dataset_id": dataset_id,
+                                  "generated_at": generated_at.isoformat(), "model_version": MODEL_VERSION,
+                                  "findings": findings, "checks": coverage(df)},
+                        distribution={"analysis_id": analysis_id, **distribution(df, findings)})
+    db.add(analysis)
+    log_entry(db, user, analysis)  # also what makes the upload readable by its own organization
     db.commit()
     return {"analysis_id": analysis_id, "dataset_id": dataset_id, "rows": len(df),
             "shipments": df.shipment_id.nunique(), "batches": df.batch_id.nunique(), "findings": len(findings)}
 
 
 @router.get("/{analysis_id}/findings")
-def get_findings(analysis_id: str, db: Session = Depends(get_db)):
-    return stored(db, analysis_id).findings
+def get_findings(analysis_id: str, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    return stored(db, analysis_id, user).findings
 
 
 @router.get("/{analysis_id}/distribution")
-def get_distribution(analysis_id: str, db: Session = Depends(get_db)):
-    return stored(db, analysis_id).distribution
+def get_distribution(analysis_id: str, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    return stored(db, analysis_id, user).distribution

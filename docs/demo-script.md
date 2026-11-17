@@ -18,7 +18,7 @@ Then:
 
 1. Run only one frontend. If `next start` or another `npm run dev` already holds port 3000, Next.js moves to 3001, and the server refuses requests from 3001.
 2. Click through the whole flow once, without pressing **Approve**. Dev mode compiles each page on its first visit, which takes a few seconds; this warm-up keeps that delay out of the live demo.
-3. On `/trace`, check that RM-402 reads "Marinated chicken". If it doesn't, click **Load synthetic scenario** once.
+3. Sign in as a Ministry of Health officer before the audience arrives; a session lasts 12 hours. On `/trace`, check that RM-402 reads "Marinated chicken". If it doesn't, click **Load synthetic scenario** once.
 4. Close other tabs and set the browser zoom so the trace network fits the screen width.
 
 ## The script
@@ -64,10 +64,10 @@ Then:
 - **Show:** the **Containment decision** panel.
   - **Targeted hold:** 2 lots, 5 shipments.
   - **Extended hold (recommended):** 5 lots, 9 shipments, 7 sites. 3 shipments are still moving and can be stopped; 6 are delivered and need a hold at the site. It includes **VW-17 veggie wrap**, made with the same lettuce, which hasn't tested positive yet.
-- **Click:** type an officer name and a reason, then **Approve extended hold**.
+- **Click:** type a reason, then **Approve extended hold**. The officer is the signed-in account.
 - **Show:**
   - The decision history: who, when, why, and the link back to the upload.
-  - The held shipments are marked "Hold approved · simulated".
+  - The held lots and shipments are marked "on hold", and **Holds in force** lists the sites still to acknowledge.
   - Refresh the page: the decision is still there.
 - **Say:** "The system recommends; a person decides; the record survives."
 
@@ -101,6 +101,9 @@ Yes. The evidence is in `food-risk-ml/reports/linuxone_evidence/`:
 **Why not just recall everything?**
 The two hold options make the trade-off visible: 5 shipments for the targeted hold against 9 for the extended one. A broad recall pulls stock that no evidence links to the incident.
 
+**Does it only work on files sent afterwards?**
+No. Open **Live shipments** from the trace page header and click **Replay SHIP-017**. The 20 readings arrive one every 1.5 seconds: the card turns "Above limit" at 4.1 °C and "Critical" once the load has spent 2 hours in the danger zone, and it stays critical when the truck cools again. Say "the replay is simulated; a real logger posts to the same endpoint". Click **Clear simulated readings** afterwards. Before presenting, run the replay once so the page is compiled, then clear it.
+
 **Is the temperature rule made up?**
 No. The rules cite their sources: Regulation (EC) No 853/2004 for chilled poultry, and the USDA danger zone of 4.4–60 °C with a 2-hour limit.
 
@@ -111,7 +114,8 @@ No. The rules cite their sources: Regulation (EC) No 853/2004 for chilled poultr
 | "Cannot reach the backend API at http://localhost:8000…" | The tunnel dropped. Re-run Terminal A, then refresh. |
 | "Cannot reach the service at http://localhost:18000" | You're on an old production build. Stop it and use `npm run dev` on port 3000. |
 | Dev server says `Local: http://localhost:3001` | Something else holds 3000. Stop it, then restart `npm run dev`. |
-| Trace says "Lot RM-402 has no stored ingredient links yet" | Click **Load synthetic scenario**. It keeps RM-402 selected. |
+| Trace says "Lot RM-402 is not among the stored lots you can see" | Click **Load synthetic scenario** (officer accounts only). It keeps RM-402 selected. |
+| The page jumps to **Sign in** | The session ended or you are signed out. Sign in; you return to the page you were on. |
 | The animation sits at 100% | Keep the browser tab in front; the animation pauses in background tabs. |
 | Anything else | Switch to the backup video. |
 

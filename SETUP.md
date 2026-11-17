@@ -68,7 +68,27 @@ Set-Content .env "DATABASE_URL=sqlite:///./tracefront.db"
   .\.venv\Scripts\python -B -m unittest app.test_system
   ```
 
-## 4. Ship code to LinuxONE
+## 4. Create accounts
+
+Every page that reads or writes records needs a sign-in. Accounts are created on the machine that runs the backend; there is no public sign-up. The command asks for a password of at least 12 characters and does not show it as you type.
+
+On your own machine, from `backend`:
+
+```powershell
+.\.venv\Scripts\python -m app.auth add-user --email officer@example.gov.my --name "Aisyah Rahman" --role regulator
+.\.venv\Scripts\python -m app.auth add-user --email qa@farm.example --name "Lim Wei" --role company --organization "Greenfield Farm"
+```
+
+On LinuxONE, after `ssh` to the server:
+
+```bash
+cd ~/tracefront/backend && ~/.venvs/foodrisk/bin/python -m app.auth add-user --email officer@example.gov.my --name "Aisyah Rahman" --role regulator
+```
+
+- A **regulator** is a Ministry of Health officer and sees everything.
+- A **company** user belongs to one stored organization, named with `--organization`, and sees only that organization's lots, shipments and direct trading partners. Import or seed the organization first.
+
+## 5. Ship code to LinuxONE
 
 Commit first, then:
 
@@ -81,6 +101,8 @@ Commit first, then:
 | Problem | Fix |
 |---|---|
 | "Cannot reach the backend API at http://localhost:8000" | The tunnel isn't running. Run step 1 again. |
+| Sign-in succeeds but the next page asks you to sign in again | Your browser refused the session cookie on `http://localhost`. Use Chrome, Edge or Firefox, or set `TRACEFRONT_COOKIE_SECURE=0` in `backend/.env` for local use only. |
+| "The email or password is not correct" with the right password | Five wrong attempts lock an account for 15 minutes. Wait, then try again. |
 | "Cannot reach the service at http://localhost:18000" | You're on an old frontend build. Stop it and run `npm run dev`. |
 | `Permission denied (publickey)` | The key is missing, or you ran it from Git Bash. Use PowerShell. |
 | PowerShell won't run `.ps1` files | Use `powershell -ExecutionPolicy Bypass -File .\backend\demo-tunnel.ps1` |

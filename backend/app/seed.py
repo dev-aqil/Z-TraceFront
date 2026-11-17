@@ -14,7 +14,11 @@ WRAP, SALAD, LETTUCE = 910042, 910091, 910102
 # v2 renamed them to match the bundled supplier_shipments.csv, so an uploaded RM-402 finding lands on the same lot.
 LEGACY = {("organizations", 910002): {"name": "Poultry Supplier"},
           ("organizations", 910003): {"name": "FreshBite Factory KL"},
-          ("batches", 910402): {"product_name": "Chilled chicken"}}
+          ("batches", 910402): {"product_name": "Chilled chicken"},
+          # v3 records the unit of each ingredient quantity; earlier seeds stored none.
+          **{("batch_relationships", id_): {"quantity_unit": None} for id_ in range(910001, 910005)},
+          # v4 gives SHIP-017 its cold-chain profile; earlier seeds left it at the default.
+          ("shipment_manifests", 910009): {"cold_chain_profile": None}}
 
 
 def seed_demo(db):
@@ -53,7 +57,8 @@ def seed_demo(db):
         for index, (parent, child, quantity) in enumerate([
             (LETTUCE, WRAP, 10.0), (LETTUCE, SALAD, 15.0), (LETTUCE, 910017, 8.0), (910402, WRAP, 20.0),
         ], 910001):
-            ensure(BatchRelationship, index, parent_batch_id=parent, child_batch_id=child, quantity_used=quantity)
+            ensure(BatchRelationship, index, parent_batch_id=parent, child_batch_id=child, quantity_used=quantity,
+                   quantity_unit="kg")
         # Ingredient transport to both factories, followed by product transport to warehouses and stores.
         for index, (batch, from_, to, quantity, status, code, unit) in enumerate([
             (LETTUCE, 910001, 910003, 10, "delivered", "T17-KL", "kg"),
@@ -69,7 +74,8 @@ def seed_demo(db):
             ensure(Shipment, index, batch_id=batch, from_org_id=from_, to_org_id=to, quantity=float(quantity),
                    status=status, departed_at=datetime(2026, 10, 17, 6) if status != "pending" else None,
                    eta=datetime(2026, 10, 17, 9))
-            ensure(ShipmentManifest, index, from_org_id=from_, shipment_code=code, quantity_unit=unit)
+            ensure(ShipmentManifest, index, from_org_id=from_, shipment_code=code, quantity_unit=unit,
+                   cold_chain_profile="poultry_chilled" if code == "SHIP-017" else None)
         # The salad has no chicken, so its positive points past the RM-402 excursion to the shared lettuce lot.
         for id_, batch, hour in [(910001, WRAP, 8), (910002, SALAD, 10)]:
             ensure(LabResult, id_, batch_id=batch, tested_at=datetime(2026, 10, 17, hour),

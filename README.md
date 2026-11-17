@@ -77,11 +77,17 @@ Upload file -> Backend analysis -> Findings + Distribution graph
 - Lot trace investigation with upstream/downstream/related lot ranking.
 - Containment decision recording (approve/reject) with officer, reason, and timestamp.
 - Demo synthetic scenario seeding (`POST /api/demo/seed`, idempotent).
-- Frontend workflow pages (`/`, `/distribution`, `/trace`, `/analysis-results`).
+- Frontend workflow pages (`/`, `/distribution`, `/trace`, `/analysis-results`, `/monitor`, `/login`).
+- Sign-in with per-company access: a Ministry of Health officer sees everything; a company sees and enters only records its own organization is a party to.
+- Record import: organizations (with contact details), lots, ingredient links and shipments from one CSV/XLSX/JSON file (`frontend/public/trace_records_template.csv`), and a list of every company to notify for a traced lot.
+- Holds: an approved decision holds its lots until an officer lifts it; each affected company sees the hold when it signs in and acknowledges it.
+- Live shipments (`/monitor`): sensor readings checked as they arrive against each shipment's cold-chain limit, with alerts, a quiet-logger warning and a simulated replay of SHIP-017.
 
 ### Not fully built yet
-- Live event replay remains pending.
-- Hold execution is **simulated** (recorded decision, no outbound execution).
+- Holds and cold-chain alerts show in the app only: nothing is sent by email or SMS, and stock is not stopped physically.
+- Live readings arrive over HTTP only (no MQTT or logger vendor integration).
+- A shipment carries one lot (number mixed loads `S1-A`, `S1-B`), and there are no GS1 identifiers.
+- Accounts are created from the command line only; there is no sign-up, password reset or account screen.
 - Uploaded cold-chain findings are rule-based, not a trained contamination detector.
 
 ---
@@ -151,6 +157,8 @@ uvicorn app.main:app --reload
 
 API docs: http://localhost:8000/docs
 
+Every endpoint except `GET /api/health` and sign-in needs a session. Create accounts with `python -m app.auth add-user` ([SETUP.md](SETUP.md), step 4); the access rules are in [docs/schema-and-api.md](docs/schema-and-api.md), section 6.
+
 Windows (PowerShell) variant used in project docs:
 
 ```powershell
@@ -180,6 +188,14 @@ While open:
 | Method | Path | Purpose |
 | --- | --- | --- |
 | GET | `/api/health` | Backend/database health |
+| POST | `/api/auth/login`, `/api/auth/logout` | Sign in and out (12-hour HttpOnly session cookie) |
+| GET | `/api/auth/me` | The signed-in account |
+| POST | `/api/records/import` | Import organizations, lots, ingredient links and shipments from one file |
+| GET | `/api/organizations/{id}/lots` | Lots to investigate when the lead is a company |
+| GET | `/api/holds` | Holds in force and lifted, with affected sites |
+| POST | `/api/holds/{id}/acknowledge`, `/api/holds/{id}/release` | A company acknowledges a hold; an officer lifts it |
+| GET | `/api/monitor` | Live cold-chain state of every shipment with readings |
+| DELETE | `/api/monitor/{id}/readings` | Clear readings of a synthetic demo shipment (officers only) |
 | GET/POST | `/api/batches` | List/create batches |
 | GET/POST | `/api/organizations` | List/create organizations |
 | GET/POST | `/api/shipments` | List/create shipments |
@@ -199,7 +215,9 @@ While open:
 
 - `/` upload and incident entry flow
 - `/distribution` distribution graph and trace handoff
-- `/trace` lot investigation and containment decision
+- `/trace` lot investigation, containment decision, holds and record import
+- `/monitor` live shipment temperatures and the simulated replay
+- `/login` sign-in
 - `/analysis-results` findings view
 - `/reports` legacy sample UI data page
 - `/design` mockup-to-screen design workspace
@@ -224,7 +242,7 @@ Canonical references:
 ## Data and model caveats (read before presenting)
 
 - Trace connections are **investigation leads**, not proof of causation.
-- Approved hold actions are **simulated records**; they are not dispatched to real sites.
+- Approved holds are **recorded and shown to affected companies in the app**; nothing is sent to sites by email or SMS.
 - Uploaded shipment analysis is rule-based and transparent; it is not a trained contamination classifier.
 - Pathogen model outputs concern FSIS laboratory sample prioritization, not direct shipment-file contamination verdicts.
 - Demo synthetic scenario rows are intentionally additive/idempotent for repeat demos.
@@ -273,7 +291,7 @@ Generation/reading requires Python 3.11+ standard library (SQLite for upstream c
 This repository is licensed under the **PolyForm Noncommercial License 1.0.0**.  
 See [/LICENSE](LICENSE) for the full terms.
 
-=======
+---
 
 For the full concept narrative/specification, see [tracefront_project_summary.md](tracefront_project_summary.md).
 
